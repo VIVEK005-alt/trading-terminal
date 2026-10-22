@@ -495,7 +495,7 @@ with tab1:
                 </div>
             """, unsafe_allow_html=True)
 
-            # --- TRADINGVIEW ADVANCED PRO EMBED CHART WITH BUILT-IN WATCHLIST & FULL INTERACTIVITY ---
+            # --- TRADINGVIEW PRO ADVANCED EMBED CHART WITH BUILT-IN WATCHLIST & FULL INTERACTIVITY ---
             st.markdown(f"### 📈 Live TradingView Professional Chart ({c_tab_name})")
             
             col_c1, col_c2, col_c3 = st.columns([2, 2, 3])
@@ -521,7 +521,7 @@ with tab1:
                 is_fs = "true"
             else: # Landscape View
                 tv_width = "100%"
-                tv_height = "610px"
+                tv_height = "640px"
                 is_fs = "false"
 
             tv_symbol = f"BINANCE:{c_tab_name}USDT"
