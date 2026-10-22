@@ -343,58 +343,21 @@ with tab5:
             st.rerun()
 
     st.markdown("---")
-    st.markdown("### 📥 Multi-Quality HD Video & Audio Download Suite (SSYouTube & Cobalt Powered)")
+    st.markdown("### 📥 Multi-Quality HD Video & Audio Download Suite (Official Secure Links)")
 
     original_title = get_original_video_title(st.session_state.active_yt_url)
-    
-    # Extract clean video ID for SSYouTube
-    raw_url = st.session_state.active_yt_url.strip()
-    if "youtu.be/" in raw_url:
-        vid_id_dl = raw_url.split("youtu.be/")[1].split("?")[0]
-    elif "watch?v=" in raw_url:
-        vid_id_dl = raw_url.split("watch?v=")[1].split("&")[0]
-    else:
-        vid_id_dl = "5qap5aO4i9A"
-
-    ssyoutube_link = f"https://www.ssyoutube.com/watch?v={vid_id_dl}"
-    cobalt_link = f"https://co.wuk.sh/"
+    encoded_url = urllib.parse.quote(st.session_state.active_yt_url)
 
     st.info(f"📌 **Detected Media Title:** `{original_title}`")
 
-    # Multiple Professional Download Quality Buttons using stable engines (SSYouTube & Cobalt)
-    dl_c1, dl_c2, dl_c3, dl_c4 = st.columns(4)
+    # Using Streamlit official link buttons pointing to robust public alternative download portals (Cobalt & KeepVid)
+    dl_c1, dl_c2, dl_c3 = st.columns(3)
     with dl_c1:
-        st.markdown(f"""
-            <a href="{ssyoutube_link}" target="_blank">
-                <button style="width:100%; background:linear-gradient(135deg, #ff0055, #7928ca); color:white; border:1px solid #00ffcc; padding:10px; border-radius:8px; font-family:'Orbitron'; font-weight:bold; cursor:pointer; font-size:12px;">
-                    📥 Download 1080p HD
-                </button>
-            </a>
-        """, unsafe_allow_html=True)
+        st.link_button("📥 Download HD Video (Cobalt)", f"https://co.wuk.sh/#url={encoded_url}", use_container_width=True)
     with dl_c2:
-        st.markdown(f"""
-            <a href="{ssyoutube_link}" target="_blank">
-                <button style="width:100%; background:linear-gradient(135deg, #238636, #2ea043); color:white; border:1px solid #00ffcc; padding:10px; border-radius:8px; font-family:'Orbitron'; font-weight:bold; cursor:pointer; font-size:12px;">
-                    📥 Download 720p HD
-                </button>
-            </a>
-        """, unsafe_allow_html=True)
+        st.link_button("🎧 Download Audio MP3", f"https://loader.to/api/button/?url={encoded_url}&f=mp3", use_container_width=True)
     with dl_c3:
-        st.markdown(f"""
-            <a href="{cobalt_link}" target="_blank">
-                <button style="width:100%; background:linear-gradient(135deg, #1f6feb, #388bfd); color:white; border:1px solid #00ffcc; padding:10px; border-radius:8px; font-family:'Orbitron'; font-weight:bold; cursor:pointer; font-size:12px;">
-                    📥 Fast Cobalt Engine
-                </button>
-            </a>
-        """, unsafe_allow_html=True)
-    with dl_c4:
-        st.markdown(f"""
-            <a href="{ssyoutube_link}" target="_blank">
-                <button style="width:100%; background:linear-gradient(135deg, #00ffcc, #1f6feb); color:#05070b; border:1px solid #ff0055; padding:10px; border-radius:8px; font-family:'Orbitron'; font-weight:bold; cursor:pointer; font-size:12px;">
-                    🎧 Download MP3 Audio
-                </button>
-            </a>
-        """, unsafe_allow_html=True)
+        st.link_button("🔗 Open on Official YouTube", st.session_state.active_yt_url, use_container_width=True)
 
     st.markdown("---")
     st.markdown("### 🔥 Pro Quick Channels & Playlists")
