@@ -5,9 +5,9 @@ import requests
 import urllib.parse
 from datetime import datetime
 
-# 1. PAGE CONFIGURATION & ULTRA-PRO RESPONSIVE CYBER ARCHITECTURE
+# 1. PAGE CONFIGURATION & PROFESSIONAL ARCHITECTURE
 st.set_page_config(
-    page_title="NEXUS CYBER-TERMINAL X",
+    page_title="APEX QUANTUM TRADING TERMINAL",
     layout="wide",
     page_icon="⚡",
     initial_sidebar_state="expanded"
@@ -27,10 +27,10 @@ st.markdown("""
         100% { color: #ff0055; text-shadow: 0 0 10px #ff0055, 0 0 20px #ff0055; }
     }
 
-    @keyframes livePulse {
-        0% { opacity: 0.8; transform: scale(1); }
-        50% { opacity: 1; transform: scale(1.02); text-shadow: 0 0 20px #00ffcc; }
-        100% { opacity: 0.8; transform: scale(1); }
+    @keyframes liveTickerPulse {
+        0% { transform: scale(1); text-shadow: 0 0 10px #00ffcc; }
+        50% { transform: scale(1.03); text-shadow: 0 0 25px #00ffcc, 0 0 10px #ff0055; }
+        100% { transform: scale(1); text-shadow: 0 0 10px #00ffcc; }
     }
 
     @keyframes borderGlow {
@@ -50,7 +50,9 @@ st.markdown("""
     .live-ticker-metric {
         font-family: 'Orbitron', sans-serif;
         font-weight: 900;
-        animation: livePulse 2s infinite ease-in-out;
+        font-size: 32px;
+        animation: liveTickerPulse 1.5s infinite ease-in-out;
+        display: inline-block;
     }
 
     h1, h2, h3, h4, p, label, .stMarkdown { 
@@ -109,7 +111,7 @@ st.markdown("""
         animation: rgbNeonGlow 4s infinite;
     }
 
-    /* Custom Multi-Color Neon Styling for Table Headers & Cells */
+    /* Multi-Color Neon Styling for Table Headers */
     table.dataframe th:nth-child(1) { color: #00ffcc !important; text-shadow: 0 0 8px #00ffcc; }
     table.dataframe th:nth-child(2) { color: #ff0055 !important; text-shadow: 0 0 8px #ff0055; }
     table.dataframe th:nth-child(3) { color: #ff00ff !important; text-shadow: 0 0 8px #ff00ff; }
@@ -120,14 +122,12 @@ st.markdown("""
     table.dataframe th:nth-child(8) { color: #ff073a !important; text-shadow: 0 0 8px #ff073a; }
     table.dataframe th:nth-child(9) { color: #da70d6 !important; text-shadow: 0 0 8px #da70d6; }
     table.dataframe th:nth-child(10) { color: #00fa9a !important; text-shadow: 0 0 8px #00fa9a; }
-    table.dataframe th:nth-child(11) { color: #ff69b4 !important; text-shadow: 0 0 8px #ff69b4; }
-    table.dataframe th:nth-child(12) { color: #1e90ff !important; text-shadow: 0 0 8px #1e90ff; }
     </style>
 """, unsafe_allow_html=True)
 
 # 2. SQLITE DATABASE INITIALIZATION
 def init_db():
-    conn = sqlite3.connect('nexus_terminal.db', check_same_thread=False)
+    conn = sqlite3.connect('apex_terminal.db', check_same_thread=False)
     cursor = conn.cursor()
     cursor.execute('CREATE TABLE IF NOT EXISTS watchlists (user_email TEXT, symbol TEXT)')
     cursor.execute('CREATE TABLE IF NOT EXISTS ai_logs (timestamp TEXT, agent TEXT, action TEXT)')
@@ -150,9 +150,13 @@ def fetch_market_data(symbol):
         'BTC/USDT': 'bitcoin',
         'ETH/USDT': 'ethereum',
         'SOL/USDT': 'solana',
+        'BNB/USDT': 'binancecoin',
         'XRP/USDT': 'ripple',
-        'ADA/USDT': 'cardano',
-        'DOGE/USDT': 'dogecoin'
+        'DOGE/USDT': 'dogecoin',
+        'AVAX/USDT': 'avalanche-2',
+        'LINK/USDT': 'chainlink',
+        'NEAR/USDT': 'near',
+        'SUI/USDT': 'sui'
     }
     coin_id = mapping.get(symbol.upper(), 'bitcoin')
     url = f"https://api.coingecko.com/api/v3/coins/{coin_id}/market_chart?vs_currency=usd&days=1"
@@ -172,6 +176,48 @@ def fetch_market_data(symbol):
     df = pd.DataFrame(df_rows, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
     df['datetime'] = pd.to_datetime(df['timestamp'], unit='ms')
     return df
+
+# Function to fetch multi-coin overview table
+def fetch_multi_coin_overview():
+    coins = [
+        ("BTC (Bitcoin)", "bitcoin"),
+        ("ETH (Ethereum)", "ethereum"),
+        ("SOL (Solana)", "solana"),
+        ("BNB (Build N Build)", "binancecoin"),
+        ("XRP (Ripple)", "ripple"),
+        ("DOGE (Dogecoin)", "dogecoin"),
+        ("AVAX (Avalanche)", "avalanche-2"),
+        ("LINK (Chainlink)", "chainlink"),
+        ("NEAR (NEAR Protocol)", "near"),
+        ("SUI (Sui Network)", "sui")
+    ]
+    
+    table_data = []
+    for name, cid in coins:
+        try:
+            url = f"https://api.coingecko.com/api/v3/simple/price?ids={cid}&vs_currencies=usd,usd_24h_change,usd_market_cap"
+            res = requests.get(url, timeout=2).json()
+            if cid in res:
+                price = res[cid].get('usd', 0)
+                change = res[cid].get('usd_24h_change', 0)
+                mcap = res[cid].get('usd_market_cap', 0)
+                status = "🟢 Bullish" if change >= 0 else "🔴 Bearish"
+                table_data.append({
+                    "Asset": name,
+                    "Price ($)": f"${price:,.2f}",
+                    "24h Change (%)": f"{change:+.2f}%",
+                    "Market Cap ($)": f"${mcap:,.0f}" if mcap else "N/A",
+                    "Status / Trend": status
+                })
+        except:
+            table_data.append({
+                "Asset": name,
+                "Price ($)": "Loading...",
+                "24h Change (%)": "N/A",
+                "Market Cap ($)": "N/A",
+                "Status / Trend": "⚡ Syncing"
+            })
+    return pd.DataFrame(table_data)
 
 # Robust YouTube Video ID Parser
 def get_youtube_embed_url(url, mute_state=0):
@@ -206,8 +252,8 @@ def get_original_video_title(url):
     return "YouTube_Media_Stream"
 
 # 3. SIDEBAR: CONTROL CENTER
-st.sidebar.title("⚡ NEXUS CONTROL")
-user_email = st.sidebar.text_input("Trader Profile:", value="trader@nexus.ai")
+st.sidebar.title("⚡ APEX CONTROL")
+user_email = st.sidebar.text_input("Trader Profile:", value="trader@apex.ai")
 
 st.sidebar.markdown("---")
 st.sidebar.subheader("🤖 Dual-AI Core Status")
@@ -219,8 +265,8 @@ selected_exchange = st.sidebar.selectbox("Exchange Node", ["CoinGecko Global Fee
 timeframe = st.sidebar.selectbox("Timeframe", ["1m", "5m", "15m", "1h", "4h", "1D"])
 
 # 4. UNIVERSAL SEARCH BAR
-st.title("⚡ NEXUS CYBER-TERMINAL X")
-search_query = st.text_input("🔍 Global Search Bar (e.g., BTC/USDT, ETH/USDT, SOL/USDT):", value="BTC/USDT")
+st.title("⚡ APEX QUANTUM TRADING TERMINAL")
+search_query = st.text_input("🔍 Global Search Bar (e.g., BTC/USDT, ETH/USDT, SOL/USDT, BNB/USDT):", value="BTC/USDT")
 
 # 5. MAIN NAVIGATION TABS
 tab1, tab2, tab3, tab4, tab5, tab6, tab7 = st.tabs([
@@ -237,12 +283,11 @@ df = None
 
 # --- TAB 1: SCREENER & SEARCH ---
 with tab1:
-    st.subheader("🌍 Live Market Feed Matrix & Advanced Screener")
+    st.subheader("🌍 Live Market Feed Matrix & Multi-Coin Quantum Screener")
     try:
         df = fetch_market_data(search_query)
         df['RSI'] = compute_rsi(df['close'], window=14)
         
-        # Enhanced Easy-to-Read Columns Added
         df['Change ($)'] = df['close'].diff()
         df['Change (%)'] = (df['Change ($)'] / df['open']) * 100
         df['Spread'] = df['high'] - df['low']
@@ -254,19 +299,25 @@ with tab1:
         # Live Animated Ticker Display for Top Numbers
         c1, c2, c3, c4 = st.columns(4)
         with c1:
-            st.markdown(f"### Live Price\n<span class='live-ticker-metric' style='color:#00ffcc; font-size:28px;'>${df['close'].iloc[-1]:,.2f}</span>", unsafe_allow_html=True)
+            st.markdown(f"### Live Price\n<span class='live-ticker-metric' style='color:#00ffcc;'>${df['close'].iloc[-1]:,.2f}</span>", unsafe_allow_html=True)
         with c2:
-            st.markdown(f"### RSI (14)\n<span class='live-ticker-metric' style='color:#ff00ff; font-size:28px;'>{df['RSI'].iloc[-1]:,.2f}</span>", unsafe_allow_html=True)
+            st.markdown(f"### RSI (14)\n<span class='live-ticker-metric' style='color:#ff00ff;'>{df['RSI'].iloc[-1]:,.2f}</span>", unsafe_allow_html=True)
         with c3:
-            st.markdown(f"### 20-Period MA\n<span class='live-ticker-metric' style='color:#ffff00; font-size:28px;'>${df['MA_20'].iloc[-1]:,.2f}</span>", unsafe_allow_html=True)
+            st.markdown(f"### 20-Period MA\n<span class='live-ticker-metric' style='color:#ffff00;'>${df['MA_20'].iloc[-1]:,.2f}</span>", unsafe_allow_html=True)
         with c4:
-            st.markdown(f"### 24h Volume\n<span class='live-ticker-metric' style='color:#ff9900; font-size:24px;'>${df['volume'].sum():,.0f}</span>", unsafe_allow_html=True)
+            st.markdown(f"### 24h Volume\n<span class='live-ticker-metric' style='color:#ff9900; font-size:26px;'>${df['volume'].sum():,.0f}</span>", unsafe_allow_html=True)
         
         st.markdown("<br>", unsafe_allow_html=True)
         
         # Comprehensive Data Matrix with All Columns
-        display_df = df[['datetime', 'open', 'high', 'low', 'close', 'Change ($)', 'Change (%)', 'Spread', 'Volatility (%)', 'MA_20', 'RSI', 'Pressure', 'Signal']].tail(12)
+        display_df = df[['datetime', 'open', 'high', 'low', 'close', 'Change ($)', 'Change (%)', 'Spread', 'Volatility (%)', 'MA_20', 'RSI', 'Pressure', 'Signal']].tail(10)
         st.dataframe(display_df, use_container_width=True)
+        
+        st.markdown("---")
+        st.subheader("🔥 Top Crypto Assets Overview Matrix")
+        coins_table_df = fetch_multi_coin_overview()
+        st.dataframe(coins_table_df, use_container_width=True)
+
     except Exception as e:
         st.warning(f"Market feed note: Ensure symbol format is correct (e.g., BTC/USDT). Error: {e}")
 
@@ -308,7 +359,7 @@ with tab4:
 
 # --- TAB 5: CYBER YOUTUBE & DOWNLOAD SUITE ---
 with tab5:
-    st.markdown('<div class="rgb-neon-title">📺 🔴 CYBERPUNK YOUTUBE STREAM & DOWNLOAD SUITE</div>', unsafe_allow_html=True)
+    st.markdown('<div class="rgb-neon-title">📺 🔴 APEX MEDIA STREAM & DOWNLOAD SUITE</div>', unsafe_allow_html=True)
     st.markdown("Lightning-fast streaming, instant URL loading, and direct official streaming links.")
 
     if 'active_yt_url' not in st.session_state:
