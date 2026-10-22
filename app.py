@@ -40,7 +40,6 @@ TIMEOUT = 8
 START_CASH = 10_000.0
 DB_PATH = "apex_terminal.db"
 
-# label -> (binance interval, yahoo interval, yahoo period, resample rule)
 TIMEFRAMES = {
     "1 Min": ("1m", "1m", "5d", None),
     "5 Min": ("5m", "5m", "30d", None),
@@ -79,10 +78,10 @@ html, body, .stApp, [data-testid="stAppViewContainer"], [data-testid="stHeader"]
 [data-testid="stSidebar"] {{ background-color: {SIDE} !important; border-right: 1px solid #1b2330; }}
 h1, h2, h3, h4, h5, label, p {{ color: #d6fff5 !important; }}
 .apex-title {{ font-weight: 800; font-size: 28px; color: {ACCENT};
-              text-shadow: 0 0 10px rgba(0,255,204,0.35); margin-bottom: 2px; }}
+               text-shadow: 0 0 10px rgba(0,255,204,0.35); margin-bottom: 2px; }}
 .apex-sub {{ color: {MUTED}; font-size: 13px; margin-bottom: 10px; }}
 .apex-live {{ background: {PANEL}; border: 1px solid {ACCENT}; border-radius: 12px; padding: 12px 18px;
-             box-shadow: 0 0 18px rgba(0,255,204,0.18); display:flex; gap:28px; align-items:center; flex-wrap:wrap; }}
+              box-shadow: 0 0 18px rgba(0,255,204,0.18); display:flex; gap:28px; align-items:center; flex-wrap:wrap; }}
 .apex-price {{ font-size: 30px; font-weight: 900; text-shadow: 0 0 8px rgba(38,166,154,0.5); }}
 .apex-card {{ background: {PANEL}; border: 1px solid #1b2330; border-radius: 10px; padding: 12px 16px; margin: 8px 0; }}
 .badge {{ padding: 3px 10px; border-radius: 12px; font-size: 12px; font-weight: 700; }}
@@ -106,12 +105,12 @@ input, textarea, [data-baseweb="select"] > div, [data-baseweb="input"] > div {{
 """, unsafe_allow_html=True)
 
 # =====================================================================
-# 2. DATABASE (watchlists, alerts, trades, settings — all persisted)
+# 2. DATABASE SETUP
 # =====================================================================
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS playlists (name TEXT PRIMARY KEY, created_at TEXT);
 CREATE TABLE IF NOT EXISTS playlist_coins (playlist TEXT, symbol TEXT, pos INTEGER,
-                                           PRIMARY KEY (playlist, symbol));
+                                            PRIMARY KEY (playlist, symbol));
 CREATE TABLE IF NOT EXISTS alerts (id INTEGER PRIMARY KEY AUTOINCREMENT, symbol TEXT,
                                    cond TEXT, price REAL, created_at TEXT);
 CREATE TABLE IF NOT EXISTS trades (id INTEGER PRIMARY KEY AUTOINCREMENT, ts TEXT, symbol TEXT,
@@ -120,10 +119,8 @@ CREATE TABLE IF NOT EXISTS settings (key TEXT PRIMARY KEY, value TEXT);
 """
 _DB_LOCK = threading.Lock()
 
-
 def now_iso():
     return datetime.now(timezone.utc).isoformat(timespec="seconds")
-
 
 @st.cache_resource
 def get_conn():
@@ -138,28 +135,23 @@ def get_conn():
     conn.commit()
     return conn
 
-
 def db_write(sql, params=()):
     with _DB_LOCK:
         conn = get_conn()
         conn.execute(sql, params)
         conn.commit()
 
-
 def db_read(sql, params=()):
     with _DB_LOCK:
         return get_conn().execute(sql, params).fetchall()
-
 
 def get_setting(key, default):
     rows = db_read("SELECT value FROM settings WHERE key = ?", (key,))
     return rows[0][0] if rows else default
 
-
 def set_setting(key, value):
     db_write("INSERT INTO settings (key, value) VALUES (?, ?) "
              "ON CONFLICT(key) DO UPDATE SET value = excluded.value", (key, str(value)))
-
 
 def load_playlists():
     rows = db_read("""
@@ -174,11 +166,9 @@ def load_playlists():
             out[name].append(sym)
     return out
 
-
 def create_playlist(name):
     db_write("INSERT OR IGNORE INTO playlists (name, created_at) VALUES (?, ?)", (name, now_iso()))
     save_playlist_coins(name, ["BTC", "ETH"])
-
 
 def delete_playlist(name):
     with _DB_LOCK:
@@ -186,7 +176,6 @@ def delete_playlist(name):
         conn.execute("DELETE FROM playlist_coins WHERE playlist = ?", (name,))
         conn.execute("DELETE FROM playlists WHERE name = ?", (name,))
         conn.commit()
-
 
 def save_playlist_coins(name, coins):
     unique = list(dict.fromkeys(coins))
@@ -197,24 +186,20 @@ def save_playlist_coins(name, coins):
                          [(name, c, i) for i, c in enumerate(unique)])
         conn.commit()
 
-
 def load_trades():
     with _DB_LOCK:
         return pd.read_sql_query("SELECT * FROM trades ORDER BY id", get_conn())
-
 
 def add_trade(symbol, side, qty, price, pnl):
     db_write("INSERT INTO trades (ts, symbol, side, qty, price, pnl) VALUES (?, ?, ?, ?, ?, ?)",
              (now_iso(), symbol, side, qty, price, pnl))
 
-
 def load_alerts():
     with _DB_LOCK:
         return pd.read_sql_query("SELECT * FROM alerts ORDER BY id", get_conn())
 
-
 # =====================================================================
-# 3. INDICATORS (computed from real OHLCV)
+# 3. INDICATORS
 # =====================================================================
 def true_range(df):
     pc = df["close"].shift()
@@ -222,14 +207,12 @@ def true_range(df):
                       (df["high"] - pc).abs(),
                       (df["low"] - pc).abs()], axis=1).max(axis=1)
 
-
 def rsi(close, n=14):
     d = close.diff()
     up = d.clip(lower=0).ewm(alpha=1 / n, adjust=False).mean()
     dn = (-d.clip(upper=0)).ewm(alpha=1 / n, adjust=False).mean()
     rs = up / dn.replace(0, np.nan)
     return (100 - 100 / (1 + rs)).fillna(50)
-
 
 def adx_di(df, tr, n=14):
     up = df["high"].diff()
@@ -241,7 +224,6 @@ def adx_di(df, tr, n=14):
     mdi = 100 * minus.ewm(alpha=1 / n, adjust=False).mean() / atr
     dx = 100 * (pdi - mdi).abs() / (pdi + mdi).replace(0, np.nan)
     return dx.ewm(alpha=1 / n, adjust=False).mean(), pdi, mdi
-
 
 def supertrend(df, period=10, mult=3.0):
     atr = true_range(df).ewm(alpha=1 / period, adjust=False).mean().values
@@ -263,41 +245,32 @@ def supertrend(df, period=10, mult=3.0):
     df["ST_DIR"] = direction
     return df
 
-
 def add_indicators(df):
     df = df.copy()
     c, h, l, v = df["close"], df["high"], df["low"], df["volume"]
-
     for s in (9, 21, 50, 200):
         df[f"EMA{s}"] = c.ewm(span=s, adjust=False).mean()
-
     mid, sd = c.rolling(20).mean(), c.rolling(20).std()
     df["BB_UP"], df["BB_LO"] = mid + 2 * sd, mid - 2 * sd
-
     df["RSI"] = rsi(c)
     macd = c.ewm(span=12, adjust=False).mean() - c.ewm(span=26, adjust=False).mean()
     df["MACD"] = macd
     df["MACD_SIG"] = macd.ewm(span=9, adjust=False).mean()
     df["MACD_HIST"] = df["MACD"] - df["MACD_SIG"]
-
     tr = true_range(df)
     df["ATR"] = tr.ewm(alpha=1 / 14, adjust=False).mean()
     adx, dip, dim = adx_di(df, tr)
     df["ADX"], df["DIP"], df["DIM"] = adx, dip, dim
-
     df = supertrend(df)
-
     typical = (h + l + c) / 3
     df["VWAP"] = (typical * v).cumsum() / v.cumsum().replace(0, np.nan)
     df["CLOSE_IN_RANGE"] = ((c - l) / (h - l).replace(0, np.nan) * 100).fillna(50).round(1)
-
     buy = (c > df["EMA21"]) & (df["EMA9"] > df["EMA21"]) & (df["MACD"] > df["MACD_SIG"]) \
           & (df["RSI"] < 70) & (df["ST_DIR"] == 1) & (df["ADX"] > 20)
     sell = (c < df["EMA21"]) & (df["EMA9"] < df["EMA21"]) & (df["MACD"] < df["MACD_SIG"]) \
            & (df["RSI"] > 30) & (df["ST_DIR"] == -1) & (df["ADX"] > 20)
     df["SIGNAL"] = np.select([buy, sell], ["BUY 🟢", "SELL 🔴"], "NEUTRAL 🟡")
     return df
-
 
 def volume_profile(df, bins=40):
     lo, hi = df["low"].min(), df["high"].max()
@@ -308,9 +281,8 @@ def volume_profile(df, bins=40):
     vols = np.bincount(idx, weights=df["volume"].values, minlength=bins)
     return mids, vols
 
-
 # =====================================================================
-# 4. DATA FETCHERS (real APIs only, cached)
+# 4. DATA FETCHERS
 # =====================================================================
 def _binance_klines(base, tf_key, limit):
     r = requests.get(f"{BINANCE_SPOT}/klines",
@@ -325,7 +297,6 @@ def _binance_klines(base, tf_key, limit):
     df["time"] = pd.to_datetime(df["time"], unit="ms")
     return df
 
-
 def _yahoo_klines(yf_symbol, tf_key, limit):
     _, yf_iv, period, rule = TIMEFRAMES[tf_key]
     h = yf.Ticker(yf_symbol).history(period=period, interval=yf_iv, auto_adjust=False)
@@ -338,14 +309,12 @@ def _yahoo_klines(yf_symbol, tf_key, limit):
     h.index = idx
     if rule:
         h = h.resample(rule).agg({"open": "first", "high": "max", "low": "min",
-                                  "close": "last", "volume": "sum"}).dropna()
+                                 "close": "last", "volume": "sum"}).dropna()
     h.index.name = "time"
     return h.reset_index().tail(limit).reset_index(drop=True)
 
-
 @st.cache_data(ttl=60, show_spinner=False)
 def get_klines(base, tf_key, limit=300):
-    """Returns (df_with_indicators, source_label). Binance first, Yahoo fallback."""
     try:
         df = _binance_klines(base, tf_key, limit)
         if df is not None and len(df):
@@ -360,7 +329,6 @@ def get_klines(base, tf_key, limit=300):
         except Exception:
             pass
     return None, "NO DATA"
-
 
 @st.cache_data(ttl=15, show_spinner=False)
 def get_snapshot(base):
@@ -382,7 +350,6 @@ def get_snapshot(base):
             pass
     return None
 
-
 @st.cache_data(ttl=300, show_spinner=False)
 def get_universe():
     cols = ["Rank", "Symbol", "Name", "Price (USD)", "Market Cap", "Volume 24h", "24h %"]
@@ -401,7 +368,6 @@ def get_universe():
     except Exception:
         return pd.DataFrame(columns=cols)
 
-
 @st.cache_data(ttl=3600, show_spinner=False)
 def get_fx():
     try:
@@ -412,16 +378,13 @@ def get_fx():
     except Exception:
         return FALLBACK_FX
 
-
 @st.cache_data(ttl=60, show_spinner=False)
 def get_derivatives(base):
     pair = f"{base}USDT"
-
     def g(url, **params):
         r = requests.get(url, params=params, headers=HEADERS, timeout=TIMEOUT)
         r.raise_for_status()
         return r.json()
-
     try:
         oi = g(f"{BINANCE_FUT}/fapi/v1/openInterest", symbol=pair)
         pi = g(f"{BINANCE_FUT}/fapi/v1/premiumIndex", symbol=pair)
@@ -436,10 +399,8 @@ def get_derivatives(base):
             "funding": float(pi["lastFundingRate"]) * 100,
             "ls": pd.DataFrame(ls), "oih": oh_df}
 
-
 @st.cache_data(ttl=300, show_spinner=False)
 def get_stock(yf_symbol):
-    """Daily OHLCV + indicators for NSE/BSE/indices via Yahoo Finance."""
     if not HAS_YF:
         return None
     try:
@@ -456,7 +417,6 @@ def get_stock(yf_symbol):
     except Exception:
         return None
 
-
 # =====================================================================
 # 5. HELPERS & CHART BUILDER
 # =====================================================================
@@ -468,13 +428,11 @@ def parse_base(q):
             break
     return re.sub(r"[^A-Z0-9]", "", s) or "BTC"
 
-
 def fmt_money(usd, rate, sym):
     if usd is None or not np.isfinite(usd):
         return "N/A"
     v = usd * rate
     return f"{sym}{v:,.6f}" if abs(v) < 1 else f"{sym}{v:,.2f}"
-
 
 def color_signal(v):
     s = str(v)
@@ -486,19 +444,16 @@ def color_signal(v):
         return f"color:{WARN};font-weight:700"
     return ""
 
-
 def color_pct(v):
     try:
         return f"color:{UP};font-weight:600" if float(v) >= 0 else f"color:{DOWN};font-weight:600"
     except (TypeError, ValueError):
         return ""
 
-
 def source_badge(src):
     if src.startswith("LIVE"):
         return f'<span class="badge badge-live">● {src}</span>'
     return f'<span class="badge badge-warn">● {src}</span>'
-
 
 def build_chart(df, title, overlays, panels, show_vp=False, height=None):
     n = 1 + len(panels)
@@ -581,7 +536,6 @@ def build_chart(df, title, overlays, panels, show_vp=False, height=None):
     fig.update_yaxes(showspikes=True, spikecolor=MUTED, spikethickness=1, gridcolor=GRID)
     return fig
 
-
 def tv_widget(symbol, interval, theme, height, uid, studies=None):
     cfg = {
         "autosize": True, "symbol": symbol, "interval": interval, "timezone": "Asia/Kolkata",
@@ -596,16 +550,13 @@ def tv_widget(symbol, interval, theme, height, uid, studies=None):
     <script>new TradingView.widget({json.dumps(cfg)});</script>
     """
 
-
 def flash(msg):
     st.session_state["flash"] = msg
-
 
 def show_flash():
     msg = st.session_state.pop("flash", None)
     if msg:
         st.success(msg)
-
 
 # =====================================================================
 # 6. PAPER TRADING & TAX MATH
@@ -633,15 +584,13 @@ def compute_portfolio(trades):
                 pos[t["symbol"]] = p
     return cash, pos, realized
 
-
 def fy_label(ts):
     d = pd.to_datetime(ts)
     y = d.year if d.month >= 4 else d.year - 1
     return f"FY {y}-{str(y + 1)[-2:]}"
 
-
 # =====================================================================
-# 7. SIDEBAR (all state persisted in SQLite)
+# 7. SIDEBAR
 # =====================================================================
 get_conn()
 universe = get_universe()
@@ -659,10 +608,8 @@ with st.sidebar:
     def persisted_select(label, options, key):
         saved = get_setting(key, options[0])
         idx = options.index(saved) if saved in options else 0
-
         def _save():
             set_setting(key, st.session_state[f"w_{key}"])
-
         return st.selectbox(label, options, index=idx, key=f"w_{key}", on_change=_save)
 
     lang = persisted_select("🌐 Language", list(LANG_TITLES), "language")
@@ -752,7 +699,6 @@ st.markdown('<div class="apex-sub">Live market data • Rule-based signals • P
 query = st.text_input("🔍 Global search (pair / symbol)", key="global_q", help="Example: ETH/USDT, SOL, DOGE")
 base = parse_base(query)
 
-
 @st.fragment(run_every=20)
 def live_bar(coin, rate_, sym_):
     snap = get_snapshot(coin)
@@ -767,7 +713,6 @@ def live_bar(coin, rate_, sym_):
             <div><span style="color:{MUTED};font-size:12px">24h change</span><br>
                  <span style="color:{color};font-size:20px;font-weight:700">{snap['chg']:+.2f}%</span></div>
         </div>""", unsafe_allow_html=True)
-
 
 live_bar(base, rate, sym)
 
