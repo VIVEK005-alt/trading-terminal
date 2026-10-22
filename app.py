@@ -495,7 +495,7 @@ with tab1:
                 </div>
             """, unsafe_allow_html=True)
 
-            # --- TRADINGVIEW PRO ADVANCED EMBED CHART (FULL USER CONTROL, DRAWING SUITE & RIGHT-CLICK) ---
+            # --- TRADINGVIEW ADVANCED REAL-TIME CHART WIDGET (HTML EMBED SUITE WITH FULL CONTROLS) ---
             st.markdown(f"### 📈 Live TradingView Professional Chart ({c_tab_name})")
             
             col_c1, col_c2, col_c3 = st.columns([2, 2, 3])
@@ -521,27 +521,52 @@ with tab1:
                 is_fs = "true"
             else: # Landscape View
                 tv_width = "100%"
-                tv_height = "650px"
+                tv_height = "680px"
                 is_fs = "false"
 
             tv_symbol = f"BINANCE:{c_tab_name}USDT"
-            
-            if chart_theme_mode == "Light Mode":
-                tv_theme_val = "light"
-                bg_col = "#fff"
-            elif chart_theme_mode == "Dark Mode":
-                tv_theme_val = "dark"
-                bg_col = "#000"
-            else: # System Default
-                tv_theme_val = "dark"
-                bg_col = "#07090e"
+            tv_theme_str = "light" if chart_theme_mode == "Light Mode" else "dark"
+            bg_col = "#fff" if chart_theme_mode == "Light Mode" else "#07090e"
 
             container_id = f"tv_chart_container_{c_id}"
             
-            # Using TradingView Widget Embed with enabled side toolbar (hidesidetoolbar=0) for full drawing & indicator suite
+            # Using TradingView Advanced Chart HTML Script Embed wrapped in an iframe srcdoc for direct execution without black screen
+            chart_html_content = f"""
+            <!DOCTYPE html>
+            <html>
+            <head>
+              <meta charset="utf-8">
+            </head>
+            <body style="margin:0;padding:0;background-color:{bg_col};">
+              <div class="tradingview-widget-container" style="height:100vh;width:100vw">
+                <div class="tradingview-widget-container__widget" style="height:100%;width:100%"></div>
+                <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js" async>
+                {{
+                  "autosize": true,
+                  "symbol": "{tv_symbol}",
+                  "interval": "D",
+                  "timezone": "Etc/UTC",
+                  "theme": "{tv_theme_str}",
+                  "style": "1",
+                  "locale": "en",
+                  "enable_publishing": false,
+                  "allow_symbol_change": true,
+                  "watchlist": ["BINANCE:BTCUSDT", "BINANCE:ETHUSDT", "BINANCE:SOLUSDT", "BINANCE:BNBUSDT", "BINANCE:XRPUSDT"],
+                  "details": true,
+                  "hotlist": true,
+                  "calendar": false,
+                  "support_host": "https://www.tradingview.com"
+                }}
+                </script>
+              </div>
+            </body>
+            </html>
+            """
+            encoded_html = urllib.parse.quote(chart_html_content)
+
             st.markdown(f"""
                 <div id="{container_id}" style="width: {tv_width}; height: {tv_height}; margin: 0 auto; border: 2px solid #00ffcc; border-radius: 14px; overflow: hidden; background: {bg_col}; position: {'fixed' if is_fs=='true' else 'relative'}; top: {'0' if is_fs=='true' else 'auto'}; left: {'0' if is_fs=='true' else 'auto'}; z-index: {'99999' if is_fs=='true' else '1'};">
-                    <iframe src="https://s.tradingview.com/widgetembed/?symbol={tv_symbol}&interval=1&hidesidetoolbar=0&symboledit=1&saveimage=1&toolbarbg=f1f3f6&studies=%5B%22Volume%40tv-basicstudies%22%2C%22RSI%40tv-basicstudies%22%2C%22MACD%40tv-basicstudies%22%2C%22BB%40tv-basicstudies%22%5D&theme={tv_theme_val}&style=1&timezone=Etc%2FUTC&withdateranges=1&showpopupbutton=1" width="100%" height="100%" frameborder="0" allowtransparency="true" scrolling="no" allowfullscreen="true"></iframe>
+                    <iframe src="data:text/html;charset=utf-8,{encoded_html}" width="100%" height="100%" frameborder="0" allowtransparency="true" scrolling="no" allowfullscreen="true"></iframe>
                 </div>
             """, unsafe_allow_html=True)
             
