@@ -110,7 +110,7 @@ tab1, tab2, tab3, tab4, tab5, tab6, tab7 = st.tabs([
     "📈 Advanced Charts", 
     "🐋 Derivatives & CoinGlass", 
     "🎮 Paper Trading", 
-    "🎵 Media & Lofi Hub", 
+    "🎵 Pro Media & YouTube Hub", 
     "💰 Tax & PnL Ledger",
     "🤖 Public Demand & AI Developer Box"
 ])
@@ -169,10 +169,25 @@ with tab4:
     if st.button("🚀 Execute Simulated Order"):
         st.success(f"Successfully placed {t_type} for {search_query} with Auto-Trailing Stop-Loss!")
 
-# --- TAB 5: MEDIA & LOFI HUB ---
+# --- TAB 5: PRO MEDIA & YOUTUBE HUB ---
 with tab5:
-    st.subheader("📺 In-Built Trading Lofi & Podcast Hub")
-    yt_link = st.text_input("Enter YouTube Lofi Stream / Crypto Analysis URL:", value="https://www.youtube.com/watch?v=5qap5aO4i9A")
+    st.subheader("📺 Pro YouTube Trading & Lofi Broadcast Center")
+    st.markdown("Stream live YouTube analysis, lofi concentration beats, or enter any custom YouTube link below:")
+    
+    media_preset = st.selectbox("Select Preset Channel / Stream:", [
+        "Custom YouTube URL",
+        "Lofi Trading Beats (Live)",
+        "Crypto Market Analysis & News"
+    ])
+    
+    if media_preset == "Lofi Trading Beats (Live)":
+        default_yt = "https://www.youtube.com/watch?v=5qap5aO4i9A"
+    elif media_preset == "Crypto Market Analysis & News":
+        default_yt = "https://www.youtube.com/watch?v=jfKfPfyJRdk"
+    else:
+        default_yt = "https://www.youtube.com/watch?v=5qap5aO4i9A"
+        
+    yt_link = st.text_input("YouTube Video / Stream URL:", value=default_yt)
     st.video(yt_link)
 
 # --- TAB 6: TAX & PNL LEDGER ---
