@@ -495,7 +495,7 @@ with tab1:
                 </div>
             """, unsafe_allow_html=True)
 
-            # --- TRADINGVIEW ADVANCED PRO EMBED CHART (PERFECT HEIGHT FIT, NO BLACK GAP) ---
+            # --- TRADINGVIEW ADVANCED PRO EMBED CHART (OPTIMIZED HEIGHT FOR EXACT PRO FIT) ---
             st.markdown(f"### 📈 Live TradingView Professional Chart ({c_tab_name})")
             
             col_c1, col_c2, col_c3 = st.columns([2, 2, 3])
@@ -521,7 +521,7 @@ with tab1:
                 is_fs = "true"
             else: # Landscape View
                 tv_width = "100%"
-                tv_height = "520px"
+                tv_height = "610px"
                 is_fs = "false"
 
             tv_symbol = f"BINANCE:{c_tab_name}USDT"
@@ -575,7 +575,7 @@ with tab1:
 
             st.markdown(f"""
                 <div id="{container_id}" style="width: {tv_width}; height: {tv_height}; margin: 0 auto; border: 2px solid #00ffcc; border-radius: 14px; overflow: hidden; background: {bg_col}; position: {'fixed' if is_fs=='true' else 'relative'}; top: {'0' if is_fs=='true' else 'auto'}; left: {'0' if is_fs=='true' else 'auto'}; z-index: {'99999' if is_fs=='true' else '1'};">
-                    <iframe src="data:text/html;charset=utf-8,{encoded_html}" width="100%" height="100%" frameborder="0" allowtransparency="true" scrolling="no" allowfullscreen="true"></iframe>
+                    <iframe src="data:text/html;charset=utf-8,{encoded_html}" width="100%" height="100%" frameborder="0" allowtransparency="true" scrolling="no" allowfullscreen="true" sandbox="allow-scripts allow-same-origin allow-popups"></iframe>
                 </div>
             """, unsafe_allow_html=True)
             
