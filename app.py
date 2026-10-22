@@ -4,7 +4,6 @@ import sqlite3
 import requests
 import urllib.parse
 from datetime import datetime, timedelta
-import time
 import numpy as np
 
 # 1. PAGE CONFIGURATION & PROFESSIONAL ARCHITECTURE
@@ -55,7 +54,6 @@ st.markdown("""
         box-shadow: 0 4px 15px rgba(0,0,0,0.5);
     }
 
-    /* Professional Dark Cyberpunk Table Styling */
     table.dataframe {
         background-color: #0d1117 !important;
         color: #00ffcc !important;
@@ -111,6 +109,7 @@ def init_db():
 init_db()
 
 # MASTER TECHNICAL INDICATORS COMPUTATION (FULL ACCURACY)
+@st.cache_data(ttl=60)
 def compute_master_indicators(df):
     close = df['close']
     high = df['high']
@@ -179,11 +178,12 @@ def compute_master_indicators(df):
     
     return df
 
-# MASTER EXCEL DATA FETCHER
-def fetch_master_excel_data(coin_id, row_count=200):
-    url = f"https://api.coingecko.com/api/v3/coins/{coin_id}/market_chart?vs_currency=usd&days=365"
+# STABLE & FAST MASTER EXCEL DATA FETCHER
+@st.cache_data(ttl=30)
+def fetch_master_excel_data(coin_id, row_count=100):
+    url = f"https://api.coingecko.com/api/v3/coins/{coin_id}/market_chart?vs_currency=usd&days=90"
     try:
-        response = requests.get(url, timeout=4)
+        response = requests.get(url, timeout=3)
         if response.status_code == 200:
             data = response.json()
             prices = data.get('prices', [])
@@ -202,7 +202,7 @@ def fetch_master_excel_data(coin_id, row_count=200):
     except:
         pass
     
-    base_date = datetime.now() - timedelta(days=365)
+    base_date = datetime.now() - timedelta(days=90)
     dummy_dates = [base_date + timedelta(hours=i) for i in range(row_count)]
     df = pd.DataFrame({
         'Date': [d.strftime('%Y-%m-%d') for d in dummy_dates],
@@ -254,18 +254,14 @@ def get_original_video_title(url):
         pass
     return "YouTube_Media_Stream"
 
-# 3. SIDEBAR: CONTROL CENTER & TRADINGVIEW-STYLE SMART AUTO-REFRESH
+# 3. SIDEBAR: CONTROL CENTER & MANUAL SYNC BUTTON
 st.sidebar.title("⚡ APEX CONTROL")
 user_email = st.sidebar.text_input("Trader Profile:", value="trader@apex.ai")
 
 st.sidebar.markdown("---")
-st.sidebar.subheader("🔄 TradingView-Style Live Sync")
-auto_refresh = st.sidebar.checkbox("Enable Live Background Sync", value=True)
-refresh_interval = st.sidebar.slider("Sync Interval (Seconds):", 5, 60, 15)
-
-if auto_refresh:
-    st.sidebar.caption(f"🟢 Status: Syncing every {refresh_interval}s smoothly")
-    time.sleep(refresh_interval)
+st.sidebar.subheader("🔄 Master Data Refresh")
+if st.sidebar.button("🔄 Refresh Data Matrix Now", use_container_width=True):
+    st.cache_data.clear()
     st.rerun()
 
 st.sidebar.markdown("---")
@@ -292,7 +288,7 @@ df = None
 
 # --- TAB 1: SCREENER & MASTER TIMEFRAMES & HISTORICAL YEARS ---
 with tab1:
-    st.subheader("🌍 Master Excel Sheet Matrix (TradingView Smooth Sync)")
+    st.subheader("🌍 Master Excel Sheet Matrix (Optimized & Stable)")
     
     coin_tabs = st.tabs(["BTC (Bitcoin)", "ETH (Ethereum)", "SOL (Solana)", "BNB", "XRP", "DOGE", "AVAX", "LINK", "NEAR", "SUI"])
     
@@ -323,14 +319,14 @@ with tab1:
             selected_tf = st.radio(f"Select Timeframe / Year ({c_tab_name}):", timeframe_list, horizontal=True, key=f"radio_{c_id}")
             
             tf_row_counts = {
-                "1 Min": 150, "3 Min": 150, "5 Min": 150, "15 Min": 150, "30 Min": 150, "75 Min": 150, 
-                "1 Hour": 200, "2 Hour": 200, "3 Hour": 200, "4 Hour": 200, "6 Hour": 200, "12 Hour": 200, 
-                "1 Day": 300, "1 Week": 300, "1 Month": 300, "3 Months": 300, "6 Months": 300, 
-                "1 Year": 365, "3 Years": 400, "5 Years": 400, 
-                "2026 (YTD)": 300, "2025": 365, "2024": 366, "2023": 365, "2022": 365, "2021": 365, "2020": 366
+                "1 Min": 100, "3 Min": 100, "5 Min": 100, "15 Min": 100, "30 Min": 100, "75 Min": 100, 
+                "1 Hour": 120, "2 Hour": 120, "3 Hour": 120, "4 Hour": 120, "6 Hour": 120, "12 Hour": 120, 
+                "1 Day": 150, "1 Week": 150, "1 Month": 150, "3 Months": 150, "6 Months": 150, 
+                "1 Year": 150, "3 Years": 150, "5 Years": 150, 
+                "2026 (YTD)": 150, "2025": 150, "2024": 150, "2023": 150, "2022": 150, "2021": 150, "2020": 150
             }
 
-            r_count = tf_row_counts.get(selected_tf, 200)
+            r_count = tf_row_counts.get(selected_tf, 100)
             coin_df = fetch_master_excel_data(c_id, row_count=r_count)
             current_price = coin_df['close'].iloc[-1]
             animal_type = coin_df['Animal_Type'].iloc[-1]
@@ -380,7 +376,7 @@ with tab1:
             
             styled_df = filtered_df[excel_display_cols].style.map(color_coding_table, subset=['Animal_Type', 'Trade Advice'])
             
-            st.dataframe(styled_df, use_container_width=True, height=650)
+            st.dataframe(styled_df, use_container_width=True, height=600)
 
 # --- TAB 2: ADVANCED CHARTS ---
 with tab2:
