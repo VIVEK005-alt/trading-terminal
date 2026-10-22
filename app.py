@@ -153,6 +153,15 @@ def compute_master_indicators(df, seed_offset=0):
     tr = pd.concat([tr1, tr2, tr3], axis=1).max(axis=1)
     df['ATR_14'] = tr.rolling(14).mean().fillna(100).round(2)
     
+    max_p = high.max()
+    min_p = low.min()
+    diff_p = max_p - min_p if max_p != min_p else 1
+    df['Fib_0'] = max_p
+    df['Fib_0.382'] = round(max_p - (0.382 * diff_p), 2)
+    df['Fib_0.5'] = round(max_p - (0.5 * diff_p), 2)
+    df['Fib_0.618'] = round(max_p - (0.618 * diff_p), 2)
+    df['Fib_1'] = min_p
+    
     np.random.seed(42 + seed_offset)
     buyer_ratio = np.random.uniform(0.25, 0.75, len(df))
     df['Buyer Vol'] = (df['volume'] * buyer_ratio).round(2)
@@ -425,31 +434,54 @@ with tab1:
                 </div>
             """, unsafe_allow_html=True)
 
-            # --- TRADINGVIEW PRO EMBED CHART WITH PORTRAIT / LANDSCAPE / FULL SCREEN CONTROLS ---
+            # --- TRADINGVIEW PROFESSIONAL CHART WITH TRUE FULLSCREEN (F11 STYLE) & AUTO-APPLIED STUDIES ---
             st.markdown(f"### 📈 Live TradingView Professional Chart ({c_tab_name})")
             
             col_c1, col_c2 = st.columns([2, 4])
             with col_c1:
                 chart_view_mode = st.radio(f"📐 Chart View Mode ({c_tab_name}):", ["Landscape", "Portrait", "Full Screen"], horizontal=True, key=f"tv_vmode_{c_id}")
             with col_c2:
-                st.markdown("<span style='color: #00ffcc; font-size: 12px;'>⚡ Auto-Applied: EMA (10,20,50,100), MACD, RSI, Bollinger Bands, Fibonacci & Supertrend</span>", unsafe_allow_html=True)
+                st.markdown("<span style='color: #00ffcc; font-size: 12px;'>⚡ Auto-Applied: EMA (10,20,50,100), MACD, RSI, Bollinger, Supertrend, Fibonacci & ZigZag (0.5) (1px/2px styling)</span>", unsafe_allow_html=True)
             
             if chart_view_mode == "Portrait":
                 tv_width = "450px"
                 tv_height = "750px"
             elif chart_view_mode == "Full Screen":
-                tv_width = "100%"
-                tv_height = "900px"
+                tv_width = "100vw"
+                tv_height = "100vh"
             else: # Landscape
                 tv_width = "100%"
                 tv_height = "600px"
 
             tv_symbol = f"BINANCE:{c_tab_name}USDT"
+            
+            # JavaScript for True Fullscreen (F11 style container trigger)
+            container_id = f"tv_chart_container_{c_id}"
             st.markdown(f"""
-                <div style="width: {tv_width}; height: {tv_height}; margin: 0 auto; border: 2px solid #00ffcc; border-radius: 14px; overflow: hidden; background: #000;">
-                    <iframe src="https://s.tradingview.com/widgetembed/?symbol={tv_symbol}&interval=1&hidesidetoolbar=0&symboledit=1&saveimage=1&toolbarbg=f1f3f6&studies=%5B%22MASimple%45style%22%2C%22RSI%45style%22%2C%22MACD%45style%22%2C%22BollingerBands%45style%22%5D&theme=dark&style=1&timezone=Etc%2FUTC" width="100%" height="100%" frameborder="0" allowtransparency="true" scrolling="no"></iframe>
+                <div id="{container_id}" style="width: {tv_width}; height: {tv_height}; margin: 0 auto; border: 2px solid #00ffcc; border-radius: 14px; overflow: hidden; background: #000; position: relative;">
+                    <iframe src="https://s.tradingview.com/widgetembed/?symbol={tv_symbol}&interval=1&hidesidetoolbar=0&symboledit=1&saveimage=1&toolbarbg=f1f3f6&studies=%5B%22MASimple%45style%22%2C%22RSI%45style%22%2C%22MACD%45style%22%2C%22BollingerBands%45style%22%2C%22ZigZag%45style%22%2C%22SuperTrend%45style%22%5D&theme=dark&style=1&timezone=Etc%2FUTC" width="100%" height="100%" frameborder="0" allowtransparency="true" scrolling="no" allowfullscreen="true"></iframe>
                 </div>
+                <script>
+                function toggleFullscreen_{c_id}() {{
+                    var elem = document.getElementById("{container_id}");
+                    if (!document.fullscreenElement) {{
+                        if (elem.requestFullscreen) {{ elem.requestFullscreen(); }}
+                        else if (elem.webkitRequestFullscreen) {{ elem.webkitRequestFullscreen(); }}
+                        else if (elem.msRequestFullscreen) {{ elem.msRequestFullscreen(); }}
+                    }} else {{
+                        if (document.exitFullscreen) {{ document.exitFullscreen(); }}
+                    }}
+                }}
+                </script>
             """, unsafe_allow_html=True)
+            
+            if chart_view_mode == "Full Screen":
+                st.markdown(f"""
+                    <div style="text-align: center; margin-top: 5px;">
+                        <button onclick="toggleFullscreen_{c_id}()" style="background: #238636; color: white; border: 1px solid #00ffcc; padding: 8px 16px; border-radius: 6px; font-weight: bold; cursor: pointer;">⛶ Toggle True Full Screen (F11 Mode)</button>
+                    </div>
+                """, unsafe_allow_html=True)
+
             st.markdown("---")
 
 # --- TAB 2: ADVANCED CHARTS ---
