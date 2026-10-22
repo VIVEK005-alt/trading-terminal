@@ -19,7 +19,7 @@ st.markdown("""
     @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Inter:wght@400;500;600;700&display=swap');
     
     * { box-sizing: border-box; }
-    .main { background-color: #05070b; color: #00ffcc; font-family: 'Inter', sans-serif; }
+    .main, .stApp { background-color: #05070b !important; color: #00ffcc !important; font-family: 'Inter', sans-serif; }
     
     .rgb-neon-title {
         font-family: 'Orbitron', sans-serif;
@@ -64,7 +64,7 @@ st.markdown("""
     }
 
     [data-testid="stSidebar"] {
-        background-color: #12141c;
+        background-color: #12141c !important;
         border-right: 1px solid #2d333b;
         padding: 20px 14px;
         font-family: 'Inter', sans-serif;
@@ -126,6 +126,7 @@ st.markdown("""
 
     h1, h2, h3, h4, p, label, .stMarkdown { 
         font-family: 'Orbitron', sans-serif !important; 
+        color: #00ffcc !important;
     }
     
     .stTabs [data-baseweb="tab-list"] { gap: 6px; background-color: #0d1117; padding: 10px; border-radius: 12px; border: 1px solid #30363d; flex-wrap: wrap; }
@@ -332,7 +333,6 @@ if st.sidebar.button("➕ Create New Playlist", use_container_width=True):
 
 active_playlist = st.sidebar.selectbox("📂 Select Active Playlist:", list(st.session_state.custom_playlists.keys()))
 
-# Manage coins in active playlist (Supports 1K+ Coins)
 current_coins_in_playlist = st.session_state.custom_playlists[active_playlist]
 updated_playlist_coins = st.sidebar.multiselect(
     f"Edit Coins in [{active_playlist}]:",
@@ -361,17 +361,17 @@ st.sidebar.success("🟢 **Developer AI**: Synced")
 st.title("⚡ APEX QUANTUM MULTI-TIMEFRAME MASTER TERMINAL")
 search_query = st.text_input("🔍 Global Search Bar (e.g., BTC/USDT, ETH/USDT, SOL/USDT):", value="BTC/USDT")
 
-# --- UPDATED TABS INCLUDING TOKEN TAB & INDIAN STOCK MARKET TAB ---
+# --- FULL TABS SUITE ---
 tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9 = st.tabs([
-    "📊 Master Excel Screener", 
+    "📊 Master Excel", 
     "📈 Advanced Charts", 
-    "🐋 Derivatives & CoinGlass", 
+    "🐋 Derivatives", 
     "🎮 Paper Trading", 
-    "🔴 Cyber YouTube & Download Suite", 
-    "💰 Tax & PnL Ledger",
+    "🔴 YouTube Suite", 
+    "💰 Tax & PnL",
     "🪙 Token Tab",
-    "🇮🇳 Indian Stock Market",
-    "🤖 AI Developer Core"
+    "🇮🇳 Indian Stocks",
+    "🤖 AI Core"
 ])
 
 df = None
@@ -509,7 +509,6 @@ with tab1:
             styled_df = filtered_df[excel_display_cols].style.map(color_coding_table, subset=['Animal_Type', 'Trade Advice'])
             st.dataframe(styled_df, use_container_width=True, height=450)
             
-            # --- REAL-TIME SCALPING & FUTURE TRADE BANNER ---
             st.markdown(f"""
                 <div style="background: #161b22; border: 1px solid #39ff14; padding: 12px; border-radius: 8px; margin-top: 10px; margin-bottom: 10px;">
                     <span style="color: #39ff14; font-weight: 900;">🚀 Real-Time Scalping & Future Trade Signal ({selected_tf}):</span> 
@@ -517,7 +516,6 @@ with tab1:
                 </div>
             """, unsafe_allow_html=True)
 
-            # --- UNIQUE PRO AI STRATEGY BOX ---
             last_row = coin_df.iloc[-1]
             rsi_v = last_row['RSI_14']
             macd_v = last_row['MACD']
@@ -533,7 +531,7 @@ with tab1:
                 </div>
             """, unsafe_allow_html=True)
 
-            # --- TRADINGVIEW PRO ADVANCED EMBED CHART WITH BUILT-IN WATCHLIST & FULL INTERACTIVITY ---
+            # --- TRADINGVIEW PRO ADVANCED EMBED CHART ---
             st.markdown(f"### 📈 Live TradingView Professional Chart ({c_tab_name})")
             
             col_c1, col_c2, col_c3 = st.columns([2, 2, 3])
@@ -557,7 +555,7 @@ with tab1:
                 tv_width = "100vw"
                 tv_height = "100vh"
                 is_fs = "true"
-            else: # Landscape View
+            else:
                 tv_width = "100%"
                 tv_height = "650px"
                 is_fs = "false"
@@ -705,15 +703,6 @@ with tab5:
                 <span>[ 🔊 AUDIO: {'ON' if mute_val==0 else 'OFF'} ] [ ⛶ FULLSCREEN ]</span>
             </div>
         </div>
-        
-        <script>
-            function sendPlayerCommand(command) {{
-                var iframe = document.getElementById('yt-iframe');
-                if (iframe) {{
-                    iframe.contentWindow.postMessage(JSON.stringify({{"event": "command", "func": command, "args": []}}), "*");
-                }}
-            }}
-        </script>
     """, unsafe_allow_html=True)
 
 # --- TAB 6: TAX & PNL LEDGER ---
@@ -730,7 +719,7 @@ with tab6:
     if st.button("📥 Export CA-Ready Report", use_container_width=True):
         st.success("Report successfully generated and downloaded!")
 
-# --- TAB 7: TOKEN TAB (NEWLY ADDED) ---
+# --- TAB 7: TOKEN TAB ---
 with tab7:
     st.subheader("🪙 Web3 & Crypto Tokens Master Screener")
     st.markdown("Explore top altcoins, Layer-1 tokens, DeFi protocols, and meme coins with live synchronized indicators and market caps.")
@@ -750,9 +739,8 @@ with tab7:
         
     st.dataframe(token_list_df.style.map(color_coding_table, subset=['Signal']), use_container_width=True, height=450)
     st.markdown("---")
-    st.info("💡 **Token Tab Tip:** Use the TradingView Advanced Chart tab or Master Screener for deep timeframe analysis on any selected token.")
 
-# --- TAB 8: INDIAN STOCK MARKET TAB (NEWLY ADDED) ---
+# --- TAB 8: INDIAN STOCK MARKET TAB ---
 with tab8:
     st.subheader("🇮🇳 Indian Stock Market Terminal (NSE / BSE)")
     st.markdown("Live tracking of major Indian benchmark indices and top equity stocks with professional technical signals.")
@@ -785,7 +773,7 @@ with tab8:
     st.dataframe(indian_stocks_df.style.map(color_coding_table, subset=['Trend Signal']), use_container_width=True, height=450)
     st.markdown("---")
 
-# --- TAB 9: PUBLIC DEMAND & AI DEVELOPER BOX ---
+# --- TAB 9: AI CORE ---
 with tab9:
     st.subheader("🤖 Autonomous Developer AI Core")
     st.markdown("Type any requirement below to update app architecture insights instantly.")
