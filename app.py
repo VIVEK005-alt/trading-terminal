@@ -4,9 +4,9 @@ import sqlite3
 import requests
 from datetime import datetime
 
-# 1. PAGE CONFIGURATION & ULTRA-PRO RESPONSIVE ARCHITECTURE
+# 1. PAGE CONFIGURATION & ULTRA-PRO RESPONSIVE CYBER ARCHITECTURE
 st.set_page_config(
-    page_title="Master Autonomous Trading Terminal",
+    page_title="NEXUS CYBER-TERMINAL X",
     layout="wide",
     page_icon="⚡",
     initial_sidebar_state="expanded"
@@ -16,42 +16,64 @@ st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Inter:wght@300;400;600&display=swap');
     
+    /* Global Auto-Fit, Zoom Fixes & Cyberpunk Neon Styling */
     * { box-sizing: border-box; }
-    .main { background-color: #07090e; color: #e6edf3; font-family: 'Inter', sans-serif; }
-    h1, h2, h3 { font-family: 'Orbitron', sans-serif; letter-spacing: 0.5px; }
+    .main { background-color: #05070b; color: #00ffcc; font-family: 'Inter', sans-serif; }
     
-    .stTabs [data-baseweb="tab-list"] { gap: 8px; background-color: #0d1117; padding: 10px; border-radius: 10px; border: 1px solid #21262d; flex-wrap: wrap; }
-    .stTabs [data-baseweb="tab"] { background-color: #161b22; color: #8b949e; border-radius: 6px; padding: 10px 20px; font-weight: 600; border: none; }
-    .stTabs [aria-selected="true"] { background: linear-gradient(135deg, #238636 0%, #2ea043 100%) !important; color: white !important; box-shadow: 0 0 15px rgba(35, 134, 54, 0.4); }
-    
-    .metric-card { background: linear-gradient(145deg, #161b22, #0d1117); padding: 20px; border-radius: 12px; border: 1px solid #30363d; box-shadow: 0 4px 12px rgba(0,0,0,0.3); width: 100%; }
-    .ai-box { background: rgba(33, 38, 45, 0.7); border-left: 4px solid #58a6ff; padding: 15px; border-radius: 0 8px 8px 0; margin-bottom: 15px; }
-    
-    /* ULTRA-UNIQUE NEON ANIMATED YOUTUBE HUB STYLING */
-    @keyframes neonGlow {
+    @keyframes neonPulse {
+        0% { text-shadow: 0 0 5px rgba(0,255,204,0.4), 0 0 10px rgba(0,255,204,0.4); }
+        50% { text-shadow: 0 0 20px rgba(0,255,204,0.8), 0 0 30px rgba(255,0,85,0.8); }
+        100% { text-shadow: 0 0 5px rgba(0,255,204,0.4), 0 0 10px rgba(0,255,204,0.4); }
+    }
+
+    @keyframes borderGlow {
         0% { border-color: #ff0055; box-shadow: 0 0 10px rgba(255,0,85,0.3), inset 0 0 10px rgba(255,0,85,0.3); }
         50% { border-color: #00ffcc; box-shadow: 0 0 25px rgba(0,255,204,0.6), inset 0 0 15px rgba(0,255,204,0.4); }
         100% { border-color: #ff0055; box-shadow: 0 0 10px rgba(255,0,85,0.3), inset 0 0 10px rgba(255,0,85,0.3); }
     }
-    
-    .neon-title {
-        font-family: 'Orbitron', sans-serif;
-        font-weight: 900;
+
+    h1, h2, h3 { 
+        font-family: 'Orbitron', sans-serif; 
+        letter-spacing: 1px;
         background: linear-gradient(45deg, #ff0055, #00ffcc, #7928ca);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
-        text-shadow: 0 0 20px rgba(0,255,204,0.4);
-        font-size: 26px;
-        margin-bottom: 10px;
+        animation: neonPulse 3s infinite ease-in-out;
     }
     
+    /* Tabs Styling */
+    .stTabs [data-baseweb="tab-list"] { gap: 8px; background-color: #0d1117; padding: 10px; border-radius: 12px; border: 1px solid #ff0055; flex-wrap: wrap; }
+    .stTabs [data-baseweb="tab"] { background-color: #161b22; color: #8b949e; border-radius: 6px; padding: 10px 20px; font-weight: 600; border: 1px solid #30363d; font-family: 'Orbitron', sans-serif; }
+    .stTabs [aria-selected="true"] { background: linear-gradient(135deg, #ff0055 0%, #7928ca 100%) !important; color: white !important; box-shadow: 0 0 20px rgba(255, 0, 85, 0.6); border-color: #00ffcc !important; }
+    
+    /* Custom Neon Metric Cards */
+    .neon-metric {
+        background: linear-gradient(145deg, #161b22, #0d1117);
+        padding: 20px;
+        border-radius: 12px;
+        border: 1px solid #00ffcc;
+        box-shadow: 0 0 15px rgba(0,255,204,0.2);
+        margin-bottom: 10px;
+        width: 100%;
+    }
+    
+    .ai-box { background: rgba(33, 38, 45, 0.8); border-left: 4px solid #ff0055; padding: 15px; border-radius: 0 8px 8px 0; margin-bottom: 15px; color: #e6edf3; }
+
+    /* Sidebar Cyber Styling */
+    [data-testid="stSidebar"] {
+        background-color: #07090e;
+        border-right: 1px solid #ff0055;
+    }
+
+    /* YouTube Neon Wrapper */
     .neon-player-wrapper {
         border-radius: 14px;
         border: 2px solid #ff0055;
-        animation: neonGlow 4s infinite ease-in-out;
+        animation: borderGlow 4s infinite ease-in-out;
         background: #000;
         overflow: hidden;
         margin-bottom: 15px;
+        width: 100%;
     }
     
     .youtube-container {
@@ -86,7 +108,7 @@ st.markdown("""
 
 # 2. SQLITE DATABASE INITIALIZATION
 def init_db():
-    conn = sqlite3.connect('master_terminal.db', check_same_thread=False)
+    conn = sqlite3.connect('nexus_terminal.db', check_same_thread=False)
     cursor = conn.cursor()
     cursor.execute('CREATE TABLE IF NOT EXISTS watchlists (user_email TEXT, symbol TEXT)')
     cursor.execute('CREATE TABLE IF NOT EXISTS ai_logs (timestamp TEXT, agent TEXT, action TEXT)')
@@ -135,7 +157,6 @@ def fetch_market_data(symbol):
 # Helper to extract YouTube video or playlist ID accurately
 def get_youtube_embed_url(url):
     if "list=" in url:
-        # Handle YouTube Playlists
         playlist_id = url.split("list=")[1].split("&")[0]
         return f"https://www.youtube.com/embed/videoseries?list={playlist_id}&autoplay=1&enablejsapi=1"
     elif "youtu.be/" in url:
@@ -145,42 +166,41 @@ def get_youtube_embed_url(url):
         video_id = url.split("watch?v=")[1].split("&")[0]
         return f"https://www.youtube.com/embed/{video_id}?autoplay=1&enablejsapi=1"
     else:
-        # Default fallback lofi
         return "https://www.youtube.com/embed/5qap5aO4i9A?autoplay=1&enablejsapi=1"
 
 # 3. SIDEBAR: CONTROL CENTER
-st.sidebar.title("⚡ Autonomous Control")
-user_email = st.sidebar.text_input("Trader Profile:", value="trader@gmail.com")
+st.sidebar.title("⚡ NEXUS CONTROL")
+user_email = st.sidebar.text_input("Trader Profile:", value="trader@nexus.ai")
 
 st.sidebar.markdown("---")
-st.sidebar.subheader("🤖 Dual-AI System Status")
-st.sidebar.success("🟢 **Trading Expert AI**: Active & Scanning Markets")
-st.sidebar.success("🟢 **Developer AI**: Ready for Architecture Updates")
+st.sidebar.subheader("🤖 Dual-AI Core Status")
+st.sidebar.success("🟢 **Trading Expert AI**: Active")
+st.sidebar.success("🟢 **Developer AI**: Synced")
 
 st.sidebar.markdown("---")
-selected_exchange = st.sidebar.selectbox("Exchange Feed", ["CoinGecko Global Feed", "Global Cloud Node"])
+selected_exchange = st.sidebar.selectbox("Exchange Node", ["CoinGecko Global Feed", "Global Cloud Node"])
 timeframe = st.sidebar.selectbox("Timeframe", ["1m", "5m", "15m", "1h", "4h", "1D"])
 
 # 4. UNIVERSAL SEARCH BAR
-st.title("🚀 Master Universal Trading Terminal")
+st.title("⚡ NEXUS CYBER-TERMINAL X")
 search_query = st.text_input("🔍 Global Search Bar (e.g., BTC/USDT, ETH/USDT, SOL/USDT):", value="BTC/USDT")
 
-# 5. MAIN NAVIGATION TABS
+# 5. MAIN NAVIGATION TABS (AUTO-FIT ACROSS ALL SCREENS)
 tab1, tab2, tab3, tab4, tab5, tab6, tab7 = st.tabs([
     "📊 Screener & Search", 
     "📈 Advanced Charts", 
     "🐋 Derivatives & CoinGlass", 
     "🎮 Paper Trading", 
-    "🔴 Ultra-Pro YouTube & Playlist Hub", 
+    "🔴 Cyber YouTube & Playlist Hub", 
     "💰 Tax & PnL Ledger",
-    "🤖 Public Demand & AI Developer Box"
+    "🤖 AI Developer Core"
 ])
 
 df = None
 
 # --- TAB 1: SCREENER & SEARCH ---
 with tab1:
-    st.subheader(f"🌍 Live Market Feed: {search_query}")
+    st.subheader("🌍 Live Market Feed Matrix")
     try:
         df = fetch_market_data(search_query)
         df['RSI'] = compute_rsi(df['close'], window=14)
@@ -199,10 +219,10 @@ with tab1:
 
 # --- TAB 2: ADVANCED CHARTS ---
 with tab2:
-    st.subheader("📊 Pro Interactive Chart with AI Support/Resistance Engine")
+    st.subheader("📊 Pro Interactive Chart Engine")
     st.markdown("""
         <div class="ai-box">
-            <b>🤖 Trading Expert AI Insight:</b> Market is currently consolidating near key support levels. Volatility expected around US market open.
+            <b>🤖 Trading Expert AI Insight:</b> Market is consolidating near key support zones. High volatility expected during US session.
         </div>
     """, unsafe_allow_html=True)
     try:
@@ -218,7 +238,7 @@ with tab3:
     st.subheader("🐋 Whales, Open Interest & Liquidations")
     col1, col2 = st.columns(2)
     with col1:
-        st.metric("Open Interest (OI)", "$5.82 Billion", "+6.2% (Bullish Build-up)")
+        st.metric("Open Interest (OI)", "$5.82 Billion", "+6.2% (Bullish)")
         st.metric("Long / Short Ratio", "1.95", "Dominant Longs")
     with col2:
         st.metric("24h Liquidations", "$158 Million", "Short Squeeze Active")
@@ -233,16 +253,14 @@ with tab4:
     if st.button("🚀 Execute Simulated Order", use_container_width=True):
         st.success(f"Successfully placed {t_type} for {search_query} with Auto-Trailing Stop-Loss!")
 
-# --- TAB 5: ULTRA-PRO YOUTUBE & PLAYLIST HUB (NEON ANIMATED & LINK PASTE ENGINE) ---
+# --- TAB 5: CYBER YOUTUBE & PLAYLIST HUB ---
 with tab5:
-    st.markdown('<div class="neon-title">⚡ CYBERPUNK YOUTUBE & PLAYLIST MEDIA ENGINE</div>', unsafe_allow_html=True)
-    st.markdown("Paste any YouTube Video URL or Playlist Link below to stream instantly with full VLC-style controls and responsive auto-fit UI.")
+    st.markdown("<h3>🔴 CYBERPUNK YOUTUBE & PLAYLIST STREAM ENGINE</h3>", unsafe_allow_html=True)
+    st.markdown("Paste any YouTube Video URL or Playlist Link below to stream instantly with full neon aesthetics and auto-fit responsive layout.")
 
-    # Session state initialization for dynamic link pasting
     if 'custom_yt_url' not in st.session_state:
         st.session_state.custom_yt_url = "https://www.youtube.com/watch?v=5qap5aO4i9A"
 
-    # Input Box for pasting any YouTube link / Playlist
     col_inp1, col_inp2 = st.columns([4, 1])
     with col_inp1:
         user_link_input = st.text_input("🔗 Paste YouTube Video or Playlist Link:", value=st.session_state.custom_yt_url)
@@ -254,7 +272,6 @@ with tab5:
 
     st.markdown("---")
 
-    # Render Neon Glowing Player Frame
     embed_url = get_youtube_embed_url(st.session_state.custom_yt_url)
     st.markdown(f"""
         <div class="neon-player-wrapper">
@@ -262,56 +279,13 @@ with tab5:
                 <iframe src="{embed_url}" title="YouTube Player" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
             </div>
             <div class="player-toolbar">
-                <span>🔴 STREAM STATUS: ACTIVE (HD 1080p)</span>
+                <span>🔴 STREAM STATUS: SECURE HD ACTIVE</span>
                 <span>[ ▶ PLAY ] [ ⏸ PAUSE ] [ 🔊 VOL: 100% ] [ ⛶ FULLSCREEN ]</span>
             </div>
         </div>
     """, unsafe_allow_html=True)
 
     st.markdown("---")
-    st.markdown("### 🔥 Quick Pro Playlists & Lofi Presets")
+    st.markdown("### 🔥 Quick Neon Playlists & Presets")
     
-    qp_col1, qp_col2, qp_col3, qp_col4 = st.columns(4)
-    with qp_col1:
-        if st.button("🎵 Trading Lofi Beats", use_container_width=True):
-            st.session_state.custom_yt_url = "https://www.youtube.com/watch?v=5qap5aO4i9A"
-            st.rerun()
-    with qp_col2:
-        if st.button("📈 Crypto Price Action", use_container_width=True):
-            st.session_state.custom_yt_url = "https://www.youtube.com/watch?v=jfKfPfyJRdk"
-            st.rerun()
-    with qp_col3:
-        if st.button("🎬 Diljit Top Hits", use_container_width=True):
-            st.session_state.custom_yt_url = "https://www.youtube.com/watch?v=5qap5aO4i9A"
-            st.rerun()
-    with qp_col4:
-        if st.button("🚀 Elliott Wave Masterclass", use_container_width=True):
-            st.session_state.custom_yt_url = "https://www.youtube.com/watch?v=jfKfPfyJRdk"
-            st.rerun()
-
-# --- TAB 6: TAX & PNL LEDGER ---
-with tab6:
-    st.subheader("💰 CA-Ready Tax & PnL Ledger")
-    tax_df = pd.DataFrame({
-        "Date": ["2026-03-01", "2026-04-15", "2026-06-10"],
-        "Asset": ["BTC/USDT", "ETH/USDT", "SOL/USDT"],
-        "Type": ["Long", "Short", "Long"],
-        "Net PnL ($)": [1420.0, -410.0, 950.0],
-        "Status": ["Audited", "Audited", "Verified"]
-    })
-    st.dataframe(tax_df, use_container_width=True)
-    if st.button("📥 Export CA-Ready Report", use_container_width=True):
-        st.success("Report successfully generated and downloaded!")
-
-# --- TAB 7: PUBLIC DEMAND & AI DEVELOPER BOX ---
-with tab7:
-    st.subheader("🤖 Public Demand & Autonomous Developer AI Hub")
-    st.markdown("Type any requirement below to update app architecture instantly.")
-    user_demand = st.text_area("What do you want to add or change in the app?", placeholder="e.g., Add crypto fear & greed index...")
-    if st.button("✨ Submit Demand to Developer AI", use_container_width=True):
-        if user_demand:
-            st.info(f"🔄 **Developer AI is processing your request:** '{user_demand}'...")
-            st.success("✅ **Architecture Updated Successfully!**")
-            st.balloons()
-        else:
-            st.warning("Please enter a valid requirement.")
+    qp_col1, qp_col2, qp_
