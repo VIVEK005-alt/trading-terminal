@@ -38,13 +38,40 @@ st.markdown("""
         text-shadow: 0 0 8px rgba(57,255,20,0.5);
     }
 
-    .global-summary-card {
-        background: rgba(22, 27, 34, 0.95);
-        border: 1px solid #30363d;
+    /* Summary Cards with Background Theme & Overlay for High Readability */
+    .summary-card-bull {
+        background: linear-gradient(rgba(13, 17, 23, 0.85), rgba(13, 17, 23, 0.85)), url('https://images.unsplash.com/photo-1639762681485-074b7f938ba0?q=80&w=400&auto=format&fit=crop');
+        background-size: cover;
+        background-position: center;
+        border: 2px solid #39ff14;
         padding: 15px;
         border-radius: 12px;
         text-align: center;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+        box-shadow: 0 4px 15px rgba(57,255,20,0.3);
+        margin-bottom: 20px;
+    }
+
+    .summary-card-bear {
+        background: linear-gradient(rgba(13, 17, 23, 0.85), rgba(13, 17, 23, 0.85)), url('https://images.unsplash.com/photo-1621416894569-0f39ed31d247?q=80&w=400&auto=format&fit=crop');
+        background-size: cover;
+        background-position: center;
+        border: 2px solid #ff073a;
+        padding: 15px;
+        border-radius: 12px;
+        text-align: center;
+        box-shadow: 0 4px 15px rgba(255,7,58,0.3);
+        margin-bottom: 20px;
+    }
+
+    .summary-card-side {
+        background: linear-gradient(rgba(13, 17, 23, 0.85), rgba(13, 17, 23, 0.85)), url('https://images.unsplash.com/photo-1642543492481-44e81e3914a7?q=80&w=400&auto=format&fit=crop');
+        background-size: cover;
+        background-position: center;
+        border: 2px solid #ffa500;
+        padding: 15px;
+        border-radius: 12px;
+        text-align: center;
+        box-shadow: 0 4px 15px rgba(255,165,0,0.3);
         margin-bottom: 20px;
     }
 
@@ -162,7 +189,7 @@ def compute_master_indicators(df, seed_offset=0):
         elif bp <= 45:
             return "BEAR 🐻", (100 - bp), "STRONG SELL / SHORT 🔴"
         else:
-            return "SIDEWAYS 🤖", 50.0, "NEUTRAL / HOLD 🔵"
+            return "SIDEWAYS 🐺", 50.0, "NEUTRAL / HOLD 🟡"
 
     sentiments = df.apply(get_sentiment, axis=1)
     df['Animal_Type'] = [s[0] for s in sentiments]
@@ -203,15 +230,15 @@ def fetch_master_excel_data(coin_id, row_count=100, seed_offset=0):
     })
     return compute_master_indicators(df, seed_offset)
 
-# Distinct High-Readability Neon Color Styling for Table & Cards
+# Distinct High-Readability Neon Color Styling for Table
 def color_coding_table(val):
     if isinstance(val, str):
         if 'BULL' in val or 'BUY' in val or '🟢' in val:
             return 'color: #39ff14; font-weight: 900; text-shadow: 0 0 8px #39ff14;'
         elif 'BEAR' in val or 'SELL' in val or '🔴' in val:
             return 'color: #ff073a; font-weight: 900; text-shadow: 0 0 8px #ff073a;'
-        elif 'SIDEWAYS' in val or 'HOLD' in val or '🔵' in val or 'ROBOT' in val:
-            return 'color: #00d2ff; font-weight: 900; text-shadow: 0 0 8px #00d2ff;'
+        elif 'SIDEWAYS' in val or 'HOLD' in val or '🟡' in val or 'WOLF' in val:
+            return 'color: #ffa500; font-weight: 900; text-shadow: 0 0 8px #ffa500;'
     return ''
 
 # Robust YouTube Video ID Parser
@@ -280,7 +307,7 @@ df = None
 
 # --- TAB 1: SCREENER & MASTER TIMEFRAMES & HISTORICAL YEARS ---
 with tab1:
-    st.subheader("🌍 Master Excel Sheet Matrix (Distinct Neon Readability)")
+    st.subheader("🌍 Master Excel Sheet Matrix (Background Theme Card Design)")
     
     coin_mapping = {
         "BTC": "bitcoin",
@@ -325,23 +352,23 @@ with tab1:
         anim = last_row['Animal_Type']
         power = last_row['Sentiment (%)']
         
-        # Distinct Color Assignment: Green for Bull, Red for Bear, Cyan for Sideways
+        # Assigning Card Styles & Neon Glow based on Sentiment
         if 'BULL' in anim:
+            card_class = "summary-card-bull"
             col_color = '#39ff14'
-            glow_shadow = '0 0 10px #39ff14'
         elif 'BEAR' in anim:
+            card_class = "summary-card-bear"
             col_color = '#ff073a'
-            glow_shadow = '0 0 10px #ff073a'
         else:
-            col_color = '#00d2ff'
-            glow_shadow = '0 0 10px #00d2ff'
+            card_class = "summary-card-side"
+            col_color = '#ffa500'
 
         with summary_cols[i]:
             st.markdown(f"""
-                <div class="global-summary-card">
-                    <span style="font-size: 13px; font-weight: 900; color: #ffffff;">{c_name}</span><br>
-                    <span style="font-size: 14px; font-weight: 900; color: {col_color}; text-shadow: {glow_shadow};">{anim}</span><br>
-                    <span style="font-size: 11px; font-weight: 700; color: #00ffcc;">{power}% Power</span>
+                <div class="{card_class}">
+                    <span style="font-size: 13px; font-weight: 900; color: #ffffff; text-shadow: 0 0 5px #000;">{c_name}</span><br>
+                    <span style="font-size: 14px; font-weight: 900; color: {col_color}; text-shadow: 0 0 8px {col_color};">{anim}</span><br>
+                    <span style="font-size: 11px; font-weight: 700; color: #ffffff; text-shadow: 0 0 4px #000;">{power}% Power</span>
                 </div>
             """, unsafe_allow_html=True)
 
@@ -359,7 +386,7 @@ with tab1:
             sentiment_pct = coin_df['Sentiment (%)'].iloc[-1]
             trade_advice = coin_df['Trade Advice'].iloc[-1]
             
-            box_color = '#39ff14' if 'BULL' in animal_type else ('#ff073a' if 'BEAR' in animal_type else '#00d2ff')
+            box_color = '#39ff14' if 'BULL' in animal_type else ('#ff073a' if 'BEAR' in animal_type else '#ffa500')
             box_shadow = f"0 0 10px {box_color}"
 
             st.markdown(f"""
@@ -385,7 +412,7 @@ with tab1:
             
             col_f1, col_f2 = st.columns(2)
             with col_f1:
-                filter_signal = st.selectbox(f"Filter Signal ({selected_tf})", ["All", "STRONG BUY / LONG 🟢", "STRONG SELL / SHORT 🔴", "NEUTRAL / HOLD 🔵"], key=f"filt_{c_id}")
+                filter_signal = st.selectbox(f"Filter Signal ({selected_tf})", ["All", "STRONG BUY / LONG 🟢", "STRONG SELL / SHORT 🔴", "NEUTRAL / HOLD 🟡"], key=f"filt_{c_id}")
             with col_f2:
                 min_rsi = st.slider(f"Minimum RSI Filter ({selected_tf})", 0.0, 100.0, 0.0, key=f"rsi_{c_id}")
             
@@ -524,7 +551,7 @@ with tab5:
     with dl_c1:
         st.link_button("🔗 Open & Watch on Official YouTube", st.session_state.active_yt_url, use_container_width=True)
     with dl_c2:
-        st.link_button("🚀 Direct Stream External Hub", st.session_state.active_yt_url, use_container_width=True)
+        st.link_code = st.link_button("🚀 Direct Stream External Hub", st.session_state.active_yt_url, use_container_width=True)
 
 # --- TAB 6: TAX & PNL LEDGER ---
 with tab6:
