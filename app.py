@@ -53,6 +53,17 @@ st.markdown("""
         background-size: cover; background-position: center; border: 2px solid #ffa500; padding: 15px; border-radius: 12px; text-align: center; box-shadow: 0 4px 15px rgba(255,165,0,0.3); margin-bottom: 20px;
     }
 
+    /* Unique Pro Strategy Box */
+    .unique-strategy-box {
+        background: linear-gradient(135deg, #0d1117 0%, #161b22 100%);
+        border: 2px solid #00ffcc;
+        border-radius: 12px;
+        padding: 20px;
+        box-shadow: 0 0 20px rgba(0,255,204,0.25);
+        margin-top: 15px;
+        margin-bottom: 25px;
+    }
+
     table.dataframe {
         background-color: #0d1117 !important;
         color: #00ffcc !important;
@@ -87,8 +98,6 @@ st.markdown("""
     .stTabs [data-baseweb="tab"] { background-color: #161b22; color: #00ffcc; border-radius: 6px; padding: 8px 16px; font-weight: 700; border: 1px solid #30363d; font-family: 'Orbitron', sans-serif; }
     .stTabs [aria-selected="true"] { background: linear-gradient(135deg, #238636 0%, #1f6feb 100%) !important; color: white !important; border-color: #00ffcc !important; }
     
-    .ai-box { background: rgba(33, 38, 45, 0.9); border-left: 4px solid #39ff14; padding: 15px; border-radius: 0 8px 8px 0; margin-bottom: 15px; color: #ffffff; font-family: 'Orbitron', sans-serif; }
-
     [data-testid="stSidebar"] {
         background-color: #07090e;
         border-right: 1px solid #30363d;
@@ -96,19 +105,18 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# Language Dictionary for UI
 LANG_DICT = {
     "Hinglish": {
         "strategy": "AI Pro Strategy & Scalping Signals",
-        "chart": "TradingView Professional Chart (9:16 Optimized)",
+        "chart": "TradingView Professional Landscape Chart",
     },
     "Hindi": {
         "strategy": "एआई प्रो रणनीति और स्केलिंग सिग्नल",
-        "chart": "ट्रेडिंगव्यू प्रोफेशनल चार्ट (9:16 ऑप्टिमाइज़्ड)",
+        "chart": "ट्रेडिंगव्यू प्रोफेशनल लैंडस्केप चार्ट",
     },
     "English": {
         "strategy": "AI Pro Strategy & Scalping Signals",
-        "chart": "TradingView Professional Chart (9:16 Optimized)",
+        "chart": "TradingView Professional Landscape Chart",
     }
 }
 
@@ -123,7 +131,7 @@ def init_db():
 
 init_db()
 
-# MASTER TECHNICAL INDICATORS COMPUTATION (TIME-SENSITIVE)
+# MASTER TECHNICAL INDICATORS COMPUTATION
 def compute_master_indicators(df, seed_offset=0):
     close = df['close']
     high = df['high']
@@ -234,28 +242,6 @@ def color_coding_table(val):
             return 'color: #ffa500; font-weight: 900; text-shadow: 0 0 8px #ffa500;'
     return ''
 
-def generate_ai_strategy(df, lang_choice):
-    last_row = df.iloc[-1]
-    rsi = last_row['RSI_14']
-    macd = last_row['MACD']
-    advice = last_row['Trade Advice']
-    date_str = last_row['Date']
-    time_str = last_row['Time']
-    
-    if lang_choice == "Hinglish":
-        strat = f"Time ({date_str} {time_str}): RSI ({rsi}) aur MACD ({macd}) ke anusar market mein {advice} setup hai. Scalping ke liye tight stoploss rakhein."
-    elif lang_choice == "Hindi":
-        strat = f"समय ({date_str} {time_str}): RSI ({rsi}) और MACD ({macd}) के अनुसार {advice} सक्रिय है। उचित जोखिम प्रबंधन रखें।"
-    else:
-        strat = f"Time ({date_str} {time_str}): RSI ({rsi}) and MACD ({macd}) indicate {advice}. Maintain strict risk management."
-            
-    return pd.DataFrame({
-        "Timestamp": [f"{date_str} {time_str}"],
-        "Indicator Status": [f"RSI: {rsi} | MACD: {macd}"],
-        "AI Strategy & Action": [advice],
-        "Detailed Execution Plan": [strat]
-    })
-
 # Robust YouTube Video ID Parser
 def get_youtube_embed_url(url, mute_state=0):
     vid_id = "5qap5aO4i9A"
@@ -322,7 +308,6 @@ df = None
 with tab1:
     st.subheader("🌍 Master Excel Sheet Matrix (Crypto Background Theme)")
     
-    # LANGUAGE SELECTOR INSIDE TAB 1 AS REQUESTED
     selected_lang = st.selectbox("🌐 Choose Language / भाषा चुनें:", ["Hinglish", "Hindi", "English"], key="inline_lang_selector")
     lang = LANG_DICT[selected_lang]
     
@@ -339,6 +324,7 @@ with tab1:
         "SUI": "sui"
     }
     
+    # RESTORED FULL TIME/YEAR BUTTONS
     timeframe_list = [
         "1 Min", "3 Min", "5 Min", "15 Min", "30 Min", "75 Min", 
         "1 Hour", "2 Hour", "3 Hour", "4 Hour", "6 Hour", "12 Hour", 
@@ -449,15 +435,31 @@ with tab1:
             styled_df = filtered_df[excel_display_cols].style.map(color_coding_table, subset=['Animal_Type', 'Trade Advice'])
             st.dataframe(styled_df, use_container_width=True, height=500)
             
-            # --- AI STRATEGY TABLE BELOW EACH MAIN TABLE ---
-            st.markdown(f"### 🤖 AI Strategy & Indicator Action Plan ({c_tab_name} - {selected_tf})")
-            strategy_df = generate_ai_strategy(coin_df, selected_lang)
-            st.dataframe(strategy_df, use_container_width=True, height=100)
+            # --- UNIQUE PRO AI STRATEGY BOX ---
+            last_row = coin_df.iloc[-1]
+            rsi_v = last_row['RSI_14']
+            macd_v = last_row['MACD']
+            adv_v = last_row['Trade Advice']
+            
+            if selected_lang == "Hinglish":
+                strat_text = f"Market mein {adv_v} setup active hai. RSI ({rsi_v}) aur MACD ({macd_v}) momentum confirm kar rahe hain. Scalping ya long trade ke liye tight stoploss use karein."
+            elif selected_lang == "Hindi":
+                strat_text = f"बाजार में {adv_v} सक्रिय है। RSI ({rsi_v}) और MACD ({macd_v}) के आधार पर उचित जोखिम प्रबंधन के साथ ट्रेड करें।"
+            else:
+                strat_text = f"Active setup: {adv_v}. RSI ({rsi_v}) and MACD ({macd_v}) validate current trend. Maintain strict stoploss for scalping."
 
-            # --- TRADINGVIEW 9:16 PRO CHART DIRECTLY BELOW EACH TABLE & STRATEGY BOX ---
-            st.markdown(f"### 📈 Live TradingView Professional Chart ({c_tab_name} - 9:16 Optimized)")
+            st.markdown(f"""
+                <div class="unique-strategy-box">
+                    <h3 style="color: #00ffcc; margin-top: 0; font-family: 'Orbitron'; font-size: 18px;">🤖 AI Pro Strategy & Scalping Matrix ({c_tab_name} - {selected_tf})</h3>
+                    <p style="color: #ffffff; font-size: 14px; margin-bottom: 8px;"><b>Indicator Status:</b> RSI: {rsi_v} | MACD: {macd_v} | Volume & Supertrend: Synced</p>
+                    <p style="color: #39ff14; font-size: 15px; margin-bottom: 0;"><b>Execution Plan:</b> {strat_text}</p>
+                </div>
+            """, unsafe_allow_html=True)
+
+            # --- LANDSCAPE TRADINGVIEW PRO CHART DIRECTLY BELOW ---
+            st.markdown(f"### 📈 Live TradingView Professional Landscape Chart ({c_tab_name})")
             st.markdown("""
-                <div style="width: 100%; max-width: 500px; height: 750px; margin: 0 auto; border: 2px solid #00ffcc; border-radius: 14px; overflow: hidden; background: #000;">
+                <div style="width: 100%; height: 600px; border: 2px solid #00ffcc; border-radius: 14px; overflow: hidden; background: #000;">
                     <iframe src="https://s.tradingview.com/widgetembed/?symbol=BINANCE%3ABTCUSDT&interval=1&hidesidetoolbar=0&symboledit=1&saveimage=1&toolbarbg=f1f3f6&studies=%5B%%5D&theme=dark&style=1&timezone=Etc%2FUTC" width="100%" height="100%" frameborder="0" allowtransparency="true" scrolling="no"></iframe>
                 </div>
             """, unsafe_allow_html=True)
