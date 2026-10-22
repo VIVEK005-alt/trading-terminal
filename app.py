@@ -33,25 +33,19 @@ st.markdown("""
     .live-running-price {
         font-family: 'Orbitron', sans-serif;
         font-weight: 900;
-        font-size: 30px;
+        font-size: 28px;
         color: #39ff14;
         text-shadow: 0 0 8px rgba(57,255,20,0.5);
-        display: inline-block;
-        background: rgba(13, 17, 23, 0.9);
-        padding: 6px 16px;
-        border-radius: 8px;
-        border: 2px solid #39ff14;
     }
 
-    .market-sentiment-box {
+    .global-summary-card {
         background: rgba(22, 27, 34, 0.95);
         border: 1px solid #30363d;
-        padding: 12px 20px;
+        padding: 15px;
         border-radius: 12px;
-        display: flex;
-        align-items: center;
-        gap: 20px;
+        text-align: center;
         box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+        margin-bottom: 20px;
     }
 
     table.dataframe {
@@ -108,7 +102,7 @@ def init_db():
 
 init_db()
 
-# MASTER TECHNICAL INDICATORS COMPUTATION (FULL ACCURACY)
+# MASTER TECHNICAL INDICATORS COMPUTATION
 @st.cache_data(ttl=60)
 def compute_master_indicators(df):
     close = df['close']
@@ -156,7 +150,7 @@ def compute_master_indicators(df):
     df['CCI_20'] = ((typical_price - typical_price.rolling(20).mean()) / (0.015 * mad)).round(2)
     
     np.random.seed(42)
-    buyer_ratio = np.random.uniform(0.35, 0.75, len(df))
+    buyer_ratio = np.random.uniform(0.30, 0.70, len(df))
     df['Buyer Vol'] = (df['volume'] * buyer_ratio).round(2)
     df['Seller Vol'] = (df['volume'] - df['Buyer Vol']).round(2)
     df['Buy Pressure (%)'] = (buyer_ratio * 100).round(1)
@@ -164,12 +158,12 @@ def compute_master_indicators(df):
     
     def get_sentiment(row):
         bp = row['Buy Pressure (%)']
-        if bp >= 58:
+        if bp >= 56:
             return "BULL 🐂", bp, "STRONG BUY / LONG 🟢"
-        elif bp <= 42:
+        elif bp <= 44:
             return "BEAR 🐻", (100 - bp), "STRONG SELL / SHORT 🔴"
         else:
-            return "WOLF 🐺", 50.0, "NEUTRAL / SIDEWAYS 🟡"
+            return "SIDEWAYS 🤖", 50.0, "NEUTRAL / HOLD 🔵"
 
     sentiments = df.apply(get_sentiment, axis=1)
     df['Animal_Type'] = [s[0] for s in sentiments]
@@ -178,7 +172,6 @@ def compute_master_indicators(df):
     
     return df
 
-# STABLE & FAST MASTER EXCEL DATA FETCHER
 @st.cache_data(ttl=30)
 def fetch_master_excel_data(coin_id, row_count=100):
     url = f"https://api.coingecko.com/api/v3/coins/{coin_id}/market_chart?vs_currency=usd&days=90"
@@ -211,15 +204,15 @@ def fetch_master_excel_data(coin_id, row_count=100):
     })
     return compute_master_indicators(df)
 
-# Neon Color Styling Function with Animal Emojis & Bold Neon Text
+# Neon Color Styling for Table (Green, Red, Blue for Sideways without column highlights)
 def color_coding_table(val):
     if isinstance(val, str):
         if 'BULL' in val or 'BUY' in val or '🟢' in val:
-            return 'background-color: rgba(57, 255, 20, 0.2); color: #39ff14; font-weight: 900; text-shadow: 0 0 8px #39ff14;'
+            return 'color: #39ff14; font-weight: 900; text-shadow: 0 0 8px #39ff14;'
         elif 'BEAR' in val or 'SELL' in val or '🔴' in val:
-            return 'background-color: rgba(255, 7, 58, 0.2); color: #ff073a; font-weight: 900; text-shadow: 0 0 8px #ff073a;'
-        elif 'WOLF' in val or 'HOLD' in val or 'SIDEWAYS' in val or '🟡' in val:
-            return 'background-color: rgba(255, 255, 0, 0.2); color: #ffff00; font-weight: 900; text-shadow: 0 0 8px #ffff00;'
+            return 'color: #ff073a; font-weight: 900; text-shadow: 0 0 8px #ff073a;'
+        elif 'SIDEWAYS' in val or 'HOLD' in val or '🔵' in val or 'WOLF' in val:
+            return 'color: #00d2ff; font-weight: 900; text-shadow: 0 0 8px #00d2ff;'
     return ''
 
 # Robust YouTube Video ID Parser
@@ -288,14 +281,12 @@ df = None
 
 # --- TAB 1: SCREENER & MASTER TIMEFRAMES & HISTORICAL YEARS ---
 with tab1:
-    st.subheader("🌍 Master Excel Sheet Matrix (Neon Bold Animal AI)")
-    
-    coin_tabs = st.tabs(["BTC (Bitcoin)", "ETH (Ethereum)", "SOL (Solana)", "BNB", "XRP", "DOGE", "AVAX", "LINK", "NEAR", "SUI"])
+    st.subheader("🌍 Master Excel Sheet Matrix (Global Sentiment Summary Row)")
     
     coin_mapping = {
-        "BTC (Bitcoin)": "bitcoin",
-        "ETH (Ethereum)": "ethereum",
-        "SOL (Solana)": "solana",
+        "BTC": "bitcoin",
+        "ETH": "ethereum",
+        "SOL": "solana",
         "BNB": "binancecoin",
         "XRP": "ripple",
         "DOGE": "dogecoin",
@@ -304,30 +295,58 @@ with tab1:
         "NEAR": "near",
         "SUI": "sui"
     }
+    
+    timeframe_list = [
+        "1 Min", "3 Min", "5 Min", "15 Min", "30 Min", "75 Min", 
+        "1 Hour", "2 Hour", "3 Hour", "4 Hour", "6 Hour", "12 Hour", 
+        "1 Day", "1 Week", "1 Month", "3 Months", "6 Months", 
+        "1 Year", "3 Years", "5 Years", "2026 (YTD)", "2025", "2024", "2023", "2022", "2021", "2020"
+    ]
+    
+    # Global Master Timeframe Selection Bar for All Coins
+    selected_tf = st.radio("⚡ Select Global Timeframe / Year for All Coins:", timeframe_list, horizontal=True)
+    
+    tf_row_counts = {
+        "1 Min": 100, "3 Min": 100, "5 Min": 100, "15 Min": 100, "30 Min": 100, "75 Min": 100, 
+        "1 Hour": 120, "2 Hour": 120, "3 Hour": 120, "4 Hour": 120, "6 Hour": 120, "12 Hour": 120, 
+        "1 Day": 150, "1 Week": 150, "1 Month": 150, "3 Months": 150, "6 Months": 150, 
+        "1 Year": 150, "3 Years": 150, "5 Years": 150, 
+        "2026 (YTD)": 150, "2025": 150, "2024": 150, "2023": 150, "2022": 150, "2021": 150, "2020": 150
+    }
+    r_count = tf_row_counts.get(selected_tf, 100)
 
+    # TOP GLOBAL SUMMARY ROW: Showing all coins with sentiment & percentage simultaneously
+    st.markdown("### 🔥 All Coins Market Sentiment Matrix")
+    summary_cols = st.columns(len(coin_mapping))
+    
+    coin_data_cache = {}
+    for i, (c_name, c_id) in enumerate(coin_mapping.items()):
+        cdf = fetch_master_excel_data(c_id, row_count=r_count)
+        coin_data_cache[c_name] = cdf
+        last_row = cdf.iloc[-1]
+        anim = last_row['Animal_Type']
+        power = last_row['Sentiment (%)']
+        
+        col_color = '#39ff14' if 'BULL' in anim else ('#ff073a' if 'BEAR' in anim else '#00d2ff')
+        with summary_cols[i]:
+            st.markdown(f"""
+                <div class="global-summary-card">
+                    <span style="font-size: 13px; font-weight: 900; color: #ffffff;">{c_name}</span><br>
+                    <span style="font-size: 14px; font-weight: 900; color: {col_color};">{anim}</span><br>
+                    <span style="font-size: 11px; color: #8b949e;">{power}% Power</span>
+                </div>
+            """, unsafe_allow_html=True)
+
+    st.markdown("---")
+
+    # INDIVIDUAL COIN TABS & DETAILED TABLES
+    coin_tabs = st.tabs(list(coin_mapping.keys()))
+    
     for idx, (c_tab_name, c_id) in enumerate(coin_mapping.items()):
         with coin_tabs[idx]:
-            st.markdown(f"### ⚡ {c_tab_name} Full Master Sheet & Historical Matrix")
+            st.markdown(f"### ⚡ {c_tab_name} Comprehensive Data Matrix ({selected_tf})")
             
-            timeframe_list = [
-                "1 Min", "3 Min", "5 Min", "15 Min", "30 Min", "75 Min", 
-                "1 Hour", "2 Hour", "3 Hour", "4 Hour", "6 Hour", "12 Hour", 
-                "1 Day", "1 Week", "1 Month", "3 Months", "6 Months", 
-                "1 Year", "3 Years", "5 Years", "2026 (YTD)", "2025", "2024", "2023", "2022", "2021", "2020"
-            ]
-            
-            selected_tf = st.radio(f"Select Timeframe / Year ({c_tab_name}):", timeframe_list, horizontal=True, key=f"radio_{c_id}")
-            
-            tf_row_counts = {
-                "1 Min": 100, "3 Min": 100, "5 Min": 100, "15 Min": 100, "30 Min": 100, "75 Min": 100, 
-                "1 Hour": 120, "2 Hour": 120, "3 Hour": 120, "4 Hour": 120, "6 Hour": 120, "12 Hour": 120, 
-                "1 Day": 150, "1 Week": 150, "1 Month": 150, "3 Months": 150, "6 Months": 150, 
-                "1 Year": 150, "3 Years": 150, "5 Years": 150, 
-                "2026 (YTD)": 150, "2025": 150, "2024": 150, "2023": 150, "2022": 150, "2021": 150, "2020": 150
-            }
-
-            r_count = tf_row_counts.get(selected_tf, 100)
-            coin_df = fetch_master_excel_data(c_id, row_count=r_count)
+            coin_df = coin_data_cache[c_tab_name]
             current_price = coin_df['close'].iloc[-1]
             animal_type = coin_df['Animal_Type'].iloc[-1]
             sentiment_pct = coin_df['Sentiment (%)'].iloc[-1]
@@ -341,7 +360,7 @@ with tab1:
                     </div>
                     <div style="border-left: 1px solid #30363d; padding-left: 20px;">
                         <span style="font-size: 11px; color: #8b949e; display: block; font-weight: 600;">MARKET SENTIMENT & ANIMAL AI</span>
-                        <span style="font-size: 22px; font-weight: 900; color: {'#39ff14' if 'BULL' in animal_type else ('#ff073a' if 'BEAR' in animal_type else '#ffff00')};">
+                        <span style="font-size: 22px; font-weight: 900; color: {'#39ff14' if 'BULL' in animal_type else ('#ff073a' if 'BEAR' in animal_type else '#00d2ff')};">
                             {animal_type} — {sentiment_pct}% Power
                         </span>
                     </div>
@@ -356,9 +375,9 @@ with tab1:
             
             col_f1, col_f2 = st.columns(2)
             with col_f1:
-                filter_signal = st.selectbox(f"Filter Signal ({selected_tf})", ["All", "STRONG BUY / LONG 🟢", "STRONG SELL / SHORT 🔴", "NEUTRAL / SIDEWAYS 🟡"], key=f"filt_{c_id}_{selected_tf}")
+                filter_signal = st.selectbox(f"Filter Signal ({selected_tf})", ["All", "STRONG BUY / LONG 🟢", "STRONG SELL / SHORT 🔴", "NEUTRAL / HOLD 🔵"], key=f"filt_{c_id}")
             with col_f2:
-                min_rsi = st.slider(f"Minimum RSI Filter ({selected_tf})", 0.0, 100.0, 0.0, key=f"rsi_{c_id}_{selected_tf}")
+                min_rsi = st.slider(f"Minimum RSI Filter ({selected_tf})", 0.0, 100.0, 0.0, key=f"rsi_{c_id}")
             
             filtered_df = coin_df.copy()
             if filter_signal != "All":
@@ -375,7 +394,6 @@ with tab1:
             ]
             
             styled_df = filtered_df[excel_display_cols].style.map(color_coding_table, subset=['Animal_Type', 'Trade Advice'])
-            
             st.dataframe(styled_df, use_container_width=True, height=600)
 
 # --- TAB 2: ADVANCED CHARTS ---
