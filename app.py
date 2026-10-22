@@ -211,7 +211,7 @@ def fetch_master_excel_data(coin_id, row_count=200):
     })
     return compute_master_indicators(df)
 
-# Color Styling Function for Table (Compatible with modern Pandas `.map()`)
+# Color Styling Function for Table
 def color_coding_table(val):
     if isinstance(val, str):
         if 'BULL' in val or 'BUY' in val or '🟢' in val:
@@ -254,18 +254,18 @@ def get_original_video_title(url):
         pass
     return "YouTube_Media_Stream"
 
-# 3. SIDEBAR: CONTROL CENTER & AUTO-REFRESH SETTINGS
+# 3. SIDEBAR: CONTROL CENTER & SILENT AUTO-REFRESH
 st.sidebar.title("⚡ APEX CONTROL")
 user_email = st.sidebar.text_input("Trader Profile:", value="trader@apex.ai")
 
 st.sidebar.markdown("---")
-st.sidebar.subheader("🔄 Live Auto-Refresh Suite")
-auto_refresh = st.sidebar.checkbox("Enable Auto-Refresh (Live)", value=True)
-refresh_rate = st.sidebar.slider("Refresh Interval (Seconds):", 5, 60, 15)
+st.sidebar.subheader("🔄 Silent Live Auto-Sync")
+silent_refresh = st.sidebar.checkbox("Enable 1-Second Silent Sync", value=True)
 
-if auto_refresh:
-    st.sidebar.caption(f"🟢 Status: Live Syncing Every {refresh_rate}s")
-    time.sleep(0.1)
+if silent_refresh:
+    st.sidebar.caption("🟢 Status: Background Live Data Active")
+    time.sleep(1)
+    st.rerun()
 
 st.sidebar.markdown("---")
 st.sidebar.subheader("🤖 Dual-AI Core Status")
@@ -291,7 +291,7 @@ df = None
 
 # --- TAB 1: SCREENER & MASTER TIMEFRAMES & HISTORICAL YEARS ---
 with tab1:
-    st.subheader("🌍 Master Excel Sheet Matrix (Color-Coded & Filtered)")
+    st.subheader("🌍 Master Excel Sheet Matrix (Silent Live Auto-Refresh)")
     
     coin_tabs = st.tabs(["BTC (Bitcoin)", "ETH (Ethereum)", "SOL (Solana)", "BNB", "XRP", "DOGE", "AVAX", "LINK", "NEAR", "SUI"])
     
@@ -377,7 +377,6 @@ with tab1:
                 'Animal_Type', 'Trade Advice'
             ]
             
-            # Apply Modern Pandas Map Styling
             styled_df = filtered_df[excel_display_cols].style.map(color_coding_table, subset=['Animal_Type', 'Trade Advice'])
             
             st.dataframe(styled_df, use_container_width=True, height=650)
