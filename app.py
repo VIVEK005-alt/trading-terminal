@@ -48,12 +48,18 @@ st.markdown("""
         display: inline-block;
     }
 
-    .live-ticker-metric {
+    .live-running-price {
         font-family: 'Orbitron', sans-serif;
         font-weight: 900;
-        font-size: 28px;
+        font-size: 32px;
+        color: #00ffcc;
         animation: liveTickerPulse 1.5s infinite ease-in-out;
         display: inline-block;
+        background: rgba(0, 255, 204, 0.05);
+        padding: 5px 15px;
+        border-radius: 8px;
+        border: 1px solid #00ffcc;
+        margin-bottom: 10px;
     }
 
     h1, h2, h3, h4, p, label, .stMarkdown { 
@@ -130,7 +136,7 @@ def compute_technical_indicators(df):
     close = df['close']
     delta = close.diff()
     gain = (delta.where(delta > 0, 0)).rolling(window=14).mean()
-    loss = (-delta.where(delta < 0, 0)).rolling(window=14).mean()
+    loss = (-delta.where(delta < 0, 0)).rolling(window=window).mean() if 'window' in locals() else (-delta.where(delta < 0, 0)).rolling(window=14).mean()
     rs = gain / loss
     df['RSI_14'] = 100 - (100 / (1 + rs))
     
@@ -290,9 +296,21 @@ with tab1:
                 with tf_tabs[list(tf_multipliers.keys()).index(tf_name)]:
                     coin_df = fetch_market_data(c_id, timeframe_multiplier=tf_mult)
                     
+                    current_price = coin_df['close'].iloc[-1]
+                    
+                    # Live Running Price Ticker Display Right Above Matrix
+                    st.markdown(f"""
+                        <div style="display: flex; align-items: center; gap: 20px; margin-bottom: 15px;">
+                            <div>
+                                <span style="font-size: 14px; color: #8b949e; display: block;">⚡ LIVE RUNNING MARKET PRICE</span>
+                                <span class="live-running-price">${current_price:,.2f}</span>
+                            </div>
+                        </div>
+                    """, unsafe_allow_html=True)
+                    
                     m1, m2, m3, m4 = st.columns(4)
                     with m1:
-                        st.markdown(f"**Close Price:** `${coin_df['close'].iloc[-1]:,.2f}`")
+                        st.markdown(f"**Close Price:** `${current_price:,.2f}`")
                     with m2:
                         st.markdown(f"**RSI (14):** `{coin_df['RSI_14'].iloc[-1]:,.2f}`")
                     with m3:
