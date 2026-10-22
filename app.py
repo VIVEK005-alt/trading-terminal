@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import sqlite3
 import requests
+import urllib.parse
 from datetime import datetime
 
 # 1. PAGE CONFIGURATION & ULTRA-PRO RESPONSIVE CYBER ARCHITECTURE
@@ -149,7 +150,7 @@ def fetch_market_data(symbol):
     df['datetime'] = pd.to_datetime(df['timestamp'], unit='ms')
     return df
 
-# Helper to extract YouTube video ID cleanly & generate clean filenames
+# Helper to extract YouTube video ID cleanly
 def get_youtube_embed_url(url, mute_state=0):
     if "list=" in url:
         playlist_id = url.split("list=")[1].split("&")[0]
@@ -163,11 +164,20 @@ def get_youtube_embed_url(url, mute_state=0):
     else:
         return f"https://www.youtube.com/embed/5qap5aO4i9A?autoplay=1&mute={mute_state}&enablejsapi=1"
 
-def extract_safe_filename(url):
-    cleaned = url.replace("https://", "").replace("http://", "").replace("www.youtube.com/watch?v=", "").replace("youtu.be/", "").replace("/", "_").replace("?", "_").replace("=", "_")
-    if len(cleaned) > 25:
-        cleaned = cleaned[:25]
-    return cleaned if cleaned else "YouTube_Media"
+# Function to fetch 100% Original Video Title using YouTube oEmbed API
+def get_original_video_title(url):
+    try:
+        oembed_url = f"https://www.youtube.com/oembed?url={urllib.parse.quote(url)}&format=json"
+        res = requests.get(oembed_url, timeout=5)
+        if res.status_code == 200:
+            data = res.json()
+            title = data.get("title", "YouTube_Media")
+            # Clean special characters for safe filename
+            safe_title = "".join([c if c.isalnum() or c in (' ', '_', '-') else '_' for c in title])
+            return safe_title.strip()
+    except:
+        pass
+    return "YouTube_Media_Stream"
 
 # 3. SIDEBAR: CONTROL CENTER
 st.sidebar.title("⚡ NEXUS CONTROL")
@@ -257,7 +267,7 @@ with tab4:
 # --- TAB 5: CYBER YOUTUBE & DOWNLOAD SUITE ---
 with tab5:
     st.markdown('<div class="rgb-neon-title">📺 🔴 CYBERPUNK YOUTUBE STREAM & DOWNLOAD SUITE</div>', unsafe_allow_html=True)
-    st.markdown("Stream seamlessly with full sound, interactive controls, and direct file downloads with original filenames.")
+    st.markdown("Stream seamlessly with full sound, interactive controls, and direct file downloads carrying the original video title.")
 
     if 'custom_yt_url' not in st.session_state:
         st.session_state.custom_yt_url = "https://www.youtube.com/watch?v=5qap5aO4i9A"
@@ -298,7 +308,7 @@ with tab5:
     """, unsafe_allow_html=True)
 
     st.markdown("---")
-    st.markdown("### 📥 Direct Video & Audio Download Suite (No ZIP - Pure Formats)")
+    st.markdown("### 📥 Direct Video & Audio Download Suite (Original Title & Formats)")
 
     # Format & Quality selectors
     dl_col1, dl_col2 = st.columns(2)
@@ -307,15 +317,16 @@ with tab5:
     with dl_col2:
         aud_quality = st.selectbox("Select Audio Format:", ["MP3 - 320kbps (High Quality)", "MP4A - Lossless Audio"])
 
-    safe_name = extract_safe_filename(st.session_state.custom_yt_url)
+    # Fetch 100% original video title dynamically from YouTube
+    original_title = get_original_video_title(st.session_state.custom_yt_url)
 
-    # Action Download Buttons with Direct File Downloads using Original Names
+    # Action Download Buttons with Direct File Downloads using Original Title
     btn_c1, btn_c2, btn_c3 = st.columns(3)
     with btn_c1:
         st.download_button(
             label=f"📥 Download {vid_quality.split(' - ')[0]}",
-            data=b"Simulated Video Stream Binary Data",
-            file_name=f"{safe_name}_{vid_quality.split(' - ')[0]}.mp4",
+            data=b"Simulated Video Stream Binary Data Package",
+            file_name=f"{original_title}_{vid_quality.split(' - ')[0]}.mp4",
             mime="video/mp4",
             use_container_width=True
         )
@@ -323,14 +334,14 @@ with tab5:
         ext = "mp3" if "MP3" in aud_quality else "m4a"
         st.download_button(
             label=f"🎧 Download {aud_quality.split(' - ')[0]}",
-            data=b"Simulated Audio Stream Binary Data",
-            file_name=f"{safe_name}_Audio.{ext}",
+            data=b"Simulated Audio Stream Binary Data Package",
+            file_name=f"{original_title}_Audio.{ext}",
             mime=f"audio/{ext}",
             use_container_width=True
         )
     with btn_c3:
         if st.button("🔗 Open on YouTube", use_container_width=True):
-            st.markdown(f"[Click here]({st.session_state.custom_yt_url})")
+            st.markdown(f"[Click here to open direct link]({st.session_state.custom_yt_url})")
 
     st.markdown("---")
     st.markdown("### 🔥 Pro Quick Channels & Playlists")
