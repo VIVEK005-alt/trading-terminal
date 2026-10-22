@@ -63,7 +63,6 @@ st.markdown("""
         margin-bottom: 25px;
     }
 
-    /* Software Navigation Bar Styling */
     .software-nav-bar {
         background: #0d1117;
         padding: 10px 15px;
@@ -306,8 +305,23 @@ st.sidebar.title("⚡ APEX CONTROL")
 user_email = st.sidebar.text_input("Trader Profile:", value="trader@apex.ai")
 
 st.sidebar.markdown("---")
-st.sidebar.subheader("⭐ Multiple Watchlist (1K+ Coins)")
-user_watchlist = st.sidebar.multiselect("Select Coins to Watch:", options=list(all_coins_dict.keys()), default=["BTC", "ETH", "SOL", "BNB", "XRP"])
+
+# Watchlist Section with Hide/Show Toggle Button placed right where marked green
+if 'show_watchlist_section' not in st.session_state:
+    st.session_state.show_watchlist_section = True
+
+col_w_title, col_w_btn = st.sidebar.columns([3, 1])
+with col_w_title:
+    st.subheader("⭐ Multiple Watchlist (1K+ Coins)")
+with col_w_btn:
+    toggle_icon = "👁️" if st.session_state.show_watchlist_section else "🔒"
+    if st.button(toggle_icon, key="hide_show_wl", help="Hide/Show Watchlist"):
+        st.session_state.show_watchlist_section = not st.session_state.show_watchlist_section
+        st.rerun()
+
+user_watchlist = ["BTC", "ETH", "SOL", "BNB", "XRP"]
+if st.session_state.show_watchlist_section:
+    user_watchlist = st.sidebar.multiselect("Select Coins to Watch:", options=list(all_coins_dict.keys()), default=["BTC", "ETH", "SOL", "BNB", "XRP"])
 
 st.sidebar.markdown("---")
 st.sidebar.subheader("🔄 Master Data Refresh")
@@ -477,7 +491,7 @@ with tab1:
                 </div>
             """, unsafe_allow_html=True)
 
-            # --- TRADINGVIEW PROFESSIONAL CHART WITH LOCKED VIEW MODES, SYSTEM THEME & TRUE ESC FULLSCREEN ---
+            # --- TRADINGVIEW PROFESSIONAL CHART WITH LOCKED VIEW MODES, SYSTEM DEFAULT THEME & TRUE ESC FULLSCREEN ---
             st.markdown(f"### 📈 Live TradingView Professional Chart ({c_tab_name})")
             
             col_c1, col_c2, col_c3 = st.columns([2, 2, 3])
