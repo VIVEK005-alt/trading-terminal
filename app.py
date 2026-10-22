@@ -35,7 +35,7 @@ BINANCE_SPOT = "https://api.binance.com/api/v3"
 BINANCE_FUT = "https://fapi.binance.com"
 COINGECKO = "https://api.coingecko.com/api/v3"
 FX_URL = "https://api.frankfurter.app/latest"
-HEADERS = {"User-Agent": "apex-terminal/3.0"}
+HEADERS = {"User-Agent": "apex-terminal/4.0"}
 TIMEOUT = 8
 START_CASH = 10_000.0
 DB_PATH = "apex_terminal.db"
@@ -55,8 +55,12 @@ TV_INTERVALS = {"1 Min": "1", "5 Min": "5", "15 Min": "15", "30 Min": "30",
                 "1 Hour": "60", "4 Hour": "240", "1 Day": "D", "1 Week": "W"}
 CURRENCIES = {"USD": "$", "EUR": "€", "GBP": "£", "INR": "₹", "JPY": "¥", "USDT": "₮"}
 FALLBACK_FX = {"USD": 1.0, "USDT": 1.0, "EUR": 0.92, "GBP": 0.79, "INR": 83.5, "JPY": 152.5}
-LANGS = {"English": "Market Sentiment Matrix", "Hinglish": "Market Mood Matrix (Bazaar Mood)",
-         "Hindi": "बाज़ार भावना मैट्रिक्स"}
+
+LANG_TITLES = {
+    "English": "Market Sentiment Matrix",
+    "Hinglish": "Market Mood Matrix (Bazaar Mood)",
+    "Hindi": "बाज़ार भावना मैट्रिक्स",
+}
 
 DEFAULT_PLAYLISTS = {
     "Default Watchlist": ["BTC", "ETH", "SOL", "BNB"],
@@ -79,7 +83,7 @@ h1, h2, h3, h4, h5, label, p {{ color: #d6fff5 !important; }}
 .apex-sub {{ color: {MUTED}; font-size: 13px; margin-bottom: 10px; }}
 .apex-live {{ background: {PANEL}; border: 1px solid {ACCENT}; border-radius: 12px; padding: 12px 18px;
              box-shadow: 0 0 18px rgba(0,255,204,0.18); display:flex; gap:28px; align-items:center; flex-wrap:wrap; }}
-.apex-price {{ font-size: 30px; font-weight: 900; color: {UP}; text-shadow: 0 0 8px rgba(38,166,154,0.5); }}
+.apex-price {{ font-size: 30px; font-weight: 900; text-shadow: 0 0 8px rgba(38,166,154,0.5); }}
 .apex-card {{ background: {PANEL}; border: 1px solid #1b2330; border-radius: 10px; padding: 12px 16px; margin: 8px 0; }}
 .badge {{ padding: 3px 10px; border-radius: 12px; font-size: 12px; font-weight: 700; }}
 .badge-live {{ background:#0f3d2e; color:{UP}; }}
@@ -91,9 +95,9 @@ h1, h2, h3, h4, h5, label, p {{ color: #d6fff5 !important; }}
 input, textarea, [data-baseweb="select"] > div, [data-baseweb="input"] > div {{
     background:{PANEL} !important; color:#d6fff5 !important; border-color:#1b2330 !important; }}
 [data-baseweb="popover"] li, [data-baseweb="menu"] {{ background:{PANEL} !important; color:#d6fff5 !important; }}
-.stButton > button, .stDownloadButton > button, .stFormSubmitButton > button {{
-    background:{PANEL}; color:{ACCENT}; border:1px solid {ACCENT}; border-radius:8px; font-weight:700; }}
-.stButton > button:hover, .stFormSubmitButton > button:hover {{ background:{ACCENT}; color:{BG}; }}
+.stButton > button, .stDownloadButton > button, .stFormSubmitButton > button, .stLinkButton > a {{
+    background:{PANEL}; color:{ACCENT} !important; border:1px solid {ACCENT}; border-radius:8px; font-weight:700; }}
+.stButton > button:hover, .stFormSubmitButton > button:hover, .stLinkButton > a:hover {{ background:{ACCENT}; color:{BG} !important; }}
 [data-testid="stMetric"] {{ background:{PANEL}; border:1px solid #1b2330; border-radius:10px; padding:10px 14px; }}
 [data-testid="stMetricValue"] {{ color:{ACCENT} !important; }}
 [data-testid="stMetricLabel"] {{ color:{MUTED} !important; }}
@@ -102,7 +106,7 @@ input, textarea, [data-baseweb="select"] > div, [data-baseweb="input"] > div {{
 """, unsafe_allow_html=True)
 
 # =====================================================================
-# 2. DATABASE (single source of truth: watchlists, alerts, trades, settings)
+# 2. DATABASE (watchlists, alerts, trades, settings — all persisted)
 # =====================================================================
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS playlists (name TEXT PRIMARY KEY, created_at TEXT);
@@ -125,7 +129,6 @@ def now_iso():
 def get_conn():
     conn = sqlite3.connect(DB_PATH, check_same_thread=False)
     conn.executescript(SCHEMA)
-    # Seed defaults only once
     if conn.execute("SELECT COUNT(*) FROM playlists").fetchone()[0] == 0:
         for i, (name, coins) in enumerate(DEFAULT_PLAYLISTS.items()):
             conn.execute("INSERT INTO playlists (name, created_at) VALUES (?, ?)",
@@ -211,7 +214,7 @@ def load_alerts():
 
 
 # =====================================================================
-# 3. INDICATORS (computed from real OHLCV, no random numbers)
+# 3. INDICATORS (computed from real OHLCV)
 # =====================================================================
 def true_range(df):
     pc = df["close"].shift()
@@ -458,7 +461,7 @@ def get_stock(yf_symbol):
 # 5. HELPERS & CHART BUILDER
 # =====================================================================
 def parse_base(q):
-    s = q.upper().replace(" ", "").split("/")[0]
+    s = str(q).upper().replace(" ", "").split("/")[0]
     for suf in ("USDT", "USDC", "USD"):
         if s.endswith(suf) and len(s) > len(suf):
             s = s[: -len(suf)]
@@ -640,7 +643,7 @@ def fy_label(ts):
 # =====================================================================
 # 7. SIDEBAR (all state persisted in SQLite)
 # =====================================================================
-get_conn()  # init DB on startup
+get_conn()
 universe = get_universe()
 universe_syms = universe["Symbol"].tolist() if not universe.empty else sorted(
     {s for v in DEFAULT_PLAYLISTS.values() for s in v})
@@ -648,6 +651,10 @@ fx = get_fx()
 
 with st.sidebar:
     st.markdown("## ⚡ APEX CONTROL")
+
+    if st.button("🔄 Refresh all live data", use_container_width=True):
+        st.cache_data.clear()
+        st.rerun()
 
     def persisted_select(label, options, key):
         saved = get_setting(key, options[0])
@@ -658,7 +665,7 @@ with st.sidebar:
 
         return st.selectbox(label, options, index=idx, key=f"w_{key}", on_change=_save)
 
-    lang = persisted_select("🌐 Language", list(LANGS), "language")
+    lang = persisted_select("🌐 Language", list(LANG_TITLES), "language")
     currency = persisted_select("💱 Display currency", list(CURRENCIES), "currency")
     rate, sym = fx.get(currency, 1.0), CURRENCIES[currency]
 
@@ -714,6 +721,7 @@ with st.sidebar:
             st.rerun()
 
     alerts = load_alerts()
+    fired = st.session_state.setdefault("fired_alerts", set())
     for _, al in alerts.iterrows():
         snap = get_snapshot(al["symbol"])
         if snap is None:
@@ -721,6 +729,9 @@ with st.sidebar:
         else:
             hit = snap["price"] >= al["price"] if al["cond"] == "Above" else snap["price"] <= al["price"]
             status = "✅ TRIGGERED" if hit else f"⏳ now {snap['price']:,.4f}"
+            if hit and al["id"] not in fired:
+                fired.add(al["id"])
+                st.toast(f"🔔 {al['symbol']} {al['cond']} {al['price']} ho gaya", icon="🔔")
         c1, c2 = st.columns([4, 1])
         c1.caption(f"{al['symbol']} {al['cond']} {al['price']} → {status}")
         if c2.button("✖", key=f"del_alert_{al['id']}"):
@@ -768,7 +779,7 @@ tabs = st.tabs([
 
 # ---------- TAB 1: MASTER MATRIX ----------
 with tabs[0]:
-    st.subheader(f"{LANGS[lang]} — {active_pl}")
+    st.subheader(f"{LANG_TITLES[lang]} — {active_pl}")
     tf_key = st.radio("Timeframe", list(TIMEFRAMES), index=4, horizontal=True, key="mm_tf")
     coins = playlists.get(active_pl, [])
     if not coins:
@@ -779,7 +790,9 @@ with tabs[0]:
         for i, coin in enumerate(coins):
             df, src = get_klines(coin, tf_key, 300)
             if df is None:
-                rows.append({"Coin": coin, "Signal": "NEUTRAL 🟡", "Status": "No data"})
+                rows.append({"Coin": coin, "Price": "N/A", "Chg % (lookback)": None, "RSI": None,
+                             "ADX": None, "SuperTrend": "—", "Close in range %": None,
+                             "Signal": "NEUTRAL 🟡", "Source": src})
                 continue
             last = df.iloc[-1]
             ref = df["close"].iloc[-25] if len(df) > 25 else df["close"].iloc[0]
@@ -793,12 +806,20 @@ with tabs[0]:
                 "ADX": round(last["ADX"], 1), "SuperTrend": "UP 🟢" if last["ST_DIR"] == 1 else "DOWN 🔴",
                 "Close in range %": last["CLOSE_IN_RANGE"], "Signal": last["SIGNAL"], "Source": src,
             })
+
+        sig = [r["Signal"] for r in rows]
+        b, s_, n_ = sum("BUY" in x for x in sig), sum("SELL" in x for x in sig), sum("NEUTRAL" in x for x in sig)
+        m1, m2, m3 = st.columns(3)
+        m1.metric("🟢 BUY signals", b)
+        m2.metric("🔴 SELL signals", s_)
+        m3.metric("🟡 NEUTRAL", n_)
+
         st.dataframe(
             pd.DataFrame(rows).style.map(color_signal, subset=["Signal", "SuperTrend"])
             .map(color_pct, subset=["Chg % (lookback)"]),
             use_container_width=True, hide_index=True,
         )
-    st.caption("Signals = EMA + MACD + RSI + SuperTrend + ADX rules. 'Close in range %' = candle close ki high-low range me position.")
+    st.caption("Signals = EMA + MACD + RSI + SuperTrend + ADX rules. 'Close in range %' = candle close high-low range me kahan hai.")
 
 # ---------- TAB 2: PRO CHART ----------
 with tabs[1]:
@@ -817,7 +838,10 @@ with tabs[1]:
     if df is None:
         st.error(f"{base} ka data nahi mila (Binance aur Yahoo dono par). Symbol check karo.")
     else:
-        st.markdown(source_badge(src), unsafe_allow_html=True)
+        st.markdown(source_badge(src) +
+                    f' &nbsp; <a href="https://www.tradingview.com/chart/?symbol=BINANCE:{base}USDT" '
+                    f'target="_blank" style="color:{ACCENT}">Open in TradingView ↗</a>',
+                    unsafe_allow_html=True)
         fig = build_chart(df, f"{base}/USDT", overlays, panels, show_vp=show_vp)
         st.plotly_chart(fig, use_container_width=True, config={"scrollZoom": True, "displaylogo": False})
 
@@ -846,7 +870,7 @@ with tabs[2]:
     for i, k in enumerate(mtf_keys):
         d, src = get_klines(base, k, 200)
         if d is None:
-            summary.append({"Timeframe": k, "Trend": "No data"})
+            summary.append({"Timeframe": k, "Trend": "NO DATA", "Bull checks": "0/4"})
             continue
         last = d.iloc[-1]
         checks = {
@@ -866,18 +890,19 @@ with tabs[2]:
 
     st.dataframe(pd.DataFrame(summary).style.map(color_signal, subset=["Trend"]),
                  use_container_width=True, hide_index=True)
-    ok = [s for s in summary if "Bull checks" in s]
-    if ok:
-        total = sum(int(s["Bull checks"].split("/")[0]) for s in ok)
-        maxp = 4 * len(ok)
-        st.markdown(f'<div class="apex-card"><b style="color:{ACCENT}">Overall alignment:</b> '
-                    f'{total}/{maxp} bullish checks across {len(ok)} timeframes</div>',
-                    unsafe_allow_html=True)
+    total = sum(int(s["Bull checks"].split("/")[0]) for s in summary)
+    maxp = 4 * len(summary)
+    pct = total / maxp * 100 if maxp else 0
+    verdict = "STRONG BULLISH 🐂" if pct >= 75 else ("BULLISH 🐂" if pct >= 55 else
+              ("BEARISH 🐻" if pct <= 30 else "MIXED 🤖"))
+    st.markdown(f'<div class="apex-card"><b style="color:{ACCENT}">Overall alignment:</b> '
+                f'{total}/{maxp} bullish checks ({pct:.0f}%) → {verdict}</div>',
+                unsafe_allow_html=True)
 
 # ---------- TAB 4: TRADINGVIEW ----------
 with tabs[3]:
     st.subheader(f"📺 Official TradingView Widget — BINANCE:{base}USDT")
-    st.caption("Ye TradingView ka official embed hai. Iske andar custom Python indicators inject nahi ho sakte; "
+    st.caption("Ye TradingView ka official embed hai. Custom Python indicators yahan inject nahi ho sakte; "
                "custom studies TradingView ke toolbar se add karo.")
     t1, t2 = st.columns(2)
     tv_iv = t1.selectbox("Interval", list(TV_INTERVALS), index=6, key="tv_iv")
@@ -905,8 +930,8 @@ with tabs[4]:
         longs, shorts = float(last_ls["longAccount"]), float(last_ls["shortAccount"])
         c1, c2, c3, c4 = st.columns(4)
         c1.metric("Open Interest", fmt_money(d["oi_coins"] * snap["price"], rate, sym))
-        c2.metric("Funding (8h)", f"{d['funding']:+.4f}%", "Longs pay shorts" if d["funding"] > 0 else "Shorts pay longs",
-                  delta_color="off")
+        c2.metric("Funding (8h)", f"{d['funding']:+.4f}%",
+                  "Longs pay shorts" if d["funding"] > 0 else "Shorts pay longs", delta_color="off")
         c3.metric("Long / Short ratio", f"{float(last_ls['longShortRatio']):.2f}")
         c4.metric("Longs %", f"{longs * 100:.1f}%", f"Shorts {shorts * 100:.1f}%", delta_color="off")
 
@@ -956,7 +981,7 @@ with tabs[5]:
         elif qty <= 0:
             st.error("Quantity 0 se zyada honi chahiye.")
         elif side == "BUY" and qty * price_now > cash:
-            st.error("Virtual cash kam hai.")
+            st.error(f"Virtual cash kam hai. Max BUY qty: {cash / price_now:.6f} {base}")
         elif side == "SELL" and qty > held["qty"] + 1e-12:
             st.error(f"Itne {base} holdings me nahi hain (held: {held['qty']:.6f}).")
         else:
@@ -1027,7 +1052,7 @@ with tabs[6]:
 with tabs[7]:
     st.subheader("🪙 Crypto Token Screener (Top 150 by market cap — live CoinGecko)")
     if universe.empty:
-        st.warning("CoinGecko se data nahi aaya (rate limit ho sakta hai). Thodi der baad refresh karo.")
+        st.warning("CoinGecko se data nahi aaya (rate limit ho sakta hai). Sidebar se Refresh dabao.")
     else:
         search = st.text_input("🔍 Filter by symbol or name", key="tok_search", placeholder="e.g. PEPE, SOL, Layer")
         view = universe.copy()
@@ -1043,7 +1068,8 @@ with tabs[7]:
             .map(color_pct, subset=["24h %"]),
             use_container_width=True, hide_index=True, height=520,
         )
-        pick = st.selectbox("Pro Chart me kholne ke liye coin chuno", view["Symbol"].tolist() or ["BTC"], key="tok_pick")
+        pick_opts = view["Symbol"].tolist() or ["BTC"]
+        pick = st.selectbox("Pro Chart me kholne ke liye coin chuno", pick_opts, key="tok_pick")
         if st.button("📈 Open in Pro Chart", use_container_width=True):
             st.session_state["pending_q"] = f"{pick}/USDT"
             st.rerun()
@@ -1053,7 +1079,7 @@ with tabs[7]:
 with tabs[8]:
     st.subheader("🇮🇳 NSE / BSE Terminal (INR) — Yahoo Finance data")
     if not HAS_YF:
-        st.warning("Indian stocks ke liye run karo: `pip install yfinance`")
+        st.warning("Indian stocks ke liye requirements.txt me yfinance hona chahiye.")
     else:
         icols = st.columns(4)
         for col, (name, tk) in zip(icols, INDEX_TICKERS.items()):
@@ -1070,7 +1096,7 @@ with tabs[8]:
             set_setting("nse_watch", json.dumps(st.session_state["nse_ms"]))
 
         nse_opts = sorted(set(NSE_DEFAULT) | set(saved_nse))
-        st.multiselect("NSE/BSE watchlist (persisted)", nse_opts, default=saved_nse,
+        st.multiselect("NSE/BSE watchlist (saved)", nse_opts, default=saved_nse,
                        key="nse_ms", on_change=_save_nse)
 
         a1, a2, a3 = st.columns([2, 1, 1])
