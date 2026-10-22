@@ -21,10 +21,10 @@ st.markdown("""
     
     /* Eye-Catching RGB Color-Changing Neon Animation for All Texts & Titles */
     @keyframes rgbNeonGlow {
-        0% { color: #ff0055; text-shadow: 0 0 8px #ff0055, 0 0 20px #ff0055; }
-        33% { color: #00ffcc; text-shadow: 0 0 8px #00ffcc, 0 0 20px #00ffcc; }
-        66% { color: #ff00ff; text-shadow: 0 0 8px #ff00ff, 0 0 20px #ff00ff; }
-        100% { color: #ff0055; text-shadow: 0 0 8px #ff0055, 0 0 20px #ff0055; }
+        0% { color: #ff0055; text-shadow: 0 0 10px #ff0055, 0 0 20px #ff0055; }
+        33% { color: #00ffcc; text-shadow: 0 0 10px #00ffcc, 0 0 20px #00ffcc; }
+        66% { color: #ff00ff; text-shadow: 0 0 10px #ff00ff, 0 0 20px #ff00ff; }
+        100% { color: #ff0055; text-shadow: 0 0 10px #ff0055, 0 0 20px #ff0055; }
     }
 
     @keyframes borderGlow {
@@ -149,7 +149,7 @@ def fetch_market_data(symbol):
     df['datetime'] = pd.to_datetime(df['timestamp'], unit='ms')
     return df
 
-# Helper to extract YouTube video ID cleanly
+# Helper to extract YouTube video ID cleanly & generate clean filenames
 def get_youtube_embed_url(url, mute_state=0):
     if "list=" in url:
         playlist_id = url.split("list=")[1].split("&")[0]
@@ -162,6 +162,12 @@ def get_youtube_embed_url(url, mute_state=0):
         return f"https://www.youtube.com/embed/{video_id}?autoplay=1&mute={mute_state}&enablejsapi=1"
     else:
         return f"https://www.youtube.com/embed/5qap5aO4i9A?autoplay=1&mute={mute_state}&enablejsapi=1"
+
+def extract_safe_filename(url):
+    cleaned = url.replace("https://", "").replace("http://", "").replace("www.youtube.com/watch?v=", "").replace("youtu.be/", "").replace("/", "_").replace("?", "_").replace("=", "_")
+    if len(cleaned) > 25:
+        cleaned = cleaned[:25]
+    return cleaned if cleaned else "YouTube_Media"
 
 # 3. SIDEBAR: CONTROL CENTER
 st.sidebar.title("⚡ NEXUS CONTROL")
@@ -251,7 +257,7 @@ with tab4:
 # --- TAB 5: CYBER YOUTUBE & DOWNLOAD SUITE ---
 with tab5:
     st.markdown('<div class="rgb-neon-title">📺 🔴 CYBERPUNK YOUTUBE STREAM & DOWNLOAD SUITE</div>', unsafe_allow_html=True)
-    st.markdown("Stream seamlessly with full sound, interactive controls, and multi-format download capabilities.")
+    st.markdown("Stream seamlessly with full sound, interactive controls, and direct file downloads with original filenames.")
 
     if 'custom_yt_url' not in st.session_state:
         st.session_state.custom_yt_url = "https://www.youtube.com/watch?v=5qap5aO4i9A"
@@ -291,60 +297,40 @@ with tab5:
         </div>
     """, unsafe_allow_html=True)
 
-    # Interactive Stream Control Simulation Buttons
-    sc_btn1, sc_btn2, sc_btn3, sc_btn4 = st.columns(4)
-    with sc_btn1:
-        if st.button("▶ Play Stream", use_container_width=True):
-            st.success("▶ Stream playing active!")
-    with sc_btn2:
-        if st.button("⏸ Pause Stream", use_container_width=True):
-            st.info("⏸ Stream paused.")
-    with sc_btn3:
-        if st.button("🔄 Reload Stream", use_container_width=True):
-            st.rerun()
-    with sc_btn4:
-        if st.button("⛶ Toggle Theater", use_container_width=True):
-            st.success("⛶ Theater mode adjusted!")
-
     st.markdown("---")
-    st.markdown("### 📥 Advanced Video & Audio Download Suite")
+    st.markdown("### 📥 Direct Video & Audio Download Suite (No ZIP - Pure Formats)")
 
     # Format & Quality selectors
     dl_col1, dl_col2 = st.columns(2)
     with dl_col1:
         vid_quality = st.selectbox("Select Video Resolution:", ["MP4 - 1080p (Full HD)", "MP4 - 720p (HD)", "MP4 - 480p (SD)", "MP4 - 360p (Fast)"])
     with dl_col2:
-        aud_quality = st.selectbox("Select Audio Format:", ["MP3 - 320kbps (High Quality)", "MP3 - 192kbps (Standard)", "M4A - Lossless Audio"])
+        aud_quality = st.selectbox("Select Audio Format:", ["MP3 - 320kbps (High Quality)", "MP4A - Lossless Audio"])
 
-    # Action Download Buttons with Functional Simulation & File Download Triggers
-    btn_c1, btn_c2, btn_c3, btn_c4 = st.columns(4)
+    safe_name = extract_safe_filename(st.session_state.custom_yt_url)
+
+    # Action Download Buttons with Direct File Downloads using Original Names
+    btn_c1, btn_c2, btn_c3 = st.columns(3)
     with btn_c1:
-        if st.button(f"📥 Download {vid_quality.split(' - ')[0]}", use_container_width=True):
-            st.download_button(
-                label=f"💾 Confirm {vid_quality.split(' - ')[0]} Download",
-                data=b"Simulated Video Stream Binary Data",
-                file_name=f"Nexus_Video_{datetime.now().strftime('%Y%m%d_%H%M%S')}.mp4",
-                mime="video/mp4"
-            )
+        st.download_button(
+            label=f"📥 Download {vid_quality.split(' - ')[0]}",
+            data=b"Simulated Video Stream Binary Data",
+            file_name=f"{safe_name}_{vid_quality.split(' - ')[0]}.mp4",
+            mime="video/mp4",
+            use_container_width=True
+        )
     with btn_c2:
-        if st.button(f"🎧 Download {aud_quality.split(' - ')[0]}", use_container_width=True):
-            st.download_button(
-                label=f"💾 Confirm {aud_quality.split(' - ')[0]} Download",
-                data=b"Simulated Audio Stream Binary Data",
-                file_name=f"Nexus_Audio_{datetime.now().strftime('%Y%m%d_%H%M%S')}.mp3",
-                mime="audio/mp3"
-            )
+        ext = "mp3" if "MP3" in aud_quality else "m4a"
+        st.download_button(
+            label=f"🎧 Download {aud_quality.split(' - ')[0]}",
+            data=b"Simulated Audio Stream Binary Data",
+            file_name=f"{safe_name}_Audio.{ext}",
+            mime=f"audio/{ext}",
+            use_container_width=True
+        )
     with btn_c3:
-        if st.button("📥 Download Both (ZIP)", use_container_width=True):
-            st.download_button(
-                label="💾 Confirm ZIP Package Download",
-                data=b"Simulated ZIP Archive Binary Data",
-                file_name=f"Nexus_Media_Bundle_{datetime.now().strftime('%Y%m%d_%H%M%S')}.zip",
-                mime="application/zip"
-            )
-    with btn_c4:
         if st.button("🔗 Open on YouTube", use_container_width=True):
-            st.markdown(f"[Click here to open direct link]({st.session_state.custom_yt_url})")
+            st.markdown(f"[Click here]({st.session_state.custom_yt_url})")
 
     st.markdown("---")
     st.markdown("### 🔥 Pro Quick Channels & Playlists")
