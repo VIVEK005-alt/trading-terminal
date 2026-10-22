@@ -187,7 +187,7 @@ def compute_master_indicators(df, seed_offset=0):
     exp1 = close.ewm(span=12, adjust=False).mean()
     exp2 = close.ewm(span=26, adjust=False).mean()
     df['MACD'] = (exp1 - exp2).fillna(0).round(4)
-    df['MACD_Signal'] = df['MACD'].ewm(span=9, adjust=False).mean().fillna(0).round(4)
+    df['MACD_Signal'] = df['MACD'].ewm(span=9, adjust=False).mean().round(4)
     
     sma = close.rolling(window=20).mean().fillna(close)
     std = close.rolling(window=20).std().fillna(1)
@@ -495,7 +495,7 @@ with tab1:
                 </div>
             """, unsafe_allow_html=True)
 
-            # --- TRADINGVIEW ADVANCED REAL-TIME CHART WIDGET (EXACT PRO DEMO EXPERIENCE) ---
+            # --- TRADINGVIEW PRO ADVANCED EMBED CHART (FULL USER CONTROL, DRAWING SUITE & RIGHT-CLICK) ---
             st.markdown(f"### 📈 Live TradingView Professional Chart ({c_tab_name})")
             
             col_c1, col_c2, col_c3 = st.columns([2, 2, 3])
@@ -507,7 +507,7 @@ with tab1:
                 tv_link_url = f"https://www.tradingview.com/chart/?symbol=BINANCE:{c_tab_name}USDT"
                 st.markdown(f"""
                     <div style="padding-top: 5px;">
-                        <a href="{tv_link_url}" target="_blank" style="background: #238636; color: white; padding: 8px 16px; border-radius: 6px; text-decoration: none; font-weight: bold; font-size: 12px; border: 1px solid #00ffcc;">🔗 Open TradingView Pro Advanced Chart Suite</a>
+                        <a href="{tv_link_url}" target="_blank" style="background: #238636; color: white; padding: 8px 16px; border-radius: 6px; text-decoration: none; font-weight: bold; font-size: 12px; border: 1px solid #00ffcc;">🔗 Open Full TradingView Pro Workspace</a>
                     </div>
                 """, unsafe_allow_html=True)
             
@@ -525,35 +525,23 @@ with tab1:
                 is_fs = "false"
 
             tv_symbol = f"BINANCE:{c_tab_name}USDT"
-            tv_theme_str = "light" if chart_theme_mode == "Light Mode" else "dark"
-            bg_col = "#fff" if chart_theme_mode == "Light Mode" else "#07090e"
+            
+            if chart_theme_mode == "Light Mode":
+                tv_theme_val = "light"
+                bg_col = "#fff"
+            elif chart_theme_mode == "Dark Mode":
+                tv_theme_val = "dark"
+                bg_col = "#000"
+            else: # System Default
+                tv_theme_val = "dark"
+                bg_col = "#07090e"
 
             container_id = f"tv_chart_container_{c_id}"
             
-            # Using TradingView Advanced Real-Time Chart Widget Embed Script Container for Full Native Control
+            # Using TradingView Widget Embed with enabled side toolbar (hidesidetoolbar=0) for full drawing & indicator suite
             st.markdown(f"""
                 <div id="{container_id}" style="width: {tv_width}; height: {tv_height}; margin: 0 auto; border: 2px solid #00ffcc; border-radius: 14px; overflow: hidden; background: {bg_col}; position: {'fixed' if is_fs=='true' else 'relative'}; top: {'0' if is_fs=='true' else 'auto'}; left: {'0' if is_fs=='true' else 'auto'}; z-index: {'99999' if is_fs=='true' else '1'};">
-                    <div class="tradingview-widget-container" style="height:100%;width:100%">
-                        <div class="tradingview-widget-container__widget" style="height:calc(100% - 32px);width:100%"></div>
-                        <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js" async>
-                        {{
-                          "autosize": true,
-                          "symbol": "{tv_symbol}",
-                          "interval": "D",
-                          "timezone": "Etc/UTC",
-                          "theme": "{tv_theme_str}",
-                          "style": "1",
-                          "locale": "en",
-                          "enable_publishing": false,
-                          "allow_symbol_change": true,
-                          "watchlist": ["BINANCE:BTCUSDT", "BINANCE:ETHUSDT", "BINANCE:SOLUSDT", "BINANCE:BNBUSDT", "BINANCE:XRPUSDT"],
-                          "details": true,
-                          "hotlist": true,
-                          "calendar": false,
-                          "support_host": "https://www.tradingview.com"
-                        }}
-                        </script>
-                    </div>
+                    <iframe src="https://s.tradingview.com/widgetembed/?symbol={tv_symbol}&interval=1&hidesidetoolbar=0&symboledit=1&saveimage=1&toolbarbg=f1f3f6&studies=%5B%22Volume%40tv-basicstudies%22%2C%22RSI%40tv-basicstudies%22%2C%22MACD%40tv-basicstudies%22%2C%22BB%40tv-basicstudies%22%5D&theme={tv_theme_val}&style=1&timezone=Etc%2FUTC&withdateranges=1&showpopupbutton=1" width="100%" height="100%" frameborder="0" allowtransparency="true" scrolling="no" allowfullscreen="true"></iframe>
                 </div>
             """, unsafe_allow_html=True)
             
