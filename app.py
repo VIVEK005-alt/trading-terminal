@@ -150,20 +150,24 @@ def fetch_market_data(symbol):
     df['datetime'] = pd.to_datetime(df['timestamp'], unit='ms')
     return df
 
-# Helper to extract YouTube video ID cleanly
+# Helper to extract YouTube video ID cleanly from any link format
 def get_youtube_embed_url(url, mute_state=0, action_state="play"):
-    if "list=" in url:
+    vid_id = "5qap5aO4i9A"
+    if "list=" in url and not "watch?v=" in url:
         playlist_id = url.split("list=")[1].split("&")[0]
         vid_id = f"videoseries?list={playlist_id}"
     elif "youtu.be/" in url:
         vid_id = url.split("youtu.be/")[1].split("?")[0]
     elif "watch?v=" in url:
         vid_id = url.split("watch?v=")[1].split("&")[0]
-    else:
-        vid_id = "5qap5aO4i9A"
+    elif "shorts/" in url:
+        vid_id = url.split("shorts/")[1].split("?")[0]
+    elif len(url.strip()) == 11:
+        vid_id = url.strip()
     
-    # Handle Play/Pause/Stop via YouTube iframe API parameters
     autoplay = 1 if action_state == "play" else 0
+    if "videoseries" in vid_id:
+        return f"https://www.youtube.com/embed/{vid_id}&autoplay={autoplay}&mute={mute_state}&enablejsapi=1"
     return f"https://www.youtube.com/embed/{vid_id}?autoplay={autoplay}&mute={mute_state}&enablejsapi=1"
 
 # Function to fetch 100% Original Video Title using YouTube oEmbed API
@@ -274,13 +278,18 @@ with tab5:
     if 'player_action' not in st.session_state:
         st.session_state.player_action = "play"
 
-    # Professional Search & Link Bar
-    col_inp1, col_inp2 = st.columns([4, 1])
+    # Search bar with Clear and Load action buttons
+    col_inp1, col_inp2, col_inp3 = st.columns([5, 1, 1])
     with col_inp1:
         user_link_input = st.text_input("🔍 Search / Paste YouTube Video or Playlist Link:", value=st.session_state.custom_yt_url)
     with col_inp2:
         st.markdown("<br>", unsafe_allow_html=True)
-        if st.button("🚀 Load & Stream", use_container_width=True):
+        if st.button("🧹 Clear", use_container_width=True):
+            st.session_state.custom_yt_url = ""
+            st.rerun()
+    with col_inp3:
+        st.markdown("<br>", unsafe_allow_html=True)
+        if st.button("🚀 Load", use_container_width=True):
             st.session_state.custom_yt_url = user_link_input
             st.session_state.player_action = "play"
             st.rerun()
@@ -332,13 +341,11 @@ with tab5:
     st.markdown("---")
     st.markdown("### 📥 100% Working HD Video & Audio Download Suite")
 
-    # Fetch 100% original video title dynamically
     original_title = get_original_video_title(st.session_state.custom_yt_url)
     encoded_url = urllib.parse.quote(st.session_state.custom_yt_url)
 
     st.info(f"📌 **Detected Media Title:** `{original_title}`")
 
-    # Direct Working External Download Links to ensure 100% functional HD downloads with original names
     dl_col1, dl_col2, dl_col3 = st.columns(3)
     with dl_col1:
         st.markdown(f"""
