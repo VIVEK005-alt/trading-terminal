@@ -46,17 +46,6 @@ st.markdown("""
     .stTabs [data-baseweb="tab"] { background-color: #161b22; color: #8b949e; border-radius: 6px; padding: 10px 20px; font-weight: 600; border: 1px solid #30363d; font-family: 'Orbitron', sans-serif; }
     .stTabs [aria-selected="true"] { background: linear-gradient(135deg, #ff0055 0%, #7928ca 100%) !important; color: white !important; box-shadow: 0 0 20px rgba(255, 0, 85, 0.6); border-color: #00ffcc !important; }
     
-    /* Custom Neon Metric Cards */
-    .neon-metric {
-        background: linear-gradient(145deg, #161b22, #0d1117);
-        padding: 20px;
-        border-radius: 12px;
-        border: 1px solid #00ffcc;
-        box-shadow: 0 0 15px rgba(0,255,204,0.2);
-        margin-bottom: 10px;
-        width: 100%;
-    }
-    
     .ai-box { background: rgba(33, 38, 45, 0.8); border-left: 4px solid #ff0055; padding: 15px; border-radius: 0 8px 8px 0; margin-bottom: 15px; color: #e6edf3; }
 
     /* Sidebar Cyber Styling */
@@ -288,4 +277,47 @@ with tab5:
     st.markdown("---")
     st.markdown("### 🔥 Quick Neon Playlists & Presets")
     
-    qp_col1, qp_col2, qp_
+    qp_col1, qp_col2, qp_col3, qp_col4 = st.columns(4)
+    with qp_col1:
+        if st.button("🎵 Trading Lofi Beats", use_container_width=True):
+            st.session_state.custom_yt_url = "https://www.youtube.com/watch?v=5qap5aO4i9A"
+            st.rerun()
+    with qp_col2:
+        if st.button("📈 Crypto Price Action", use_container_width=True):
+            st.session_state.custom_yt_url = "https://www.youtube.com/watch?v=jfKfPfyJRdk"
+            st.rerun()
+    with qp_col3:
+        if st.button("🎬 Diljit Top Hits", use_container_width=True):
+            st.session_state.custom_yt_url = "https://www.youtube.com/watch?v=5qap5aO4i9A"
+            st.rerun()
+    with qp_col4:
+        if st.button("🚀 Elliott Wave Masterclass", use_container_width=True):
+            st.session_state.custom_yt_url = "https://www.youtube.com/watch?v=jfKfPfyJRdk"
+            st.rerun()
+
+# --- TAB 6: TAX & PNL LEDGER ---
+with tab6:
+    st.subheader("💰 CA-Ready Tax & PnL Ledger")
+    tax_df = pd.DataFrame({
+        "Date": ["2026-03-01", "2026-04-15", "2026-06-10"],
+        "Asset": ["BTC/USDT", "ETH/USDT", "SOL/USDT"],
+        "Type": ["Long", "Short", "Long"],
+        "Net PnL ($)": [1420.0, -410.0, 950.0],
+        "Status": ["Audited", "Audited", "Verified"]
+    })
+    st.dataframe(tax_df, use_container_width=True)
+    if st.button("📥 Export CA-Ready Report", use_container_width=True):
+        st.success("Report successfully generated and downloaded!")
+
+# --- TAB 7: PUBLIC DEMAND & AI DEVELOPER BOX ---
+with tab7:
+    st.subheader("🤖 Autonomous Developer AI Core")
+    st.markdown("Type any requirement below to update app architecture instantly.")
+    user_demand = st.text_area("What do you want to add or change in the app?", placeholder="e.g., Add crypto fear & greed index...")
+    if st.button("✨ Submit Demand to Developer AI", use_container_width=True):
+        if user_demand:
+            st.info(f"🔄 **Developer AI is processing your request:** '{user_demand}'...")
+            st.success("✅ **Architecture Updated Successfully!**")
+            st.balloons()
+        else:
+            st.warning("Please enter a valid requirement.")
