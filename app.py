@@ -69,20 +69,14 @@ st.markdown("""
         scrollbar-width: thin;
         scrollbar-color: #00ffcc #161b22;
     }
-    
-    .timeframe-slider-container::-webkit-scrollbar {
-        height: 8px;
-    }
-    .timeframe-slider-container::-webkit-scrollbar-track {
-        background: #161b22;
-        border-radius: 4px;
-    }
-    .timeframe-slider-container::-webkit-scrollbar-thumb {
-        background: #00ffcc;
-        border-radius: 4px;
-    }
 
-    /* Bold Excel Table Typography & Scrollbars */
+    /* Professional Dark Cyberpunk Table Styling */
+    table.dataframe {
+        background-color: #0d1117 !important;
+        color: #00ffcc !important;
+        border: 1px solid #30363d !important;
+    }
+    
     table.dataframe th {
         font-family: 'Orbitron', sans-serif !important;
         font-weight: 900 !important;
@@ -97,7 +91,8 @@ st.markdown("""
         font-family: 'Inter', sans-serif !important;
         font-weight: 700 !important;
         font-size: 12px !important;
-        color: #00ffcc !important;
+        color: #58a6ff !important;
+        background-color: #0d1117 !important;
         border: 1px solid #21262d !important;
         text-align: center !important;
     }
@@ -231,6 +226,17 @@ def fetch_master_excel_data(coin_id, row_count=200):
     })
     return compute_master_indicators(df)
 
+# Color Styling for Data Table (Green for Bullish/Buy, Red for Bearish/Sell)
+def color_coding_table(val):
+    if isinstance(val, str):
+        if 'BULL' in val or 'BUY' in val or '🟢' in val:
+            return 'background-color: rgba(57, 255, 20, 0.15); color: #39ff14; font-weight: bold;'
+        elif 'BEAR' in val or 'SELL' in val or '🔴' in val:
+            return 'background-color: rgba(255, 7, 58, 0.15); color: #ff073a; font-weight: bold;'
+        elif 'WOLF' in val or 'HOLD' in val or '⚠️' in val:
+            return 'background-color: rgba(255, 165, 0, 0.15); color: #ffa500; font-weight: bold;'
+    return ''
+
 # Robust YouTube Video ID Parser
 def get_youtube_embed_url(url, mute_state=0):
     vid_id = "5qap5aO4i9A"
@@ -300,7 +306,7 @@ df = None
 
 # --- TAB 1: SCREENER & MASTER TIMEFRAMES & HISTORICAL YEARS ---
 with tab1:
-    st.subheader("🌍 Master Excel Sheet Matrix (Minute-by-Minute & Historical Years)")
+    st.subheader("🌍 Master Excel Sheet Matrix (Color-Coded & Filtered)")
     
     coin_tabs = st.tabs(["BTC (Bitcoin)", "ETH (Ethereum)", "SOL (Solana)", "BNB", "XRP", "DOGE", "AVAX", "LINK", "NEAR", "SUI"])
     
@@ -321,7 +327,6 @@ with tab1:
         with coin_tabs[idx]:
             st.markdown(f"### ⚡ {c_tab_name} Full Master Sheet & Historical Matrix")
             
-            # Master Timeframes + Historical Years with Horizontal Slider Navigation Bar
             timeframe_list = [
                 "1 Min", "3 Min", "5 Min", "15 Min", "30 Min", "75 Min", 
                 "1 Hour", "2 Hour", "3 Hour", "4 Hour", "6 Hour", "12 Hour", 
@@ -367,7 +372,6 @@ with tab1:
             
             st.markdown("<br>", unsafe_allow_html=True)
             
-            # Interactive Filter System
             col_f1, col_f2 = st.columns(2)
             with col_f1:
                 filter_signal = st.selectbox(f"Filter Signal ({selected_tf})", ["All", "STRONG BUY / LONG 🟢", "STRONG SELL / SHORT 🔴", "NEUTRAL / HOLD ⚠️"], key=f"filt_{c_id}_{selected_tf}")
@@ -388,8 +392,10 @@ with tab1:
                 'Animal_Type', 'Trade Advice'
             ]
             
-            # Full Excel-Style Long Scrollable Table with Horizontal & Vertical Scrollbars
-            st.dataframe(filtered_df[excel_display_cols], use_container_width=True, height=650)
+            # Apply Color Styling on DataFrame
+            styled_df = filtered_df[excel_display_cols].style.applymap(color_coding_table, subset=['Animal_Type', 'Trade Advice'])
+            
+            st.dataframe(styled_df, use_container_width=True, height=650)
 
 # --- TAB 2: ADVANCED CHARTS ---
 with tab2:
