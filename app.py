@@ -14,41 +14,52 @@ st.set_page_config(
 
 st.markdown("""
     <style>
-    @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Orbitron:wght@500;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Inter:wght@300;400;600&display=swap');
     
     * { box-sizing: border-box; }
-    .main { background-color: #0f0f0f; color: #f1f1f1; font-family: 'Roboto', sans-serif; }
+    .main { background-color: #07090e; color: #e6edf3; font-family: 'Inter', sans-serif; }
     h1, h2, h3 { font-family: 'Orbitron', sans-serif; letter-spacing: 0.5px; }
     
-    .stTabs [data-baseweb="tab-list"] { gap: 8px; background-color: #121212; padding: 10px; border-radius: 10px; border: 1px solid #272727; flex-wrap: wrap; }
-    .stTabs [data-baseweb="tab"] { background-color: #212121; color: #aaa; border-radius: 6px; padding: 10px 20px; font-weight: 600; border: none; }
-    .stTabs [aria-selected="true"] { background: linear-gradient(135deg, #cc0000 0%, #ff0000 100%) !important; color: white !important; box-shadow: 0 0 15px rgba(255, 0, 0, 0.4); }
+    .stTabs [data-baseweb="tab-list"] { gap: 8px; background-color: #0d1117; padding: 10px; border-radius: 10px; border: 1px solid #21262d; flex-wrap: wrap; }
+    .stTabs [data-baseweb="tab"] { background-color: #161b22; color: #8b949e; border-radius: 6px; padding: 10px 20px; font-weight: 600; border: none; }
+    .stTabs [aria-selected="true"] { background: linear-gradient(135deg, #238636 0%, #2ea043 100%) !important; color: white !important; box-shadow: 0 0 15px rgba(35, 134, 54, 0.4); }
     
-    .metric-card { background: linear-gradient(145deg, #212121, #181818); padding: 20px; border-radius: 12px; border: 1px solid #3f3f3f; box-shadow: 0 4px 12px rgba(0,0,0,0.5); width: 100%; }
-    .ai-box { background: rgba(33, 33, 33, 0.9); border-left: 4px solid #ff0000; padding: 15px; border-radius: 0 8px 8px 0; margin-bottom: 15px; }
+    .metric-card { background: linear-gradient(145deg, #161b22, #0d1117); padding: 20px; border-radius: 12px; border: 1px solid #30363d; box-shadow: 0 4px 12px rgba(0,0,0,0.3); width: 100%; }
+    .ai-box { background: rgba(33, 38, 45, 0.7); border-left: 4px solid #58a6ff; padding: 15px; border-radius: 0 8px 8px 0; margin-bottom: 15px; }
     
-    .player-toolbar {
-        background: #181818;
-        padding: 12px;
-        border-radius: 0 0 12px 12px;
-        border: 1px solid #3f3f3f;
-        border-top: none;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 20px;
+    /* ULTRA-UNIQUE NEON ANIMATED YOUTUBE HUB STYLING */
+    @keyframes neonGlow {
+        0% { border-color: #ff0055; box-shadow: 0 0 10px rgba(255,0,85,0.3), inset 0 0 10px rgba(255,0,85,0.3); }
+        50% { border-color: #00ffcc; box-shadow: 0 0 25px rgba(0,255,204,0.6), inset 0 0 15px rgba(0,255,204,0.4); }
+        100% { border-color: #ff0055; box-shadow: 0 0 10px rgba(255,0,85,0.3), inset 0 0 10px rgba(255,0,85,0.3); }
     }
+    
+    .neon-title {
+        font-family: 'Orbitron', sans-serif;
+        font-weight: 900;
+        background: linear-gradient(45deg, #ff0055, #00ffcc, #7928ca);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        text-shadow: 0 0 20px rgba(0,255,204,0.4);
+        font-size: 26px;
+        margin-bottom: 10px;
+    }
+    
+    .neon-player-wrapper {
+        border-radius: 14px;
+        border: 2px solid #ff0055;
+        animation: neonGlow 4s infinite ease-in-out;
+        background: #000;
+        overflow: hidden;
+        margin-bottom: 15px;
+    }
+    
     .youtube-container {
         position: relative;
         width: 100%;
         padding-bottom: 56.25%;
         height: 0;
         background: #000;
-        border-radius: 12px 12px 0 0;
-        overflow: hidden;
-        border: 1px solid #3f3f3f;
-        border-bottom: none;
-        box-shadow: 0 8px 24px rgba(0,0,0,0.8);
     }
     .youtube-container iframe {
         position: absolute;
@@ -57,6 +68,18 @@ st.markdown("""
         width: 100%;
         height: 100%;
         border: 0;
+    }
+    
+    .player-toolbar {
+        background: linear-gradient(90deg, #161b22, #0d1117);
+        padding: 12px 20px;
+        border-top: 1px solid #30363d;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        color: #00ffcc;
+        font-family: 'Orbitron', sans-serif;
+        font-size: 13px;
     }
     </style>
 """, unsafe_allow_html=True)
@@ -109,6 +132,22 @@ def fetch_market_data(symbol):
     df['datetime'] = pd.to_datetime(df['timestamp'], unit='ms')
     return df
 
+# Helper to extract YouTube video or playlist ID accurately
+def get_youtube_embed_url(url):
+    if "list=" in url:
+        # Handle YouTube Playlists
+        playlist_id = url.split("list=")[1].split("&")[0]
+        return f"https://www.youtube.com/embed/videoseries?list={playlist_id}&autoplay=1&enablejsapi=1"
+    elif "youtu.be/" in url:
+        video_id = url.split("youtu.be/")[1].split("?")[0]
+        return f"https://www.youtube.com/embed/{video_id}?autoplay=1&enablejsapi=1"
+    elif "watch?v=" in url:
+        video_id = url.split("watch?v=")[1].split("&")[0]
+        return f"https://www.youtube.com/embed/{video_id}?autoplay=1&enablejsapi=1"
+    else:
+        # Default fallback lofi
+        return "https://www.youtube.com/embed/5qap5aO4i9A?autoplay=1&enablejsapi=1"
+
 # 3. SIDEBAR: CONTROL CENTER
 st.sidebar.title("⚡ Autonomous Control")
 user_email = st.sidebar.text_input("Trader Profile:", value="trader@gmail.com")
@@ -132,7 +171,7 @@ tab1, tab2, tab3, tab4, tab5, tab6, tab7 = st.tabs([
     "📈 Advanced Charts", 
     "🐋 Derivatives & CoinGlass", 
     "🎮 Paper Trading", 
-    "🔴 YouTube Media Hub", 
+    "🔴 Ultra-Pro YouTube & Playlist Hub", 
     "💰 Tax & PnL Ledger",
     "🤖 Public Demand & AI Developer Box"
 ])
@@ -194,45 +233,61 @@ with tab4:
     if st.button("🚀 Execute Simulated Order", use_container_width=True):
         st.success(f"Successfully placed {t_type} for {search_query} with Auto-Trailing Stop-Loss!")
 
-# --- TAB 5: YOUTUBE MEDIA HUB (WORKING PLAYER & CONTROLS) ---
+# --- TAB 5: ULTRA-PRO YOUTUBE & PLAYLIST HUB (NEON ANIMATED & LINK PASTE ENGINE) ---
 with tab5:
-    st.subheader("🔴 YouTube Pro Media Hub & Player")
-    
-    if 'active_vid_id' not in st.session_state:
-        st.session_state.active_vid_id = "5qap5aO4i9A"
+    st.markdown('<div class="neon-title">⚡ CYBERPUNK YOUTUBE & PLAYLIST MEDIA ENGINE</div>', unsafe_allow_html=True)
+    st.markdown("Paste any YouTube Video URL or Playlist Link below to stream instantly with full VLC-style controls and responsive auto-fit UI.")
 
-    st.markdown("### 📺 Active Video Player (VLC / MS Player Style Controls)")
+    # Session state initialization for dynamic link pasting
+    if 'custom_yt_url' not in st.session_state:
+        st.session_state.custom_yt_url = "https://www.youtube.com/watch?v=5qap5aO4i9A"
+
+    # Input Box for pasting any YouTube link / Playlist
+    col_inp1, col_inp2 = st.columns([4, 1])
+    with col_inp1:
+        user_link_input = st.text_input("🔗 Paste YouTube Video or Playlist Link:", value=st.session_state.custom_yt_url)
+    with col_inp2:
+        st.markdown("<br>", unsafe_allow_html=True)
+        if st.button("🚀 Load & Play", use_container_width=True):
+            st.session_state.custom_yt_url = user_link_input
+            st.rerun()
+
+    st.markdown("---")
+
+    # Render Neon Glowing Player Frame
+    embed_url = get_youtube_embed_url(st.session_state.custom_yt_url)
     st.markdown(f"""
-        <div class="youtube-container">
-            <iframe src="https://www.youtube.com/embed/{st.session_state.active_vid_id}?autoplay=1&enablejsapi=1" title="YouTube Media Player" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
-        </div>
-        <div class="player-toolbar">
-            <span><b>🎛️ Media Engine:</b> HD Stream Active</span>
-            <span>Controls: [ ▶ Play ] [ ⏸ Pause ] [ 🔊 Vol ] [ ⛶ Fullscreen ]</span>
+        <div class="neon-player-wrapper">
+            <div class="youtube-container">
+                <iframe src="{embed_url}" title="YouTube Player" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+            </div>
+            <div class="player-toolbar">
+                <span>🔴 STREAM STATUS: ACTIVE (HD 1080p)</span>
+                <span>[ ▶ PLAY ] [ ⏸ PAUSE ] [ 🔊 VOL: 100% ] [ ⛶ FULLSCREEN ]</span>
+            </div>
         </div>
     """, unsafe_allow_html=True)
 
     st.markdown("---")
-    st.markdown("### 🎬 Select Video / Stream to Play Instantly")
+    st.markdown("### 🔥 Quick Pro Playlists & Lofi Presets")
     
-    vols = [
-        {"title": "🎵 Lofi Trading Beats & Concentration Music", "id": "5qap5aO4i9A"},
-        {"title": "📈 Live Crypto Price Action & Technical Analysis", "id": "jfKfPfyJRdk"},
-        {"title": "🎬 Pan India Hit Song & Entertainment", "id": "5qap5aO4i9A"},
-        {"title": "🚀 Advanced Elliott Wave Masterclass", "id": "jfKfPfyJRdk"}
-    ]
-
-    cols = st.columns(2)
-    for idx, v in enumerate(vols):
-        with cols[idx % 2]:
-            st.markdown(f"""
-                <div style="background:#181818; padding:15px; border-radius:10px; border:1px solid #272727; margin-bottom:12px;">
-                    <b style="color:#fff;">{v['title']}</b>
-                </div>
-            """, unsafe_allow_html=True)
-            if st.button(f"▶ Play Now #{idx+1}", use_container_width=True, key=f"vid_btn_{idx}"):
-                st.session_state.active_vid_id = v['id']
-                st.rerun()
+    qp_col1, qp_col2, qp_col3, qp_col4 = st.columns(4)
+    with qp_col1:
+        if st.button("🎵 Trading Lofi Beats", use_container_width=True):
+            st.session_state.custom_yt_url = "https://www.youtube.com/watch?v=5qap5aO4i9A"
+            st.rerun()
+    with qp_col2:
+        if st.button("📈 Crypto Price Action", use_container_width=True):
+            st.session_state.custom_yt_url = "https://www.youtube.com/watch?v=jfKfPfyJRdk"
+            st.rerun()
+    with qp_col3:
+        if st.button("🎬 Diljit Top Hits", use_container_width=True):
+            st.session_state.custom_yt_url = "https://www.youtube.com/watch?v=5qap5aO4i9A"
+            st.rerun()
+    with qp_col4:
+        if st.button("🚀 Elliott Wave Masterclass", use_container_width=True):
+            st.session_state.custom_yt_url = "https://www.youtube.com/watch?v=jfKfPfyJRdk"
+            st.rerun()
 
 # --- TAB 6: TAX & PNL LEDGER ---
 with tab6:
