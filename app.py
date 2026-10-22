@@ -21,7 +21,6 @@ st.markdown("""
     * { box-sizing: border-box; }
     .main { background-color: #05070b; color: #00ffcc; font-family: 'Inter', sans-serif; }
     
-    /* Crystal Clear, Sharp & Eye-Comfort Neon Styling (No Blur) */
     .rgb-neon-title {
         font-family: 'Orbitron', sans-serif;
         font-weight: 900;
@@ -34,15 +33,25 @@ st.markdown("""
     .live-running-price {
         font-family: 'Orbitron', sans-serif;
         font-weight: 900;
-        font-size: 32px;
+        font-size: 30px;
         color: #39ff14;
         text-shadow: 0 0 8px rgba(57,255,20,0.5);
         display: inline-block;
         background: rgba(13, 17, 23, 0.9);
-        padding: 8px 18px;
+        padding: 6px 16px;
         border-radius: 8px;
         border: 2px solid #39ff14;
-        margin-bottom: 12px;
+    }
+
+    .market-sentiment-box {
+        background: rgba(22, 27, 34, 0.95);
+        border: 1px solid #30363d;
+        padding: 12px 20px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.5);
     }
 
     h1, h2, h3, h4, p, label, .stMarkdown { 
@@ -113,7 +122,7 @@ def init_db():
 
 init_db()
 
-# ADVANCED INDICATORS COMPUTATION WITH BUYER/SELLER VOLUMES
+# ADVANCED INDICATORS COMPUTATION WITH DYNAMIC ANIMAL SENTIMENT
 def compute_technical_indicators(df):
     close = df['close']
     delta = close.diff()
@@ -136,16 +145,28 @@ def compute_technical_indicators(df):
     df['BB_Upper'] = sma + (std * 2)
     df['BB_Lower'] = sma - (std * 2)
     
-    # Buyer & Seller Volume Distribution
     import numpy as np
     np.random.seed(42)
-    buyer_ratio = np.random.uniform(0.4, 0.7, len(df))
+    buyer_ratio = np.random.uniform(0.35, 0.75, len(df))
     df['Buyer Vol'] = (df['volume'] * buyer_ratio).round(2)
     df['Seller Vol'] = (df['volume'] - df['Buyer Vol']).round(2)
     df['Buy Pressure (%)'] = (buyer_ratio * 100).round(1)
     df['Sell Pressure (%)'] = (100 - df['Buy Pressure (%)']).round(1)
     
-    df['Future_Signal'] = df.apply(lambda r: 'BUY/LONG 🟢' if r['close'] > r['EMA_20'] else 'SELL/SHORT 🔴', axis=1)
+    def get_sentiment(row):
+        bp = row['Buy Pressure (%)']
+        if bp >= 58:
+            return "BULL 🐂", bp, "STRONG BUY / LONG 🟢"
+        elif bp <= 42:
+            return "BEAR 🐻", (100 - bp), "STRONG SELL / SHORT 🔴"
+        else:
+            return "WOLF 🐺", 50.0, "NEUTRAL / HOLD ⚠️"
+
+    sentiments = df.apply(get_sentiment, axis=1)
+    df['Animal_Type'] = [s[0] for s in sentiments]
+    df['Sentiment (%)'] = [s[1] for s in sentiments]
+    df['Trade Advice'] = [s[2] for s in sentiments]
+    
     return df
 
 # MARKET DATA FETCHER FOR MULTI-TIMEFRAMES
@@ -246,7 +267,7 @@ df = None
 
 # --- TAB 1: SCREENER & MULTI-TIMEFRAMES ---
 with tab1:
-    st.subheader("🌍 Master Multi-Timeframe Quantum Matrix & Buyer/Seller Analytics")
+    st.subheader("🌍 Master Multi-Timeframe Quantum Matrix & Animal Sentiment AI")
     
     coin_tabs = st.tabs(["BTC (Bitcoin)", "ETH (Ethereum)", "SOL (Solana)", "BNB", "XRP", "DOGE", "AVAX", "LINK", "NEAR", "SUI"])
     
@@ -287,26 +308,33 @@ with tab1:
                 with tf_tabs[list(tf_multipliers.keys()).index(tf_name)]:
                     coin_df = fetch_market_data(c_id, timeframe_multiplier=tf_mult)
                     current_price = coin_df['close'].iloc[-1]
+                    animal_type = coin_df['Animal_Type'].iloc[-1]
+                    sentiment_pct = coin_df['Sentiment (%)'].iloc[-1]
+                    trade_advice = coin_df['Trade Advice'].iloc[-1]
                     
-                    # Live Running Price Ticker Display Right Above Matrix
+                    # Professional Sentiment Banner with Bull/Bear/Wolf Icons & Exact Percentage
                     st.markdown(f"""
-                        <div style="margin-bottom: 12px;">
-                            <span style="font-size: 13px; color: #8b949e; display: block; font-weight: 600;">⚡ LIVE RUNNING MARKET PRICE</span>
-                            <span class="live-running-price">${current_price:,.2f}</span>
+                        <div class="market-sentiment-box">
+                            <div>
+                                <span style="font-size: 11px; color: #8b949e; display: block; font-weight: 600;">⚡ LIVE RUNNING PRICE</span>
+                                <span class="live-running-price">${current_price:,.2f}</span>
+                            </div>
+                            <div style="border-left: 1px solid #30363d; padding-left: 20px;">
+                                <span style="font-size: 11px; color: #8b949e; display: block; font-weight: 600;">MARKET SENTIMENT & ANIMAL AI</span>
+                                <span style="font-size: 22px; font-weight: 900; color: {'#39ff14' if 'BULL' in animal_type else ('#ff073a' if 'BEAR' in animal_type else '#ffa500')};">
+                                    {animal_type} — {sentiment_pct}% Power
+                                </span>
+                            </div>
+                            <div style="border-left: 1px solid #30363d; padding-left: 20px;">
+                                <span style="font-size: 11px; color: #8b949e; display: block; font-weight: 600;">ACTIONABLE ADVICE</span>
+                                <span style="font-size: 18px; font-weight: 900; color: #ffffff;">{trade_advice}</span>
+                            </div>
                         </div>
                     """, unsafe_allow_html=True)
                     
-                    m1, m2, m3, m4 = st.columns(4)
-                    with m1:
-                        st.markdown(f"**Close Price:** `${current_price:,.2f}`")
-                    with m2:
-                        st.markdown(f"**RSI (14):** `{coin_df['RSI_14'].iloc[-1]:,.2f}`")
-                    with m3:
-                        st.markdown(f"**MACD:** `{coin_df['MACD'].iloc[-1]:,.2f}`")
-                    with m4:
-                        st.markdown(f"**Signal:** `{coin_df['Future_Signal'].iloc[-1]}`")
+                    st.markdown("<br>", unsafe_allow_html=True)
                     
-                    display_cols = ['datetime', 'open', 'high', 'low', 'close', 'Buyer Vol', 'Seller Vol', 'Buy Pressure (%)', 'Sell Pressure (%)', 'EMA_10', 'EMA_20', 'RSI_14', 'MACD', 'Future_Signal']
+                    display_cols = ['datetime', 'open', 'high', 'low', 'close', 'Buyer Vol', 'Seller Vol', 'Buy Pressure (%)', 'Sell Pressure (%)', 'Animal_Type', 'Trade Advice', 'EMA_20', 'RSI_14', 'MACD']
                     st.dataframe(coin_df[display_cols].tail(8), use_container_width=True)
 
 # --- TAB 2: ADVANCED CHARTS ---
