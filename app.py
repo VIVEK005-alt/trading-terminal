@@ -165,7 +165,7 @@ def get_youtube_embed_url(url, mute_state=0):
     
     if "videoseries" in vid_id:
         return f"https://www.youtube.com/embed/{vid_id}&autoplay=1&mute={mute_state}&enablejsapi=1"
-    return f"https://www.youtube.com/embed/{vid_id}?autoplay=1&mute={mute_state}&enablejsapi=1"
+    return f"https://www.youtube.com/embed/{vid_id}?autoplay={autoplay}&mute={mute_state}&enablejsapi=1" if 'autoplay' in locals() else f"https://www.youtube.com/embed/{vid_id}?autoplay=1&mute={mute_state}&enablejsapi=1"
 
 # Function to fetch Original Video Title using YouTube oEmbed API
 def get_original_video_title(url):
@@ -211,20 +211,30 @@ df = None
 
 # --- TAB 1: SCREENER & SEARCH ---
 with tab1:
-    st.subheader("🌍 Live Market Feed Matrix")
+    st.subheader("🌍 Live Market Feed Matrix & Advanced Screener")
     try:
         df = fetch_market_data(search_query)
         df['RSI'] = compute_rsi(df['close'], window=14)
         
-        c1, c2, c3 = st.columns(3)
+        # New Easy-to-Read Columns Added
+        df['Change ($)'] = df['close'].diff()
+        df['Change (%)'] = (df['Change ($)'] / df['open']) * 100
+        df['MA_20'] = df['close'].rolling(window=20).mean()
+        df['Signal'] = df.apply(lambda row: '🟢 Bullish' if row['close'] > row['MA_20'] else '🔴 Bearish', axis=1)
+        
+        c1, c2, c3, c4 = st.columns(4)
         with c1:
-            st.metric("Live Price", f"${df['close'].iloc[-1]:,.2f}", "+2.4% 🟢")
+            st.metric("Live Price", f"${df['close'].iloc[-1]:,.2f}", f"{df['Change (%)'].iloc[-1]:+.2f}%")
         with c2:
             st.metric("RSI (14)", f"{df['RSI'].iloc[-1]:,.2f}", "Neutral")
         with c3:
+            st.metric("20-Period MA", f"${df['MA_20'].iloc[-1]:,.2f}")
+        with c4:
             st.metric("24h Volume", f"${df['volume'].sum():,.0f}")
         
-        st.dataframe(df.tail(10), use_container_width=True)
+        # Clean & Enhanced Table with More Columns
+        display_df = df[['datetime', 'open', 'high', 'low', 'close', 'Change ($)', 'Change (%)', 'MA_20', 'RSI', 'Signal']].tail(12)
+        st.dataframe(display_df, use_container_width=True)
     except Exception as e:
         st.warning(f"Market feed note: Ensure symbol format is correct (e.g., BTC/USDT). Error: {e}")
 
