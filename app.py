@@ -27,6 +27,12 @@ st.markdown("""
         100% { color: #ff0055; text-shadow: 0 0 10px #ff0055, 0 0 20px #ff0055; }
     }
 
+    @keyframes livePulse {
+        0% { opacity: 0.8; transform: scale(1); }
+        50% { opacity: 1; transform: scale(1.02); text-shadow: 0 0 20px #00ffcc; }
+        100% { opacity: 0.8; transform: scale(1); }
+    }
+
     @keyframes borderGlow {
         0% { border-color: #ff0055; box-shadow: 0 0 15px rgba(255,0,85,0.4), inset 0 0 10px rgba(255,0,85,0.3); }
         50% { border-color: #00ffcc; box-shadow: 0 0 30px rgba(0,255,204,0.7), inset 0 0 15px rgba(0,255,204,0.5); }
@@ -39,6 +45,12 @@ st.markdown("""
         font-size: 26px;
         animation: rgbNeonGlow 5s infinite;
         display: inline-block;
+    }
+
+    .live-ticker-metric {
+        font-family: 'Orbitron', sans-serif;
+        font-weight: 900;
+        animation: livePulse 2s infinite ease-in-out;
     }
 
     h1, h2, h3, h4, p, label, .stMarkdown { 
@@ -96,6 +108,20 @@ st.markdown("""
         font-weight: bold;
         animation: rgbNeonGlow 4s infinite;
     }
+
+    /* Custom Multi-Color Neon Styling for Table Headers & Cells */
+    table.dataframe th:nth-child(1) { color: #00ffcc !important; text-shadow: 0 0 8px #00ffcc; }
+    table.dataframe th:nth-child(2) { color: #ff0055 !important; text-shadow: 0 0 8px #ff0055; }
+    table.dataframe th:nth-child(3) { color: #ff00ff !important; text-shadow: 0 0 8px #ff00ff; }
+    table.dataframe th:nth-child(4) { color: #ffff00 !important; text-shadow: 0 0 8px #ffff00; }
+    table.dataframe th:nth-child(5) { color: #00ffff !important; text-shadow: 0 0 8px #00ffff; }
+    table.dataframe th:nth-child(6) { color: #ff9900 !important; text-shadow: 0 0 8px #ff9900; }
+    table.dataframe th:nth-child(7) { color: #39ff14 !important; text-shadow: 0 0 8px #39ff14; }
+    table.dataframe th:nth-child(8) { color: #ff073a !important; text-shadow: 0 0 8px #ff073a; }
+    table.dataframe th:nth-child(9) { color: #da70d6 !important; text-shadow: 0 0 8px #da70d6; }
+    table.dataframe th:nth-child(10) { color: #00fa9a !important; text-shadow: 0 0 8px #00fa9a; }
+    table.dataframe th:nth-child(11) { color: #ff69b4 !important; text-shadow: 0 0 8px #ff69b4; }
+    table.dataframe th:nth-child(12) { color: #1e90ff !important; text-shadow: 0 0 8px #1e90ff; }
     </style>
 """, unsafe_allow_html=True)
 
@@ -165,7 +191,7 @@ def get_youtube_embed_url(url, mute_state=0):
     
     if "videoseries" in vid_id:
         return f"https://www.youtube.com/embed/{vid_id}&autoplay=1&mute={mute_state}&enablejsapi=1"
-    return f"https://www.youtube.com/embed/{vid_id}?autoplay={autoplay}&mute={mute_state}&enablejsapi=1" if 'autoplay' in locals() else f"https://www.youtube.com/embed/{vid_id}?autoplay=1&mute={mute_state}&enablejsapi=1"
+    return f"https://www.youtube.com/embed/{vid_id}?autoplay=1&mute={mute_state}&enablejsapi=1"
 
 # Function to fetch Original Video Title using YouTube oEmbed API
 def get_original_video_title(url):
@@ -216,24 +242,30 @@ with tab1:
         df = fetch_market_data(search_query)
         df['RSI'] = compute_rsi(df['close'], window=14)
         
-        # New Easy-to-Read Columns Added
+        # Enhanced Easy-to-Read Columns Added
         df['Change ($)'] = df['close'].diff()
         df['Change (%)'] = (df['Change ($)'] / df['open']) * 100
+        df['Spread'] = df['high'] - df['low']
+        df['Volatility (%)'] = (df['Spread'] / df['open']) * 100
         df['MA_20'] = df['close'].rolling(window=20).mean()
+        df['Pressure'] = df.apply(lambda row: '🟢 Buying' if row['close'] >= row['open'] else '🔴 Selling', axis=1)
         df['Signal'] = df.apply(lambda row: '🟢 Bullish' if row['close'] > row['MA_20'] else '🔴 Bearish', axis=1)
         
+        # Live Animated Ticker Display for Top Numbers
         c1, c2, c3, c4 = st.columns(4)
         with c1:
-            st.metric("Live Price", f"${df['close'].iloc[-1]:,.2f}", f"{df['Change (%)'].iloc[-1]:+.2f}%")
+            st.markdown(f"### Live Price\n<span class='live-ticker-metric' style='color:#00ffcc; font-size:28px;'>${df['close'].iloc[-1]:,.2f}</span>", unsafe_allow_html=True)
         with c2:
-            st.metric("RSI (14)", f"{df['RSI'].iloc[-1]:,.2f}", "Neutral")
+            st.markdown(f"### RSI (14)\n<span class='live-ticker-metric' style='color:#ff00ff; font-size:28px;'>{df['RSI'].iloc[-1]:,.2f}</span>", unsafe_allow_html=True)
         with c3:
-            st.metric("20-Period MA", f"${df['MA_20'].iloc[-1]:,.2f}")
+            st.markdown(f"### 20-Period MA\n<span class='live-ticker-metric' style='color:#ffff00; font-size:28px;'>${df['MA_20'].iloc[-1]:,.2f}</span>", unsafe_allow_html=True)
         with c4:
-            st.metric("24h Volume", f"${df['volume'].sum():,.0f}")
+            st.markdown(f"### 24h Volume\n<span class='live-ticker-metric' style='color:#ff9900; font-size:24px;'>${df['volume'].sum():,.0f}</span>", unsafe_allow_html=True)
         
-        # Clean & Enhanced Table with More Columns
-        display_df = df[['datetime', 'open', 'high', 'low', 'close', 'Change ($)', 'Change (%)', 'MA_20', 'RSI', 'Signal']].tail(12)
+        st.markdown("<br>", unsafe_allow_html=True)
+        
+        # Comprehensive Data Matrix with All Columns
+        display_df = df[['datetime', 'open', 'high', 'low', 'close', 'Change ($)', 'Change (%)', 'Spread', 'Volatility (%)', 'MA_20', 'RSI', 'Pressure', 'Signal']].tail(12)
         st.dataframe(display_df, use_container_width=True)
     except Exception as e:
         st.warning(f"Market feed note: Ensure symbol format is correct (e.g., BTC/USDT). Error: {e}")
