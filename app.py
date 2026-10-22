@@ -314,7 +314,7 @@ user_email = st.sidebar.text_input("Trader Profile:", value="trader@apex.ai")
 
 st.sidebar.markdown("---")
 
-# Professional Multiple Watchlist (1K+ Coins Management)
+# Professional Multiple Watchlist (1K+ Coins Management & Persistence)
 if 'user_saved_watchlist' not in st.session_state:
     st.session_state.user_saved_watchlist = ["BTC", "ETH", "SOL", "BNB", "XRP", "ADA", "AVAX", "LINK", "SUI", "DOT"]
 
@@ -500,7 +500,7 @@ with tab1:
                 </div>
             """, unsafe_allow_html=True)
 
-            # --- TRADINGVIEW PROFESSIONAL CHART WITH UNTOUCHED VIEW MODES & FULL INTERACTIVE SUITE ---
+            # --- TRADINGVIEW PROFESSIONAL CHART WITH UNTOUCHED VIEW MODES & DIRECT ADVANCED WORKSPACE LINK ---
             st.markdown(f"### 📈 Live TradingView Professional Chart ({c_tab_name})")
             
             col_c1, col_c2, col_c3 = st.columns([2, 2, 3])
@@ -509,7 +509,12 @@ with tab1:
             with col_c2:
                 chart_theme_mode = st.selectbox(f"🌓 Theme Mode ({c_tab_name}):", ["Dark Mode", "Light Mode", "System Default"], key=f"tv_theme_{c_id}")
             with col_c3:
-                st.markdown("<span style='color: #00ffcc; font-size: 11px;'>⚡ Fully Interactive TradingView Advanced Chart Widget</span>", unsafe_allow_html=True)
+                tv_link_url = f"https://www.tradingview.com/chart/?symbol=BINANCE:{c_tab_name}USDT"
+                st.markdown(f"""
+                    <div style="padding-top: 5px;">
+                        <a href="{tv_link_url}" target="_blank" style="background: #238636; color: white; padding: 8px 16px; border-radius: 6px; text-decoration: none; font-weight: bold; font-size: 12px; border: 1px solid #00ffcc;">🔗 Open Full TradingView Pro Workspace (Drawing Tools & Right-Click)</a>
+                    </div>
+                """, unsafe_allow_html=True)
             
             if chart_view_mode == "Portrait View":
                 tv_width = "450px"
