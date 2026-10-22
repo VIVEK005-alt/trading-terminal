@@ -1,7 +1,6 @@
 import streamlit as st
 import ccxt
 import pandas as pd
-import pandas_ta as ta
 import sqlite3
 from datetime import datetime
 
@@ -39,6 +38,14 @@ def init_db():
     conn.close()
 
 init_db()
+
+# PURE PANDAS RSI FUNCTION (No external dependency needed)
+def compute_rsi(data, window=14):
+    delta = data.diff()
+    gain = (delta.where(delta > 0, 0)).rolling(window=window).mean()
+    loss = (-delta.where(delta < 0, 0)).rolling(window=window).mean()
+    rs = gain / loss
+    return 100 - (100 / (1 + rs))
 
 # 3. SIDEBAR: CONTROL CENTER & MULTI-AGENT STATUS
 st.sidebar.title("⚡ Autonomous Control")
@@ -89,7 +96,7 @@ with tab1:
         ohlcv = ex_class.fetch_ohlcv(search_query, timeframe, limit=30)
         df = pd.DataFrame(ohlcv, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
         df['datetime'] = pd.to_datetime(df['timestamp'], unit='ms')
-        df['RSI'] = ta.rsi(df['close'], length=14)
+        df['RSI'] = compute_rsi(df['close'], window=14)
         
         c1, c2, c3 = st.columns(3)
         c1.metric("Live Price", f"${df['close'].iloc[-1]:,.2f}", "+2.4% 🟢")
