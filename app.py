@@ -50,7 +50,7 @@ st.markdown("""
     .live-ticker-metric {
         font-family: 'Orbitron', sans-serif;
         font-weight: 900;
-        font-size: 32px;
+        font-size: 28px;
         animation: liveTickerPulse 1.5s infinite ease-in-out;
         display: inline-block;
     }
@@ -110,18 +110,6 @@ st.markdown("""
         font-weight: bold;
         animation: rgbNeonGlow 4s infinite;
     }
-
-    /* Multi-Color Neon Styling for Table Headers */
-    table.dataframe th:nth-child(1) { color: #00ffcc !important; text-shadow: 0 0 8px #00ffcc; }
-    table.dataframe th:nth-child(2) { color: #ff0055 !important; text-shadow: 0 0 8px #ff0055; }
-    table.dataframe th:nth-child(3) { color: #ff00ff !important; text-shadow: 0 0 8px #ff00ff; }
-    table.dataframe th:nth-child(4) { color: #ffff00 !important; text-shadow: 0 0 8px #ffff00; }
-    table.dataframe th:nth-child(5) { color: #00ffff !important; text-shadow: 0 0 8px #00ffff; }
-    table.dataframe th:nth-child(6) { color: #ff9900 !important; text-shadow: 0 0 8px #ff9900; }
-    table.dataframe th:nth-child(7) { color: #39ff14 !important; text-shadow: 0 0 8px #39ff14; }
-    table.dataframe th:nth-child(8) { color: #ff073a !important; text-shadow: 0 0 8px #ff073a; }
-    table.dataframe th:nth-child(9) { color: #da70d6 !important; text-shadow: 0 0 8px #da70d6; }
-    table.dataframe th:nth-child(10) { color: #00fa9a !important; text-shadow: 0 0 8px #00fa9a; }
     </style>
 """, unsafe_allow_html=True)
 
@@ -144,80 +132,45 @@ def compute_rsi(data, window=14):
     rs = gain / loss
     return 100 - (100 / (1 + rs))
 
-# CLOUD-FRIENDLY COINGECKO DATA FETCHER
-def fetch_market_data(symbol):
-    mapping = {
-        'BTC/USDT': 'bitcoin',
-        'ETH/USDT': 'ethereum',
-        'SOL/USDT': 'solana',
-        'BNB/USDT': 'binancecoin',
-        'XRP/USDT': 'ripple',
-        'DOGE/USDT': 'dogecoin',
-        'AVAX/USDT': 'avalanche-2',
-        'LINK/USDT': 'chainlink',
-        'NEAR/USDT': 'near',
-        'SUI/USDT': 'sui'
-    }
-    coin_id = mapping.get(symbol.upper(), 'bitcoin')
+# SAFE COINGECKO MARKET DATA FETCHER
+def fetch_market_data(coin_id):
     url = f"https://api.coingecko.com/api/v3/coins/{coin_id}/market_chart?vs_currency=usd&days=1"
+    try:
+        response = requests.get(url, timeout=3)
+        if response.status_code == 200:
+            data = response.json()
+            prices = data.get('prices', [])
+            volumes = data.get('total_volumes', [])
+            if prices:
+                df_rows = []
+                for i in range(len(prices)):
+                    ts = prices[i][0]
+                    p = prices[i][1]
+                    v = volumes[i][1] if i < len(volumes) else 0
+                    df_rows.append([ts, p, p, p, p, v])
+                df = pd.DataFrame(df_rows, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
+                df['datetime'] = pd.to_datetime(df['timestamp'], unit='ms')
+                df['RSI'] = compute_rsi(df['close'], window=14)
+                df['Change ($)'] = df['close'].diff()
+                df['Change (%)'] = (df['Change ($)'] / df['open']) * 100
+                df['Spread'] = df['high'] - df['low']
+                df['Volatility (%)'] = (df['Spread'] / df['open']) * 100
+                df['MA_20'] = df['close'].rolling(window=20).mean()
+                df['Pressure'] = df.apply(lambda row: '🟢 Buying' if row['close'] >= row['open'] else '🔴 Selling', axis=1)
+                df['Signal'] = df.apply(lambda row: '🟢 Bullish' if row['close'] > row['MA_20'] else '🔴 Bearish', axis=1)
+                return df
+    except:
+        pass
     
-    response = requests.get(url)
-    data = response.json()
-    prices = data.get('prices', [])
-    volumes = data.get('total_volumes', [])
-    
-    df_rows = []
-    for i in range(len(prices)):
-        ts = prices[i][0]
-        p = prices[i][1]
-        v = volumes[i][1] if i < len(volumes) else 0
-        df_rows.append([ts, p, p, p, p, v])
-        
-    df = pd.DataFrame(df_rows, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
-    df['datetime'] = pd.to_datetime(df['timestamp'], unit='ms')
+    # Fallback dummy dataframe if API limits are hit
+    dummy_dates = pd.date_range(end=datetime.now(), periods=10, freq='5min')
+    df = pd.DataFrame({
+        'datetime': dummy_dates,
+        'open': [81000.0]*10, 'high': [81500.0]*10, 'low': [80800.0]*10, 'close': [81200.0]*10,
+        'Change ($)':[50.0]*10, 'Change (%)':[0.06]*10, 'Spread':[700.0]*10, 'Volatility (%)':[0.8]*10,
+        'MA_20':[81100.0]*10, 'RSI':[52.4]*10, 'Pressure':['🟢 Buying']*10, 'Signal':['🟢 Bullish']*10, 'volume':[1000000]*10
+    })
     return df
-
-# Function to fetch multi-coin overview table
-def fetch_multi_coin_overview():
-    coins = [
-        ("BTC (Bitcoin)", "bitcoin"),
-        ("ETH (Ethereum)", "ethereum"),
-        ("SOL (Solana)", "solana"),
-        ("BNB (Build N Build)", "binancecoin"),
-        ("XRP (Ripple)", "ripple"),
-        ("DOGE (Dogecoin)", "dogecoin"),
-        ("AVAX (Avalanche)", "avalanche-2"),
-        ("LINK (Chainlink)", "chainlink"),
-        ("NEAR (NEAR Protocol)", "near"),
-        ("SUI (Sui Network)", "sui")
-    ]
-    
-    table_data = []
-    for name, cid in coins:
-        try:
-            url = f"https://api.coingecko.com/api/v3/simple/price?ids={cid}&vs_currencies=usd,usd_24h_change,usd_market_cap"
-            res = requests.get(url, timeout=2).json()
-            if cid in res:
-                price = res[cid].get('usd', 0)
-                change = res[cid].get('usd_24h_change', 0)
-                mcap = res[cid].get('usd_market_cap', 0)
-                status = "🟢 Bullish" if change >= 0 else "🔴 Bearish"
-                table_data.append({
-                    "Asset": name,
-                    "Price ($)": f"${price:,.2f}",
-                    "24h Change (%)": f"{change:+.2f}%",
-                    "Market Cap ($)": f"${mcap:,.0f}" if mcap else "N/A",
-                    "Status / Trend": status
-                })
-        except:
-            table_data.append({
-                "Asset": name,
-                "Price ($)": "Loading...",
-                "24h Change (%)": "N/A",
-                "Market Cap ($)": "N/A",
-                "Status / Trend": "⚡ Syncing"
-            })
-    return pd.DataFrame(table_data)
 
 # Robust YouTube Video ID Parser
 def get_youtube_embed_url(url, mute_state=0):
@@ -264,9 +217,9 @@ st.sidebar.markdown("---")
 selected_exchange = st.sidebar.selectbox("Exchange Node", ["CoinGecko Global Feed", "Global Cloud Node"])
 timeframe = st.sidebar.selectbox("Timeframe", ["1m", "5m", "15m", "1h", "4h", "1D"])
 
-# 4. UNIVERSAL SEARCH BAR
+# 4. UNIVERSAL HEADER
 st.title("⚡ APEX QUANTUM TRADING TERMINAL")
-search_query = st.text_input("🔍 Global Search Bar (e.g., BTC/USDT, ETH/USDT, SOL/USDT, BNB/USDT):", value="BTC/USDT")
+search_query = st.text_input("🔍 Global Search Bar (e.g., BTC/USDT, ETH/USDT, SOL/USDT):", value="BTC/USDT")
 
 # 5. MAIN NAVIGATION TABS
 tab1, tab2, tab3, tab4, tab5, tab6, tab7 = st.tabs([
@@ -285,41 +238,44 @@ df = None
 with tab1:
     st.subheader("🌍 Live Market Feed Matrix & Multi-Coin Quantum Screener")
     try:
-        df = fetch_market_data(search_query)
-        df['RSI'] = compute_rsi(df['close'], window=14)
-        
-        df['Change ($)'] = df['close'].diff()
-        df['Change (%)'] = (df['Change ($)'] / df['open']) * 100
-        df['Spread'] = df['high'] - df['low']
-        df['Volatility (%)'] = (df['Spread'] / df['open']) * 100
-        df['MA_20'] = df['close'].rolling(window=20).mean()
-        df['Pressure'] = df.apply(lambda row: '🟢 Buying' if row['close'] >= row['open'] else '🔴 Selling', axis=1)
-        df['Signal'] = df.apply(lambda row: '🟢 Bullish' if row['close'] > row['MA_20'] else '🔴 Bearish', axis=1)
+        df = fetch_market_data('bitcoin')
         
         # Live Animated Ticker Display for Top Numbers
         c1, c2, c3, c4 = st.columns(4)
         with c1:
-            st.markdown(f"### Live Price\n<span class='live-ticker-metric' style='color:#00ffcc;'>${df['close'].iloc[-1]:,.2f}</span>", unsafe_allow_html=True)
+            st.markdown(f"### Live Price (BTC)\n<span class='live-ticker-metric' style='color:#00ffcc;'>${df['close'].iloc[-1]:,.2f}</span>", unsafe_allow_html=True)
         with c2:
             st.markdown(f"### RSI (14)\n<span class='live-ticker-metric' style='color:#ff00ff;'>{df['RSI'].iloc[-1]:,.2f}</span>", unsafe_allow_html=True)
         with c3:
             st.markdown(f"### 20-Period MA\n<span class='live-ticker-metric' style='color:#ffff00;'>${df['MA_20'].iloc[-1]:,.2f}</span>", unsafe_allow_html=True)
         with c4:
-            st.markdown(f"### 24h Volume\n<span class='live-ticker-metric' style='color:#ff9900; font-size:26px;'>${df['volume'].sum():,.0f}</span>", unsafe_allow_html=True)
+            st.markdown(f"### 24h Volume\n<span class='live-ticker-metric' style='color:#ff9900;'>${df['volume'].sum():,.0f}</span>", unsafe_allow_html=True)
         
         st.markdown("<br>", unsafe_allow_html=True)
         
-        # Comprehensive Data Matrix with All Columns
-        display_df = df[['datetime', 'open', 'high', 'low', 'close', 'Change ($)', 'Change (%)', 'Spread', 'Volatility (%)', 'MA_20', 'RSI', 'Pressure', 'Signal']].tail(10)
-        st.dataframe(display_df, use_container_width=True)
-        
-        st.markdown("---")
-        st.subheader("🔥 Top Crypto Assets Overview Matrix")
-        coins_table_df = fetch_multi_coin_overview()
-        st.dataframe(coins_table_df, use_container_width=True)
+        # Master Coin List with Separate Individual Tables
+        coins_list = [
+            ("🪙 BTC (Bitcoin)", "bitcoin"),
+            ("🪙 ETH (Ethereum)", "ethereum"),
+            ("🪙 SOL (Solana)", "solana"),
+            ("🪙 BNB (Build N Build)", "binancecoin"),
+            ("🪙 XRP (Ripple)", "ripple"),
+            ("🪙 DOGE (Dogecoin)", "dogecoin"),
+            ("🪙 AVAX (Avalanche)", "avalanche-2"),
+            ("🪙 LINK (Chainlink)", "chainlink"),
+            ("🪙 NEAR (NEAR Protocol)", "near"),
+            ("🪙 SUI (Sui Network)", "sui")
+        ]
+
+        for title, cid in coins_list:
+            st.markdown(f"### {title} - Live Detailed Matrix Table")
+            coin_df = fetch_market_data(cid)
+            display_coin_df = coin_df[['datetime', 'open', 'high', 'low', 'close', 'Change ($)', 'Change (%)', 'Spread', 'Volatility (%)', 'MA_20', 'RSI', 'Pressure', 'Signal']].tail(5)
+            st.dataframe(display_coin_df, use_container_width=True)
+            st.markdown("---")
 
     except Exception as e:
-        st.warning(f"Market feed note: Ensure symbol format is correct (e.g., BTC/USDT). Error: {e}")
+        st.warning(f"Market feed note: {e}")
 
 # --- TAB 2: ADVANCED CHARTS ---
 with tab2:
