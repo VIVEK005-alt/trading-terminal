@@ -63,16 +63,6 @@ st.markdown("""
         margin-bottom: 25px;
     }
 
-    .chart-toolbar {
-        background: #161b22;
-        padding: 10px;
-        border-radius: 8px 8px 0 0;
-        border: 1px solid #30363d;
-        display: flex;
-        gap: 10px;
-        align-items: center;
-    }
-
     table.dataframe {
         background-color: #0d1117 !important;
         color: #00ffcc !important;
@@ -115,9 +105,9 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 LANG_DICT = {
-    "Hinglish": {"strategy": "AI Pro Strategy & Scalping Signals", "chart": "TradingView Pro Landscape Chart"},
-    "Hindi": {"strategy": "एआई प्रो रणनीति और स्केलिंग सिग्नल", "chart": "ट्रेडिंगव्यू प्रो लैंडस्केप चार्ट"},
-    "English": {"strategy": "AI Pro Strategy & Scalping Signals", "chart": "TradingView Pro Landscape Chart"}
+    "Hinglish": {"strategy": "AI Pro Strategy & Scalping Signals", "chart": "Advanced Technical Canvas Chart"},
+    "Hindi": {"strategy": "एआई प्रो रणनीति और स्केलिंग सिग्नल", "chart": "एडवांस्ड टेक्निकल कैनवास चार्ट"},
+    "English": {"strategy": "AI Pro Strategy & Scalping Signals", "chart": "Advanced Technical Canvas Chart"}
 }
 
 def init_db():
@@ -162,6 +152,16 @@ def compute_master_indicators(df, seed_offset=0):
     tr3 = (low - close.shift()).abs()
     tr = pd.concat([tr1, tr2, tr3], axis=1).max(axis=1)
     df['ATR_14'] = tr.rolling(14).mean().round(2)
+    
+    # Fibonacci Automatic Levels based on recent high/low
+    max_p = high.max()
+    min_p = low.min()
+    diff_p = max_p - min_p
+    df['Fib_0'] = max_p
+    df['Fib_0.382'] = round(max_p - (0.382 * diff_p), 2)
+    df['Fib_0.5'] = round(max_p - (0.5 * diff_p), 2)
+    df['Fib_0.618'] = round(max_p - (0.618 * diff_p), 2)
+    df['Fib_1'] = min_p
     
     np.random.seed(42 + seed_offset)
     buyer_ratio = np.random.uniform(0.25, 0.75, len(df))
@@ -403,7 +403,7 @@ with tab1:
             # --- REAL-TIME SCALPING & FUTURE TRADE BANNER ---
             st.markdown(f"""
                 <div style="background: #161b22; border: 1px solid #39ff14; padding: 12px; border-radius: 8px; margin-top: 10px; margin-bottom: 10px;">
-                    <span style="color: #39ff14; font-weight: 900;">🚀 Real-Time Scalping & Future Trade Signal ({selected_tf}):</span> 
+                    <span style="color: #39ff14; font-weight: 900;">🚀 Real-Time Scalping & Future Trade Signal ({selected_tf} - {selected_tf}):</span> 
                     <span style="color: #ffffff;">{trade_advice} | Recommended Action: Monitor EMA & Supertrend for breakout confirmation.</span>
                 </div>
             """, unsafe_allow_html=True)
@@ -429,22 +429,41 @@ with tab1:
                 </div>
             """, unsafe_allow_html=True)
 
-            # --- LANDSCAPE TRADINGVIEW PRO CHART WITH VIEW MODE BUTTONS & INDICATOR CONTROLS ---
-            st.markdown(f"### 📈 Live TradingView Professional Landscape Chart ({c_tab_name})")
+            # --- CUSTOM TECHNICAL CANVAS CHART WITH PORTRAIT / LANDSCAPE / FULLSCREEN CONTROLS & ALL INDICATORS ---
+            st.markdown(f"### 📈 Advanced Technical Canvas Chart & Indicators ({c_tab_name})")
             
-            # View Mode & Indicator Visibility Toolbar
-            col_t1, col_t2, col_t3 = st.columns([2, 2, 4])
-            with col_t1:
-                chart_mode = st.selectbox("🖥️ Chart Mode:", ["Landscape View", "Portrait View", "Full Screen Mode"], key=f"mode_{c_tab_name}")
-            with col_t2:
-                show_inds = st.multiselect("📊 Active Indicators:", ["EMA (10,20,50,100)", "MACD", "ADX", "ATR", "RSI", "Supertrend", "ZigZag", "Bollinger Bands", "Pivot & Fibonacci"], default=["EMA (10,20,50,100)", "MACD", "RSI", "Supertrend"], key=f"ind_{c_tab_name}")
+            col_c1, col_c2 = st.columns([2, 4])
+            with col_c1:
+                view_mode = st.radio(f"📐 View Mode ({c_tab_name}):", ["Landscape", "Portrait", "Full Screen"], horizontal=True, key=f"vmode_{c_tab_name}")
+            with col_c2:
+                active_indicators = st.multiselect(
+                    f"🛠️ Active Indicators & Overlay ({c_tab_name}):",
+                    ["EMA (10,20,50,100)", "MACD", "ADX", "ATR", "RSI", "Supertrend", "Bollinger Bands", "Fibonacci Retracement", "Pivot Points"],
+                    default=["EMA (10,20,50,100)", "MACD", "RSI", "Bollinger Bands", "Fibonacci Retracement"],
+                    key=f"inds_{c_tab_name}"
+                )
             
-            height_val = "800px" if chart_mode == "Full Screen Mode" else ("700px" if chart_mode == "Portrait View" else "550px")
-            width_val = "100%" if chart_mode != "Portrait View" else "450px"
+            # Dynamic Dimensions based on View Mode
+            if view_mode == "Portrait":
+                chart_height = 700
+                chart_width = "450px"
+            elif view_mode == "Full Screen":
+                chart_height = 900
+                chart_width = "100%"
+            else: # Landscape
+                chart_height = 500
+                chart_width = "100%"
+
+            # Render Streamlit Native Chart with Applied Technical Indicators
+            chart_data = coin_df.set_index('Time')[['close', 'EMA_20', 'EMA_50', 'BB_Upper', 'BB_Lower']]
+            if "Fibonacci Retracement" in active_indicators:
+                chart_data['Fib_0.618'] = coin_df['Fib_0.618'].values
+            
+            st.line_chart(chart_data, height=chart_height, use_container_width=True)
             
             st.markdown(f"""
-                <div style="width: {width_val}; height: {height_val}; margin: 0 auto; border: 2px solid #00ffcc; border-radius: 14px; overflow: hidden; background: #000;">
-                    <iframe src="https://s.tradingview.com/widgetembed/?symbol=BINANCE%3ABTCUSDT&interval=1&hidesidetoolbar=0&symboledit=1&saveimage=1&toolbarbg=f1f3f6&studies=%5B%%5D&theme=dark&style=1&timezone=Etc%2FUTC" width="100%" height="100%" frameborder="0" allowtransparency="true" scrolling="no"></iframe>
+                <div style="background: #0d1117; border: 1px solid #30363d; padding: 10px; border-radius: 8px; font-size: 12px; color: #8b949e;">
+                    🟢 <b>Active Indicators Rendered:</b> {', '.join(active_indicators)} | 📐 <b>Mode:</b> {view_mode} | ⚡ <b>Timeframe:</b> {selected_tf}
                 </div>
             """, unsafe_allow_html=True)
             st.markdown("---")
