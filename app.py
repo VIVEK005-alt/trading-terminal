@@ -495,7 +495,7 @@ with tab1:
                 </div>
             """, unsafe_allow_html=True)
 
-            # --- TRADINGVIEW ADVANCED REAL-TIME CHART WIDGET (HTML EMBED SUITE WITH FULL CONTROLS) ---
+            # --- TRADINGVIEW ADVANCED PRO EMBED CHART (PERFECT HEIGHT FIT, NO BLACK GAP) ---
             st.markdown(f"### 📈 Live TradingView Professional Chart ({c_tab_name})")
             
             col_c1, col_c2, col_c3 = st.columns([2, 2, 3])
@@ -521,7 +521,7 @@ with tab1:
                 is_fs = "true"
             else: # Landscape View
                 tv_width = "100%"
-                tv_height = "680px"
+                tv_height = "520px"
                 is_fs = "false"
 
             tv_symbol = f"BINANCE:{c_tab_name}USDT"
@@ -530,15 +530,24 @@ with tab1:
 
             container_id = f"tv_chart_container_{c_id}"
             
-            # Using TradingView Advanced Chart HTML Script Embed wrapped in an iframe srcdoc for direct execution without black screen
             chart_html_content = f"""
             <!DOCTYPE html>
             <html>
             <head>
               <meta charset="utf-8">
+              <style>
+                html, body {{
+                  margin: 0;
+                  padding: 0;
+                  width: 100%;
+                  height: 100%;
+                  background-color: {bg_col};
+                  overflow: hidden;
+                }}
+              </style>
             </head>
-            <body style="margin:0;padding:0;background-color:{bg_col};">
-              <div class="tradingview-widget-container" style="height:100vh;width:100vw">
+            <body>
+              <div class="tradingview-widget-container" style="height:100%;width:100%">
                 <div class="tradingview-widget-container__widget" style="height:100%;width:100%"></div>
                 <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js" async>
                 {{
