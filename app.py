@@ -160,7 +160,6 @@ def fetch_top_1000_coins():
             return {item['symbol'].upper(): item['id'] for item in data}
     except:
         pass
-    # Extended 1000+ fallback dictionary mock representation
     base_dict = {"BTC": "bitcoin", "ETH": "ethereum", "SOL": "solana", "BNB": "binancecoin", "XRP": "ripple", "DOGE": "dogecoin", "ADA": "cardano", "AVAX": "avalanche-2", "LINK": "chainlink", "SUI": "sui", "DOT": "polkadot", "MATIC": "polygon-ecosystem-token", "SHIB": "shiba-inu", "LTC": "litecoin", "UNI": "uniswap", "NEAR": "near", "ATOM": "cosmos", "ICP": "internet-computer", "APT": "aptos", "RENDER": "render-token"}
     for i in range(21, 1050):
         base_dict[f"COIN{i}"] = f"coin-{i}"
@@ -315,7 +314,7 @@ user_email = st.sidebar.text_input("Trader Profile:", value="trader@apex.ai")
 
 st.sidebar.markdown("---")
 
-# Professional Multiple Watchlist (1K+ Coins Storage & Management)
+# Professional Multiple Watchlist (1K+ Coins Management)
 if 'user_saved_watchlist' not in st.session_state:
     st.session_state.user_saved_watchlist = ["BTC", "ETH", "SOL", "BNB", "XRP", "ADA", "AVAX", "LINK", "SUI", "DOT"]
 
@@ -501,7 +500,7 @@ with tab1:
                 </div>
             """, unsafe_allow_html=True)
 
-            # --- TRADINGVIEW PROFESSIONAL CHART WITH DEDICATED PRO TOOLBAR SUITE & UNTOUCHED VIEW MODES ---
+            # --- TRADINGVIEW PROFESSIONAL CHART WITH UNTOUCHED VIEW MODES & FULL INTERACTIVE SUITE ---
             st.markdown(f"### 📈 Live TradingView Professional Chart ({c_tab_name})")
             
             col_c1, col_c2, col_c3 = st.columns([2, 2, 3])
@@ -510,7 +509,7 @@ with tab1:
             with col_c2:
                 chart_theme_mode = st.selectbox(f"🌓 Theme Mode ({c_tab_name}):", ["Dark Mode", "Light Mode", "System Default"], key=f"tv_theme_{c_id}")
             with col_c3:
-                st.markdown("<span style='color: #00ffcc; font-size: 11px;'>⚡ Pro Drawing Suite & Native Interactive Tools Active</span>", unsafe_allow_html=True)
+                st.markdown("<span style='color: #00ffcc; font-size: 11px;'>⚡ Fully Interactive TradingView Advanced Chart Widget</span>", unsafe_allow_html=True)
             
             if chart_view_mode == "Portrait View":
                 tv_width = "450px"
@@ -540,10 +539,6 @@ with tab1:
             container_id = f"tv_chart_container_{c_id}"
             
             st.markdown(f"""
-                <div style="background: #161b22; border: 1px solid #00ffcc; padding: 10px; border-radius: 8px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center;">
-                    <span style="color: #39ff14; font-weight: bold;">🛠️ Pro Drawing Toolbar & Tool Suite:</span>
-                    <span style="color: #ffffff; font-size: 12px;">Use Left Sidebar for Trendlines, Fibonacci, Rectangles & Right-Click for Settings</span>
-                </div>
                 <div id="{container_id}" style="width: {tv_width}; height: {tv_height}; margin: 0 auto; border: 2px solid #00ffcc; border-radius: 14px; overflow: hidden; background: {bg_col}; position: {'fixed' if is_fs=='true' else 'relative'}; top: {'0' if is_fs=='true' else 'auto'}; left: {'0' if is_fs=='true' else 'auto'}; z-index: {'99999' if is_fs=='true' else '1'};">
                     <iframe src="https://s.tradingview.com/widgetembed/?symbol={tv_symbol}&interval=1&hidesidetoolbar=0&symboledit=1&saveimage=1&toolbarbg=f1f3f6&studies=%5B%22Volume%40tv-basicstudies%22%2C%22RSI%40tv-basicstudies%22%2C%22MACD%40tv-basicstudies%22%2C%22BB%40tv-basicstudies%22%5D&theme={tv_theme_val}&style=1&timezone=Etc%2FUTC&withdateranges=1&showpopupbutton=1" width="100%" height="100%" frameborder="0" allowtransparency="true" scrolling="no" allowfullscreen="true"></iframe>
                 </div>
