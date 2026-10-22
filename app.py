@@ -495,7 +495,7 @@ with tab1:
                 </div>
             """, unsafe_allow_html=True)
 
-            # --- TRADINGVIEW PROFESSIONAL CHART WITH UNTOUCHED VIEW MODES & PRO WORKSPACE LINK ---
+            # --- TRADINGVIEW PROFESSIONAL CHART WITH PRO WORKSPACE LINK & FULL CONTROL ---
             st.markdown(f"### 📈 Live TradingView Professional Chart ({c_tab_name})")
             
             col_c1, col_c2, col_c3 = st.columns([2, 2, 3])
@@ -507,7 +507,7 @@ with tab1:
                 tv_link_url = f"https://www.tradingview.com/chart/?symbol=BINANCE:{c_tab_name}USDT"
                 st.markdown(f"""
                     <div style="padding-top: 5px;">
-                        <a href="{tv_link_url}" target="_blank" style="background: #238636; color: white; padding: 8px 16px; border-radius: 6px; text-decoration: none; font-weight: bold; font-size: 12px; border: 1px solid #00ffcc;">🔗 Open Pro TradingView Workspace (Full Tools & Right-Click)</a>
+                        <a href="{tv_link_url}" target="_blank" style="background: #238636; color: white; padding: 8px 16px; border-radius: 6px; text-decoration: none; font-weight: bold; font-size: 12px; border: 1px solid #00ffcc;">🔗 Open Pro TradingView Workspace (Full Drawing Tools & Right-Click)</a>
                     </div>
                 """, unsafe_allow_html=True)
             
