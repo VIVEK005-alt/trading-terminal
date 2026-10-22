@@ -254,17 +254,18 @@ def get_original_video_title(url):
         pass
     return "YouTube_Media_Stream"
 
-# 3. SIDEBAR: CONTROL CENTER & SILENT AUTO-REFRESH
+# 3. SIDEBAR: CONTROL CENTER & TRADINGVIEW-STYLE SMART AUTO-REFRESH
 st.sidebar.title("⚡ APEX CONTROL")
 user_email = st.sidebar.text_input("Trader Profile:", value="trader@apex.ai")
 
 st.sidebar.markdown("---")
-st.sidebar.subheader("🔄 Silent Live Auto-Sync")
-silent_refresh = st.sidebar.checkbox("Enable 1-Second Silent Sync", value=True)
+st.sidebar.subheader("🔄 TradingView-Style Live Sync")
+auto_refresh = st.sidebar.checkbox("Enable Live Background Sync", value=True)
+refresh_interval = st.sidebar.slider("Sync Interval (Seconds):", 5, 60, 15)
 
-if silent_refresh:
-    st.sidebar.caption("🟢 Status: Background Live Data Active")
-    time.sleep(1)
+if auto_refresh:
+    st.sidebar.caption(f"🟢 Status: Syncing every {refresh_interval}s smoothly")
+    time.sleep(refresh_interval)
     st.rerun()
 
 st.sidebar.markdown("---")
@@ -291,7 +292,7 @@ df = None
 
 # --- TAB 1: SCREENER & MASTER TIMEFRAMES & HISTORICAL YEARS ---
 with tab1:
-    st.subheader("🌍 Master Excel Sheet Matrix (Silent Live Auto-Refresh)")
+    st.subheader("🌍 Master Excel Sheet Matrix (TradingView Smooth Sync)")
     
     coin_tabs = st.tabs(["BTC (Bitcoin)", "ETH (Ethereum)", "SOL (Solana)", "BNB", "XRP", "DOGE", "AVAX", "LINK", "NEAR", "SUI"])
     
