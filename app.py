@@ -63,13 +63,20 @@ st.markdown("""
         margin-bottom: 25px;
     }
 
+    /* Clean Sidebar Styling */
+    [data-testid="stSidebar"] {
+        background-color: #07090e;
+        border-right: 1px solid #30363d;
+        padding: 20px 10px;
+    }
+    
     .software-nav-bar {
         background: #0d1117;
-        padding: 10px 15px;
+        padding: 10px;
         border-radius: 10px;
         border: 1px solid #30363d;
         display: flex;
-        gap: 15px;
+        justify-content: space-around;
         align-items: center;
         margin-bottom: 20px;
     }
@@ -77,7 +84,7 @@ st.markdown("""
         background: #161b22;
         color: #00ffcc;
         border: 1px solid #30363d;
-        padding: 6px 12px;
+        padding: 8px 12px;
         border-radius: 6px;
         font-family: 'Orbitron', sans-serif;
         font-weight: bold;
@@ -121,11 +128,6 @@ st.markdown("""
     .stTabs [data-baseweb="tab-list"] { gap: 6px; background-color: #0d1117; padding: 10px; border-radius: 12px; border: 1px solid #30363d; flex-wrap: wrap; }
     .stTabs [data-baseweb="tab"] { background-color: #161b22; color: #00ffcc; border-radius: 6px; padding: 8px 16px; font-weight: 700; border: 1px solid #30363d; font-family: 'Orbitron', sans-serif; }
     .stTabs [aria-selected="true"] { background: linear-gradient(135deg, #238636 0%, #1f6feb 100%) !important; color: white !important; border-color: #00ffcc !important; }
-    
-    [data-testid="stSidebar"] {
-        background-color: #07090e;
-        border-right: 1px solid #30363d;
-    }
     </style>
 """, unsafe_allow_html=True)
 
@@ -305,23 +307,8 @@ st.sidebar.title("⚡ APEX CONTROL")
 user_email = st.sidebar.text_input("Trader Profile:", value="trader@apex.ai")
 
 st.sidebar.markdown("---")
-
-# Watchlist Section with Hide/Show Toggle Button placed right where marked green
-if 'show_watchlist_section' not in st.session_state:
-    st.session_state.show_watchlist_section = True
-
-col_w_title, col_w_btn = st.sidebar.columns([3, 1])
-with col_w_title:
-    st.subheader("⭐ Multiple Watchlist (1K+ Coins)")
-with col_w_btn:
-    toggle_icon = "👁️" if st.session_state.show_watchlist_section else "🔒"
-    if st.button(toggle_icon, key="hide_show_wl", help="Hide/Show Watchlist"):
-        st.session_state.show_watchlist_section = not st.session_state.show_watchlist_section
-        st.rerun()
-
-user_watchlist = ["BTC", "ETH", "SOL", "BNB", "XRP"]
-if st.session_state.show_watchlist_section:
-    user_watchlist = st.sidebar.multiselect("Select Coins to Watch:", options=list(all_coins_dict.keys()), default=["BTC", "ETH", "SOL", "BNB", "XRP"])
+st.sidebar.subheader("⭐ Multiple Watchlist (1K+ Coins)")
+user_watchlist = st.sidebar.multiselect("Select Coins to Watch:", options=list(all_coins_dict.keys()), default=["BTC", "ETH", "SOL", "BNB", "XRP"])
 
 st.sidebar.markdown("---")
 st.sidebar.subheader("🔄 Master Data Refresh")
