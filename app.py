@@ -63,7 +63,7 @@ st.markdown("""
         margin-bottom: 25px;
     }
 
-    /* Clean, Modern Sidebar Layout with Properly Visible Navigation Buttons */
+    /* Clean Sidebar & Prominent Collapse Button Styling */
     [data-testid="stSidebar"] {
         background-color: #12141c;
         border-right: 1px solid #2d333b;
@@ -71,20 +71,12 @@ st.markdown("""
         font-family: 'Inter', sans-serif;
     }
 
-    [data-testid="stSidebar"] h2, [data-testid="stSidebar"] h3 {
-        font-family: 'Inter', sans-serif !important;
-        font-size: 15px !important;
-        font-weight: 600 !important;
-        color: #e6edf3 !important;
-        letter-spacing: 0.3px;
-        margin-bottom: 8px;
-    }
-
-    [data-testid="stSidebar"] label {
-        font-family: 'Inter', sans-serif !important;
-        font-size: 13px !important;
-        font-weight: 500 !important;
-        color: #8b949e !important;
+    /* Make collapse toggle button clearly visible */
+    [data-testid="collapsedControl"] {
+        background-color: #161b22 !important;
+        border: 1px solid #00ffcc !important;
+        color: #00ffcc !important;
+        border-radius: 8px !important;
     }
     
     .software-nav-bar {
@@ -513,7 +505,7 @@ with tab1:
                 </div>
             """, unsafe_allow_html=True)
 
-            # --- TRADINGVIEW PROFESSIONAL CHART WITH LOCKED VIEW MODES, SYSTEM DEFAULT THEME & TRUE ESC FULLSCREEN ---
+            # --- TRADINGVIEW PROFESSIONAL CHART WITH FULL TOOLBAR, CONTEXT MENU, ZIGZAG, VOLUME & STUDIES ---
             st.markdown(f"### 📈 Live TradingView Professional Chart ({c_tab_name})")
             
             col_c1, col_c2, col_c3 = st.columns([2, 2, 3])
@@ -551,6 +543,7 @@ with tab1:
 
             container_id = f"tv_chart_container_{c_id}"
             
+            # Enabled full toolbar (hidesidetoolbar=0) and full context menus for TradingView embed widget
             st.markdown(f"""
                 <style>
                 # {container_id} iframe {{
