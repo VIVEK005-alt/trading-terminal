@@ -63,28 +63,28 @@ st.markdown("""
         margin-bottom: 25px;
     }
 
-    /* Clean Sidebar Styling */
+    /* Clean Sidebar Layout & Spacing */
     [data-testid="stSidebar"] {
         background-color: #07090e;
         border-right: 1px solid #30363d;
-        padding: 20px 10px;
+        padding: 15px 10px;
     }
     
     .software-nav-bar {
         background: #0d1117;
-        padding: 10px;
-        border-radius: 10px;
+        padding: 8px;
+        border-radius: 8px;
         border: 1px solid #30363d;
         display: flex;
         justify-content: space-around;
         align-items: center;
-        margin-bottom: 20px;
+        margin-bottom: 15px;
     }
     .software-nav-btn {
         background: #161b22;
         color: #00ffcc;
         border: 1px solid #30363d;
-        padding: 8px 12px;
+        padding: 6px 10px;
         border-radius: 6px;
         font-family: 'Orbitron', sans-serif;
         font-weight: bold;
@@ -307,8 +307,23 @@ st.sidebar.title("⚡ APEX CONTROL")
 user_email = st.sidebar.text_input("Trader Profile:", value="trader@apex.ai")
 
 st.sidebar.markdown("---")
-st.sidebar.subheader("⭐ Multiple Watchlist (1K+ Coins)")
-user_watchlist = st.sidebar.multiselect("Select Coins to Watch:", options=list(all_coins_dict.keys()), default=["BTC", "ETH", "SOL", "BNB", "XRP"])
+
+# Watchlist Section with Hide/Show Toggle Button
+if 'show_watchlist_section' not in st.session_state:
+    st.session_state.show_watchlist_section = True
+
+col_w_title, col_w_btn = st.sidebar.columns([3, 1])
+with col_w_title:
+    st.subheader("⭐ Multiple Watchlist (1K+ Coins)")
+with col_w_btn:
+    toggle_icon = "👁️" if st.session_state.show_watchlist_section else "🔒"
+    if st.button(toggle_icon, key="hide_show_wl", help="Hide/Show Watchlist"):
+        st.session_state.show_watchlist_section = not st.session_state.show_watchlist_section
+        st.rerun()
+
+user_watchlist = ["BTC", "ETH", "SOL", "BNB", "XRP"]
+if st.session_state.show_watchlist_section:
+    user_watchlist = st.sidebar.multiselect("Select Coins to Watch:", options=list(all_coins_dict.keys()), default=["BTC", "ETH", "SOL", "BNB", "XRP"])
 
 st.sidebar.markdown("---")
 st.sidebar.subheader("🔄 Master Data Refresh")
