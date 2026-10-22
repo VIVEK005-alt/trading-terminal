@@ -267,7 +267,7 @@ with tab4:
 # --- TAB 5: CYBER YOUTUBE & DOWNLOAD SUITE ---
 with tab5:
     st.markdown('<div class="rgb-neon-title">📺 🔴 CYBERPUNK YOUTUBE STREAM & DOWNLOAD SUITE</div>', unsafe_allow_html=True)
-    st.markdown("Lightning-fast streaming, instant URL loading, and ultra-fast direct download engines via Cobalt & SaveFrom.")
+    st.markdown("Lightning-fast streaming, instant URL loading, and ultra-fast secure download portals.")
 
     if 'active_yt_url' not in st.session_state:
         st.session_state.active_yt_url = "https://www.youtube.com/watch?v=5qap5aO4i9A"
@@ -343,19 +343,19 @@ with tab5:
             st.rerun()
 
     st.markdown("---")
-    st.markdown("### 📥 Fast & Secure HD Video & Audio Download Suite (Official Cobalt & SaveFrom Powered)")
+    st.markdown("### 📥 Fast & Secure HD Video & Audio Download Suite (Official Cobalt & Loader Powered)")
 
     original_title = get_original_video_title(st.session_state.active_yt_url)
     encoded_url = urllib.parse.quote(st.session_state.active_yt_url)
     
     st.info(f"📌 **Detected Media Title:** `{original_title}`")
 
-    # Official and stable download portals using Streamlit link buttons
+    # Secure and direct active download portals
     dl_c1, dl_c2, dl_c3 = st.columns(3)
     with dl_c1:
-        st.link_button("📥 Download HD Video (Cobalt)", f"https://cobalt.tools/#url={encoded_url}", use_container_width=True)
+        st.link_button("📥 Download HD Video (Cobalt)", f"https://cobalt.tools/", use_container_width=True)
     with dl_c2:
-        st.link_button("🎧 Download Audio MP3 (SaveFrom)", f"https://en.savefrom.net/1-youtube-downloader-40V/?url={encoded_url}", use_container_width=True)
+        st.link_button("🎧 Download Audio MP3 (Loader)", f"https://loader.to/api/button/?url={encoded_url}&f=mp3", use_container_width=True)
     with dl_c3:
         st.link_button("🔗 Open on Official YouTube", st.session_state.active_yt_url, use_container_width=True)
 
