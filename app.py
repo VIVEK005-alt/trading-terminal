@@ -267,7 +267,7 @@ with tab4:
 # --- TAB 5: CYBER YOUTUBE & DOWNLOAD SUITE ---
 with tab5:
     st.markdown('<div class="rgb-neon-title">📺 🔴 CYBERPUNK YOUTUBE STREAM & DOWNLOAD SUITE</div>', unsafe_allow_html=True)
-    st.markdown("Lightning-fast streaming, instant URL loading, and unblocked direct download engines via Piped & Invidious portals.")
+    st.markdown("Lightning-fast streaming, instant URL loading, and ultra-fast direct download engines.")
 
     if 'active_yt_url' not in st.session_state:
         st.session_state.active_yt_url = "https://www.youtube.com/watch?v=5qap5aO4i9A"
@@ -343,29 +343,19 @@ with tab5:
             st.rerun()
 
     st.markdown("---")
-    st.markdown("### 📥 Fast & Secure HD Video & Audio Download Suite (Unblocked Piped & Invidious Powered)")
+    st.markdown("### 📥 Fast & Secure HD Video & Audio Download Suite (Instant Direct Portals)")
 
     original_title = get_original_video_title(st.session_state.active_yt_url)
+    encoded_url = urllib.parse.quote(st.session_state.active_yt_url)
     
-    # Extract clean video ID for alternative unblocked download engines
-    raw_url = st.session_state.active_yt_url.strip()
-    if "youtu.be/" in raw_url:
-        vid_id_dl = raw_url.split("youtu.be/")[1].split("?")[0]
-    elif "watch?v=" in raw_url:
-        vid_id_dl = raw_url.split("watch?v=")[1].split("&")[0]
-    else:
-        vid_id_dl = "5qap5aO4i9A"
-
-    piped_download_link = f"https://piped.video/watch?v={vid_id_dl}"
-
     st.info(f"📌 **Detected Media Title:** `{original_title}`")
 
-    # Secure and direct unblocked download portals using Streamlit link buttons
+    # Ultra-fast and reliable direct download portals using Streamlit link buttons
     dl_c1, dl_c2, dl_c3 = st.columns(3)
     with dl_c1:
-        st.link_button("📥 Download HD Video (Piped Portal)", piped_download_link, use_container_width=True)
+        st.link_button("📥 Download HD Video (9xbuddy)", f"https://9xbuddy.recup.lol/process?url={encoded_url}", use_container_width=True)
     with dl_c2:
-        st.link_button("🎧 Download Audio MP3 (Invidious)", f"https://inv.nadeko.net/watch?v={vid_id_dl}", use_container_width=True)
+        st.link_button("🎧 Download Audio MP3 (Loader)", f"https://loader.to/api/button/?url={encoded_url}&f=mp3", use_container_width=True)
     with dl_c3:
         st.link_button("🔗 Open on Official YouTube", st.session_state.active_yt_url, use_container_width=True)
 
