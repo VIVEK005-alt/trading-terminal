@@ -624,16 +624,21 @@ with tab1:
 
             st.markdown("---")
 
-# --- TAB 2: ADVANCED CHARTS (UPGRADED TO FULL PRO INTERACTIVE WIDGET) ---
+# --- TAB 2: ADVANCED CHARTS (FULLY UPGRADED PRO INTERACTIVE CHART STUDIO) ---
 with tab2:
-    st.subheader("📊 Pro Interactive Chart Engine")
+    st.subheader("📊 Pro Interactive Chart Studio")
     st.markdown("""
         <div class="unique-strategy-box">
-            <b>🤖 Trading Expert AI Insight:</b> Multi-timeframe trend alignment verified across all master structures with full TradingView integration.
+            <b>🤖 Trading Expert AI Insight:</b> Multi-timeframe trend alignment verified across all master structures with full TradingView pro studio integration.
         </div>
     """, unsafe_allow_html=True)
     
-    selected_chart_coin = st.selectbox("Select Asset for Advanced Chart Studio:", list(all_coins_dict.keys()), index=0, key="adv_chart_symbol_sel")
+    col_s1, col_s2 = st.columns([2, 4])
+    with col_s1:
+        selected_chart_coin = st.selectbox("Select Asset for Studio:", list(all_coins_dict.keys()), index=0, key="adv_chart_studio_sel")
+    with col_s2:
+        st.markdown(f"<span style='color: #39ff14; font-weight: bold;'>Active Studio Symbol: BINANCE:{selected_chart_coin}USDT</span>", unsafe_allow_html=True)
+        
     chart_symbol_str = f"BINANCE:{selected_chart_coin}USDT"
     
     chart_tab_html = f"""
@@ -679,7 +684,7 @@ with tab2:
     """
     encoded_chart_tab_html = urllib.parse.quote(chart_tab_html)
     st.markdown(f"""
-        <div style="width: 100%; height: 700px; border: 2px solid #00ffcc; border-radius: 14px; overflow: hidden; background: #05070b;">
+        <div style="width: 100%; height: 720px; border: 2px solid #00ffcc; border-radius: 14px; overflow: hidden; background: #05070b; margin-top: 15px;">
             <iframe src="data:text/html;charset=utf-8,{encoded_chart_tab_html}" width="100%" height="100%" frameborder="0" allowtransparency="true" scrolling="no" allowfullscreen="true" sandbox="allow-scripts allow-same-origin allow-popups"></iframe>
         </div>
     """, unsafe_allow_html=True)
