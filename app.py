@@ -6,7 +6,7 @@ import urllib.parse
 from datetime import datetime, timedelta
 import numpy as np
 
-# 1. PAGE CONFIGURATION & PROFESSIONAL ARCHITECTURE
+# 1. PAGE CONFIGURATION & UNIVERSAL RESPONSIVE ARCHITECTURE
 st.set_page_config(
     page_title="APEX QUANTUM MULTI-TIMEFRAME MASTER TERMINAL",
     layout="wide",
@@ -131,6 +131,12 @@ st.markdown("""
     .stTabs [data-baseweb="tab-list"] { gap: 6px; background-color: #0d1117; padding: 10px; border-radius: 12px; border: 1px solid #30363d; flex-wrap: wrap; }
     .stTabs [data-baseweb="tab"] { background-color: #161b22; color: #00ffcc; border-radius: 6px; padding: 8px 16px; font-weight: 700; border: 1px solid #30363d; font-family: 'Orbitron', sans-serif; }
     .stTabs [aria-selected="true"] { background: linear-gradient(135deg, #238636 0%, #1f6feb 100%) !important; color: white !important; border-color: #00ffcc !important; }
+
+    /* Universal Responsive Multi-Device Adaptability */
+    @media (max-width: 768px) {
+        .live-running-price { font-size: 22px !important; }
+        .rgb-neon-title { font-size: 20px !important; }
+    }
     </style>
 """, unsafe_allow_html=True)
 
@@ -530,7 +536,7 @@ with tab1:
                 </div>
             """, unsafe_allow_html=True)
 
-            # --- TRADINGVIEW PRO ADVANCED EMBED CHART WITH BUILT-IN WATCHLIST & FULL INTERACTIVITY ---
+            # --- TRADINGVIEW PRO ADVANCED EMBED CHART WITH BUILT-IN WATCHLIST & UNIVERSAL RESPONSIVENESS ---
             st.markdown(f"### 📈 Live TradingView Professional Chart ({c_tab_name})")
             
             col_c1, col_c2, col_c3 = st.columns([2, 2, 3])
