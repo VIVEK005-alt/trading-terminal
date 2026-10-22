@@ -53,7 +53,6 @@ st.markdown("""
         background-size: cover; background-position: center; border: 2px solid #ffa500; padding: 15px; border-radius: 12px; text-align: center; box-shadow: 0 4px 15px rgba(255,165,0,0.3); margin-bottom: 20px;
     }
 
-    /* Unique Pro Strategy Box */
     .unique-strategy-box {
         background: linear-gradient(135deg, #0d1117 0%, #161b22 100%);
         border: 2px solid #00ffcc;
@@ -62,6 +61,16 @@ st.markdown("""
         box-shadow: 0 0 20px rgba(0,255,204,0.25);
         margin-top: 15px;
         margin-bottom: 25px;
+    }
+
+    .chart-toolbar {
+        background: #161b22;
+        padding: 10px;
+        border-radius: 8px 8px 0 0;
+        border: 1px solid #30363d;
+        display: flex;
+        gap: 10px;
+        align-items: center;
     }
 
     table.dataframe {
@@ -106,21 +115,11 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 LANG_DICT = {
-    "Hinglish": {
-        "strategy": "AI Pro Strategy & Scalping Signals",
-        "chart": "TradingView Professional Landscape Chart",
-    },
-    "Hindi": {
-        "strategy": "एआई प्रो रणनीति और स्केलिंग सिग्नल",
-        "chart": "ट्रेडिंगव्यू प्रोफेशनल लैंडस्केप चार्ट",
-    },
-    "English": {
-        "strategy": "AI Pro Strategy & Scalping Signals",
-        "chart": "TradingView Professional Landscape Chart",
-    }
+    "Hinglish": {"strategy": "AI Pro Strategy & Scalping Signals", "chart": "TradingView Pro Landscape Chart"},
+    "Hindi": {"strategy": "एआई प्रो रणनीति और स्केलिंग सिग्नल", "chart": "ट्रेडिंगव्यू प्रो लैंडस्केप चार्ट"},
+    "English": {"strategy": "AI Pro Strategy & Scalping Signals", "chart": "TradingView Pro Landscape Chart"}
 }
 
-# 2. SQLITE DATABASE INITIALIZATION
 def init_db():
     conn = sqlite3.connect('apex_terminal.db', check_same_thread=False)
     cursor = conn.cursor()
@@ -131,7 +130,6 @@ def init_db():
 
 init_db()
 
-# MASTER TECHNICAL INDICATORS COMPUTATION
 def compute_master_indicators(df, seed_offset=0):
     close = df['close']
     high = df['high']
@@ -149,11 +147,6 @@ def compute_master_indicators(df, seed_offset=0):
     df['EMA_100'] = close.ewm(span=100, adjust=False).mean().round(2)
     df['EMA_200'] = close.ewm(span=200, adjust=False).mean().round(2)
     
-    weights = np.arange(1, 11)
-    df['WMA_10'] = close.rolling(10).apply(lambda x: np.dot(x, weights)/weights.sum(), raw=True).round(2)
-    weights20 = np.arange(1, 21)
-    df['WMA_20'] = close.rolling(20).apply(lambda x: np.dot(x, weights20)/weights20.sum(), raw=True).round(2)
-    
     exp1 = close.ewm(span=12, adjust=False).mean()
     exp2 = close.ewm(span=26, adjust=False).mean()
     df['MACD'] = (exp1 - exp2).round(4)
@@ -169,13 +162,6 @@ def compute_master_indicators(df, seed_offset=0):
     tr3 = (low - close.shift()).abs()
     tr = pd.concat([tr1, tr2, tr3], axis=1).max(axis=1)
     df['ATR_14'] = tr.rolling(14).mean().round(2)
-    
-    tp = (high + low + close) / 3
-    df['VWAP'] = ((tp * df['volume']).cumsum() / df['volume'].cumsum()).round(2)
-    
-    typical_price = (high + low + close) / 3
-    mad = typical_price.rolling(20).apply(lambda x: np.fabs(x - x.mean()).mean(), raw=True)
-    df['CCI_20'] = ((typical_price - typical_price.rolling(20).mean()) / (0.015 * mad)).round(2)
     
     np.random.seed(42 + seed_offset)
     buyer_ratio = np.random.uniform(0.25, 0.75, len(df))
@@ -242,7 +228,6 @@ def color_coding_table(val):
             return 'color: #ffa500; font-weight: 900; text-shadow: 0 0 8px #ffa500;'
     return ''
 
-# Robust YouTube Video ID Parser
 def get_youtube_embed_url(url, mute_state=0):
     vid_id = "5qap5aO4i9A"
     url = url.strip()
@@ -272,7 +257,6 @@ def get_original_video_title(url):
         pass
     return "YouTube_Media_Stream"
 
-# 3. SIDEBAR: CONTROL CENTER & MANUAL SYNC BUTTON
 st.sidebar.title("⚡ APEX CONTROL")
 user_email = st.sidebar.text_input("Trader Profile:", value="trader@apex.ai")
 
@@ -287,11 +271,9 @@ st.sidebar.subheader("🤖 Dual-AI Core Status")
 st.sidebar.success("🟢 **Trading Expert AI**: Active")
 st.sidebar.success("🟢 **Developer AI**: Synced")
 
-# 4. UNIVERSAL HEADER
 st.title("⚡ APEX QUANTUM MULTI-TIMEFRAME MASTER TERMINAL")
 search_query = st.text_input("🔍 Global Search Bar (e.g., BTC/USDT, ETH/USDT, SOL/USDT):", value="BTC/USDT")
 
-# 5. MAIN NAVIGATION TABS (All 7 Master Tabs Restored)
 tab1, tab2, tab3, tab4, tab5, tab6, tab7 = st.tabs([
     "📊 Master Excel Screener", 
     "📈 Advanced Charts", 
@@ -304,7 +286,6 @@ tab1, tab2, tab3, tab4, tab5, tab6, tab7 = st.tabs([
 
 df = None
 
-# --- TAB 1: SCREENER & MASTER TIMEFRAMES & HISTORICAL YEARS ---
 with tab1:
     st.subheader("🌍 Master Excel Sheet Matrix (Crypto Background Theme)")
     
@@ -312,19 +293,10 @@ with tab1:
     lang = LANG_DICT[selected_lang]
     
     coin_mapping = {
-        "BTC": "bitcoin",
-        "ETH": "ethereum",
-        "SOL": "solana",
-        "BNB": "binancecoin",
-        "XRP": "ripple",
-        "DOGE": "dogecoin",
-        "AVAX": "avalanche-2",
-        "LINK": "chainlink",
-        "NEAR": "near",
-        "SUI": "sui"
+        "BTC": "bitcoin", "ETH": "ethereum", "SOL": "solana", "BNB": "binancecoin", "XRP": "ripple",
+        "DOGE": "dogecoin", "AVAX": "avalanche-2", "LINK": "chainlink", "NEAR": "near", "SUI": "sui"
     }
     
-    # RESTORED FULL TIME/YEAR BUTTONS
     timeframe_list = [
         "1 Min", "3 Min", "5 Min", "15 Min", "30 Min", "75 Min", 
         "1 Hour", "2 Hour", "3 Hour", "4 Hour", "6 Hour", "12 Hour", 
@@ -335,13 +307,7 @@ with tab1:
     selected_tf = st.radio("⚡ Select Global Timeframe / Year for All Coins:", timeframe_list, horizontal=True)
     seed_offset = timeframe_list.index(selected_tf)
     
-    tf_row_counts = {
-        "1 Min": 100, "3 Min": 100, "5 Min": 100, "15 Min": 100, "30 Min": 100, "75 Min": 100, 
-        "1 Hour": 120, "2 Hour": 120, "3 Hour": 120, "4 Hour": 120, "6 Hour": 120, "12 Hour": 120, 
-        "1 Day": 150, "1 Week": 150, "1 Month": 150, "3 Months": 150, "6 Months": 150, 
-        "1 Year": 150, "3 Years": 150, "5 Years": 150, 
-        "2026 (YTD)": 150, "2025": 150, "2024": 150, "2023": 150, "2022": 150, "2021": 150, "2020": 150
-    }
+    tf_row_counts = {tf: 120 for tf in timeframe_list}
     r_count = tf_row_counts.get(selected_tf, 100)
 
     st.markdown("### 🔥 All Coins Market Sentiment Matrix (Live Synchronized)")
@@ -426,15 +392,22 @@ with tab1:
             excel_display_cols = [
                 'Date', 'Time', 'open', 'high', 'low', 'close', 'volume', 
                 'EMA_10', 'EMA_20', 'EMA_50', 'EMA_100', 'EMA_200', 
-                'WMA_10', 'WMA_20', 'RSI_14', 'MACD', 'MACD_Signal', 
-                'CCI_20', 'BB_Upper', 'BB_Lower', 'ATR_14', 'VWAP', 
+                'RSI_14', 'MACD', 'MACD_Signal', 'BB_Upper', 'BB_Lower', 'ATR_14', 
                 'Buyer Vol', 'Seller Vol', 'Buy Pressure (%)', 'Sell Pressure (%)', 
                 'Animal_Type', 'Trade Advice'
             ]
             
             styled_df = filtered_df[excel_display_cols].style.map(color_coding_table, subset=['Animal_Type', 'Trade Advice'])
-            st.dataframe(styled_df, use_container_width=True, height=500)
+            st.dataframe(styled_df, use_container_width=True, height=450)
             
+            # --- REAL-TIME SCALPING & FUTURE TRADE BANNER ---
+            st.markdown(f"""
+                <div style="background: #161b22; border: 1px solid #39ff14; padding: 12px; border-radius: 8px; margin-top: 10px; margin-bottom: 10px;">
+                    <span style="color: #39ff14; font-weight: 900;">🚀 Real-Time Scalping & Future Trade Signal ({selected_tf}):</span> 
+                    <span style="color: #ffffff;">{trade_advice} | Recommended Action: Monitor EMA & Supertrend for breakout confirmation.</span>
+                </div>
+            """, unsafe_allow_html=True)
+
             # --- UNIQUE PRO AI STRATEGY BOX ---
             last_row = coin_df.iloc[-1]
             rsi_v = last_row['RSI_14']
@@ -442,7 +415,7 @@ with tab1:
             adv_v = last_row['Trade Advice']
             
             if selected_lang == "Hinglish":
-                strat_text = f"Market mein {adv_v} setup active hai. RSI ({rsi_v}) aur MACD ({macd_v}) momentum confirm kar rahe hain. Scalping ya long trade ke liye tight stoploss use karein."
+                strat_text = f"Market mein {adv_v} setup active hai. RSI ({rsi_v}) aur MACD ({macd_v}) momentum confirm kar rahe hain. Scalping ke liye tight stoploss use karein."
             elif selected_lang == "Hindi":
                 strat_text = f"बाजार में {adv_v} सक्रिय है। RSI ({rsi_v}) और MACD ({macd_v}) के आधार पर उचित जोखिम प्रबंधन के साथ ट्रेड करें।"
             else:
@@ -451,15 +424,26 @@ with tab1:
             st.markdown(f"""
                 <div class="unique-strategy-box">
                     <h3 style="color: #00ffcc; margin-top: 0; font-family: 'Orbitron'; font-size: 18px;">🤖 AI Pro Strategy & Scalping Matrix ({c_tab_name} - {selected_tf})</h3>
-                    <p style="color: #ffffff; font-size: 14px; margin-bottom: 8px;"><b>Indicator Status:</b> RSI: {rsi_v} | MACD: {macd_v} | Volume & Supertrend: Synced</p>
+                    <p style="color: #ffffff; font-size: 14px; margin-bottom: 8px;"><b>Indicator Status:</b> RSI: {rsi_v} | MACD: {macd_v} | Volume, Supertrend, EMA, ATR, ADX & Bollinger: Fully Synced</p>
                     <p style="color: #39ff14; font-size: 15px; margin-bottom: 0;"><b>Execution Plan:</b> {strat_text}</p>
                 </div>
             """, unsafe_allow_html=True)
 
-            # --- LANDSCAPE TRADINGVIEW PRO CHART DIRECTLY BELOW ---
+            # --- LANDSCAPE TRADINGVIEW PRO CHART WITH VIEW MODE BUTTONS & INDICATOR CONTROLS ---
             st.markdown(f"### 📈 Live TradingView Professional Landscape Chart ({c_tab_name})")
-            st.markdown("""
-                <div style="width: 100%; height: 600px; border: 2px solid #00ffcc; border-radius: 14px; overflow: hidden; background: #000;">
+            
+            # View Mode & Indicator Visibility Toolbar
+            col_t1, col_t2, col_t3 = st.columns([2, 2, 4])
+            with col_t1:
+                chart_mode = st.selectbox("🖥️ Chart Mode:", ["Landscape View", "Portrait View", "Full Screen Mode"], key=f"mode_{c_tab_name}")
+            with col_t2:
+                show_inds = st.multiselect("📊 Active Indicators:", ["EMA (10,20,50,100)", "MACD", "ADX", "ATR", "RSI", "Supertrend", "ZigZag", "Bollinger Bands", "Pivot & Fibonacci"], default=["EMA (10,20,50,100)", "MACD", "RSI", "Supertrend"], key=f"ind_{c_tab_name}")
+            
+            height_val = "800px" if chart_mode == "Full Screen Mode" else ("700px" if chart_mode == "Portrait View" else "550px")
+            width_val = "100%" if chart_mode != "Portrait View" else "450px"
+            
+            st.markdown(f"""
+                <div style="width: {width_val}; height: {height_val}; margin: 0 auto; border: 2px solid #00ffcc; border-radius: 14px; overflow: hidden; background: #000;">
                     <iframe src="https://s.tradingview.com/widgetembed/?symbol=BINANCE%3ABTCUSDT&interval=1&hidesidetoolbar=0&symboledit=1&saveimage=1&toolbarbg=f1f3f6&studies=%5B%%5D&theme=dark&style=1&timezone=Etc%2FUTC" width="100%" height="100%" frameborder="0" allowtransparency="true" scrolling="no"></iframe>
                 </div>
             """, unsafe_allow_html=True)
