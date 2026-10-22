@@ -63,6 +63,12 @@ st.markdown("""
         margin-bottom: 25px;
     }
 
+    /* Remove focus cursor outlines from select boxes */
+    div[data-baseweb="select"] > div {
+        outline: none !important;
+        box-shadow: none !important;
+    }
+
     table.dataframe {
         background-color: #0d1117 !important;
         color: #00ffcc !important;
@@ -441,7 +447,7 @@ with tab1:
                 </div>
             """, unsafe_allow_html=True)
 
-            # --- TRADINGVIEW PROFESSIONAL CHART WITH LOCKED VIEW MODES, SYSTEM THEME & TRUE FULLSCREEN ---
+            # --- TRADINGVIEW PROFESSIONAL CHART WITH LOCKED VIEW MODES, SYSTEM DEFAULT THEME & TRUE ESC FULLSCREEN ---
             st.markdown(f"### 📈 Live TradingView Professional Chart ({c_tab_name})")
             
             col_c1, col_c2, col_c3 = st.columns([2, 2, 3])
@@ -450,7 +456,7 @@ with tab1:
             with col_c2:
                 chart_theme_mode = st.selectbox(f"🌓 Theme Mode ({c_tab_name}):", ["Dark Mode", "Light Mode", "System Default"], key=f"tv_theme_{c_id}")
             with col_c3:
-                st.markdown("<span style='color: #00ffcc; font-size: 11px;'>⚡ Auto-Applied: EMA, MACD, RSI, Bollinger, Supertrend, Fibonacci & ZigZag (0.5)</span>", unsafe_allow_html=True)
+                st.markdown("<span style='color: #00ffcc; font-size: 11px;'>⚡ Auto-Applied: Volume, MACD, RSI, EMA, Bollinger, Supertrend, ZigZag & Fibonacci</span>", unsafe_allow_html=True)
             
             if chart_view_mode == "Portrait View":
                 tv_width = "450px"
@@ -470,19 +476,29 @@ with tab1:
             if chart_theme_mode == "Light Mode":
                 tv_theme_val = "light"
                 bg_col = "#fff"
-            elif chart_theme_val := "Dark Mode":
+            elif chart_theme_mode == "Dark Mode":
                 tv_theme_val = "dark"
                 bg_col = "#000"
             else: # System Default
                 tv_theme_val = "dark"
-                bg_col = "#0f1117"
+                bg_col = "#07090e"
 
             container_id = f"tv_chart_container_{c_id}"
             
             st.markdown(f"""
                 <div id="{container_id}" style="width: {tv_width}; height: {tv_height}; margin: 0 auto; border: 2px solid #00ffcc; border-radius: 14px; overflow: hidden; background: {bg_col}; position: {'fixed' if is_fs=='true' else 'relative'}; top: {'0' if is_fs=='true' else 'auto'}; left: {'0' if is_fs=='true' else 'auto'}; z-index: {'99999' if is_fs=='true' else '1'};">
-                    <iframe src="https://s.tradingview.com/widgetembed/?symbol={tv_symbol}&interval=1&hidesidetoolbar=0&symboledit=1&saveimage=1&toolbarbg=f1f3f6&studies=%5B%22MASimple%45style%22%2C%22RSI%45style%22%2C%22MACD%45style%22%2C%22BollingerBands%45style%22%2C%22ZigZag%45style%22%2C%22SuperTrend%45style%22%5D&theme={tv_theme_val}&style=1&timezone=Etc%2FUTC" width="100%" height="100%" frameborder="0" allowtransparency="true" scrolling="no" allowfullscreen="true"></iframe>
+                    <iframe src="https://s.tradingview.com/widgetembed/?symbol={tv_symbol}&interval=1&hidesidetoolbar=0&symboledit=1&saveimage=1&toolbarbg=f1f3f6&studies=%5B%22Volume%40tv-basicstudies%22%2C%22MASimple%45style%22%2C%22RSI%45style%22%2C%22MACD%45style%22%2C%22BollingerBands%45style%22%2C%22ZigZag%45style%22%2C%22SuperTrend%45style%22%5D&theme={tv_theme_val}&style=1&timezone=Etc%2FUTC" width="100%" height="100%" frameborder="0" allowtransparency="true" scrolling="no" allowfullscreen="true"></iframe>
                 </div>
+                <script>
+                document.addEventListener('keydown', function(event) {{
+                    if (event.key === "Escape") {{
+                        var elem = document.getElementById("{container_id}");
+                        if (document.fullscreenElement) {{
+                            document.exitFullscreen();
+                        }}
+                    }}
+                }});
+                </script>
             """, unsafe_allow_html=True)
             
             st.markdown("---")
