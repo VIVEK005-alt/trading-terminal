@@ -169,7 +169,7 @@ def compute_technical_indicators(df):
     
     return df
 
-# MARKET DATA FETCHER FOR MULTI-TIMEFRAMES
+# MARKET DATA FETCHER FOR ALL MASTER TIME-FRAMES
 def fetch_market_data(coin_id, timeframe_multiplier=1):
     url = f"https://api.coingecko.com/api/v3/coins/{coin_id}/market_chart?vs_currency=usd&days=1"
     try:
@@ -288,20 +288,29 @@ with tab1:
         with coin_tabs[idx]:
             st.markdown(f"### ⚡ {c_tab_name} Comprehensive Timeframe Matrix")
             
-            tf_tabs = st.tabs(["1 Min", "5 Min", "15 Min", "30 Min", "1 Hour", "4 Hour", "6 Hour", "12 Hour", "1 Day", "1 Week", "1 Month"])
+            # All 15 Master Timeframes Included
+            tf_tabs = st.tabs([
+                "1 Min", "3 Min", "5 Min", "15 Min", "30 Min", 
+                "75 Min", "1 Hour", "2 Hour", "3 Hour", "4 Hour", 
+                "6 Hour", "12 Hour", "1 Day", "1 Week", "1 Month"
+            ])
             
             tf_multipliers = {
                 "1 Min": 1,
-                "5 Min": 2,
-                "15 Min": 3,
-                "30 Min": 4,
-                "1 Hour": 5,
-                "4 Hour": 6,
-                "6 Hour": 7,
-                "12 Hour": 8,
-                "1 Day": 10,
-                "1 Week": 12,
-                "1 Month": 14
+                "3 Min": 2,
+                "5 Min": 3,
+                "15 Min": 4,
+                "30 Min": 5,
+                "75 Min": 6,
+                "1 Hour": 7,
+                "2 Hour": 8,
+                "3 Hour": 9,
+                "4 Hour": 10,
+                "6 Hour": 11,
+                "12 Hour": 12,
+                "1 Day": 13,
+                "1 Week": 14,
+                "1 Month": 15
             }
 
             for tf_name, tf_mult in tf_multipliers.items():
@@ -312,7 +321,6 @@ with tab1:
                     sentiment_pct = coin_df['Sentiment (%)'].iloc[-1]
                     trade_advice = coin_df['Trade Advice'].iloc[-1]
                     
-                    # Professional Sentiment Banner with Bull/Bear/Wolf Icons & Exact Percentage
                     st.markdown(f"""
                         <div class="market-sentiment-box">
                             <div>
@@ -342,7 +350,7 @@ with tab2:
     st.subheader("📊 Pro Interactive Chart Engine")
     st.markdown("""
         <div class="ai-box">
-            <b>🤖 Trading Expert AI Insight:</b> Multi-timeframe trend alignment verified across 1H, 4H, and 1D structures.
+            <b>🤖 Trading Expert AI Insight:</b> Multi-timeframe trend alignment verified across all master structures.
         </div>
     """, unsafe_allow_html=True)
     try:
