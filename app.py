@@ -135,9 +135,9 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 LANG_DICT = {
+    "English": {"strategy": "AI Pro Strategy & Scalping Signals", "chart": "TradingView Professional Chart"},
     "Hinglish": {"strategy": "AI Pro Strategy & Scalping Signals", "chart": "TradingView Professional Chart"},
-    "Hindi": {"strategy": "एआई प्रो रणनीति और स्केलिंग सिग्नल", "chart": "ट्रेडिंगव्यू प्रोफेशनल चार्ट"},
-    "English": {"strategy": "AI Pro Strategy & Scalping Signals", "chart": "TradingView Professional Chart"}
+    "Hindi": {"strategy": "एआई प्रो रणनीति और स्केलिंग सिग्नल", "chart": "ट्रेडिंगव्यू प्रोफेशनल चार्ट"}
 }
 
 def init_db():
@@ -361,7 +361,7 @@ df = None
 with tab1:
     st.subheader("🌍 Master Excel Sheet Matrix (Crypto Background Theme)")
     
-    selected_lang = st.selectbox("🌐 Choose Language / भाषा चुनें:", ["Hinglish", "Hindi", "English"], key="inline_lang_selector")
+    selected_lang = st.selectbox("🌐 Choose Language / भाषा चुनें:", ["English", "Hinglish", "Hindi"], key="inline_lang_selector")
     lang = LANG_DICT[selected_lang]
     
     coin_mapping = {k: all_coins_dict[k] for k in st.session_state.user_saved_watchlist if k in all_coins_dict}
@@ -485,12 +485,7 @@ with tab1:
             macd_v = last_row['MACD']
             adv_v = last_row['Trade Advice']
             
-            if selected_lang == "Hinglish":
-                strat_text = f"Market mein {adv_v} setup active hai. RSI ({rsi_v}) aur MACD ({macd_v}) momentum confirm kar rahe hain. Scalping ke liye tight stoploss use karein."
-            elif selected_lang == "Hindi":
-                strat_text = f"बाजार में {adv_v} सक्रिय है। RSI ({rsi_v}) और MACD ({macd_v}) के आधार पर उचित जोखिम प्रबंधन के साथ ट्रेड करें।"
-            else:
-                strat_text = f"Active setup: {adv_v}. RSI ({rsi_v}) and MACD ({macd_v}) validate current trend. Maintain strict stoploss for scalping."
+            strat_text = f"Active setup: {adv_v}. RSI ({rsi_v}) and MACD ({macd_v}) validate current trend. Maintain strict stoploss for scalping."
 
             st.markdown(f"""
                 <div class="unique-strategy-box">
@@ -500,7 +495,7 @@ with tab1:
                 </div>
             """, unsafe_allow_html=True)
 
-            # --- TRADINGVIEW PROFESSIONAL CHART WITH UNTOUCHED VIEW MODES & DIRECT ADVANCED WORKSPACE LINK ---
+            # --- TRADINGVIEW PROFESSIONAL CHART WITH UNTOUCHED VIEW MODES & PRO WORKSPACE LINK ---
             st.markdown(f"### 📈 Live TradingView Professional Chart ({c_tab_name})")
             
             col_c1, col_c2, col_c3 = st.columns([2, 2, 3])
@@ -512,7 +507,7 @@ with tab1:
                 tv_link_url = f"https://www.tradingview.com/chart/?symbol=BINANCE:{c_tab_name}USDT"
                 st.markdown(f"""
                     <div style="padding-top: 5px;">
-                        <a href="{tv_link_url}" target="_blank" style="background: #238636; color: white; padding: 8px 16px; border-radius: 6px; text-decoration: none; font-weight: bold; font-size: 12px; border: 1px solid #00ffcc;">🔗 Open Full TradingView Pro Workspace (Drawing Tools & Right-Click)</a>
+                        <a href="{tv_link_url}" target="_blank" style="background: #238636; color: white; padding: 8px 16px; border-radius: 6px; text-decoration: none; font-weight: bold; font-size: 12px; border: 1px solid #00ffcc;">🔗 Open Pro TradingView Workspace (Full Tools & Right-Click)</a>
                     </div>
                 """, unsafe_allow_html=True)
             
