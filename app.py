@@ -16,7 +16,7 @@ st.set_page_config(
 
 st.markdown("""
     <style>
-    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Inter:wght@400;600;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Inter:wght@400;500;600;700&display=swap');
     
     * { box-sizing: border-box; }
     .main { background-color: #05070b; color: #00ffcc; font-family: 'Inter', sans-serif; }
@@ -63,35 +63,53 @@ st.markdown("""
         margin-bottom: 25px;
     }
 
-    /* Clean Sidebar Layout & Spacing */
+    /* Clean, Modern Sidebar Layout with Proper Fonts & Padding */
     [data-testid="stSidebar"] {
-        background-color: #07090e;
-        border-right: 1px solid #30363d;
-        padding: 15px 10px;
+        background-color: #12141c;
+        border-right: 1px solid #2d333b;
+        padding: 20px 14px;
+        font-family: 'Inter', sans-serif;
+    }
+
+    [data-testid="stSidebar"] h2, [data-testid="stSidebar"] h3 {
+        font-family: 'Inter', sans-serif !important;
+        font-size: 15px !important;
+        font-weight: 600 !important;
+        color: #e6edf3 !important;
+        letter-spacing: 0.3px;
+        margin-bottom: 8px;
+    }
+
+    [data-testid="stSidebar"] label {
+        font-family: 'Inter', sans-serif !important;
+        font-size: 13px !important;
+        font-weight: 500 !important;
+        color: #8b949e !important;
     }
     
     .software-nav-bar {
-        background: #0d1117;
-        padding: 8px;
+        background: #161b22;
+        padding: 10px;
         border-radius: 8px;
         border: 1px solid #30363d;
         display: flex;
         justify-content: space-around;
         align-items: center;
-        margin-bottom: 15px;
+        margin-bottom: 20px;
     }
     .software-nav-btn {
-        background: #161b22;
-        color: #00ffcc;
+        background: #21262d;
+        color: #58a6ff;
         border: 1px solid #30363d;
-        padding: 6px 10px;
+        padding: 6px 14px;
         border-radius: 6px;
-        font-family: 'Orbitron', sans-serif;
-        font-weight: bold;
+        font-size: 14px;
+        font-weight: 600;
         cursor: pointer;
     }
     .software-nav-btn:hover {
-        background: #21262d;
+        background: #30363d;
+        color: #00ffcc;
         border-color: #00ffcc;
     }
 
@@ -314,7 +332,7 @@ if 'show_watchlist_section' not in st.session_state:
 
 col_w_title, col_w_btn = st.sidebar.columns([3, 1])
 with col_w_title:
-    st.subheader("⭐ Multiple Watchlist (1K+ Coins)")
+    st.subheader("⭐ Multiple Watchlist")
 with col_w_btn:
     toggle_icon = "👁️" if st.session_state.show_watchlist_section else "🔒"
     if st.button(toggle_icon, key="hide_show_wl", help="Hide/Show Watchlist"):
@@ -323,7 +341,7 @@ with col_w_btn:
 
 user_watchlist = ["BTC", "ETH", "SOL", "BNB", "XRP"]
 if st.session_state.show_watchlist_section:
-    user_watchlist = st.sidebar.multiselect("Select Coins to Watch:", options=list(all_coins_dict.keys()), default=["BTC", "ETH", "SOL", "BNB", "XRP"])
+    user_watchlist = st.sidebar.multiselect("Select Coins:", options=list(all_coins_dict.keys()), default=["BTC", "ETH", "SOL", "BNB", "XRP"])
 
 st.sidebar.markdown("---")
 st.sidebar.subheader("🔄 Master Data Refresh")
