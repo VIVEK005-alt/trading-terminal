@@ -129,7 +129,7 @@ def compute_master_indicators(df, seed_offset=0):
     gain = (delta.where(delta > 0, 0)).rolling(window=14).mean()
     loss = (-delta.where(delta < 0, 0)).rolling(window=14).mean()
     rs = gain / loss
-    df['RSI_14'] = (100 - (100 / (1 + rs))).round(2)
+    df['RSI_14'] = (100 - (100 / (1 + rs))).fillna(50).round(2)
     
     df['EMA_10'] = close.ewm(span=10, adjust=False).mean().round(2)
     df['EMA_20'] = close.ewm(span=20, adjust=False).mean().round(2)
@@ -139,11 +139,11 @@ def compute_master_indicators(df, seed_offset=0):
     
     exp1 = close.ewm(span=12, adjust=False).mean()
     exp2 = close.ewm(span=26, adjust=False).mean()
-    df['MACD'] = (exp1 - exp2).round(4)
-    df['MACD_Signal'] = df['MACD'].ewm(span=9, adjust=False).mean().round(4)
+    df['MACD'] = (exp1 - exp2).fillna(0).round(4)
+    df['MACD_Signal'] = df['MACD'].ewm(span=9, adjust=False).mean().fillna(0).round(4)
     
-    sma = close.rolling(window=20).mean()
-    std = close.rolling(window=20).std()
+    sma = close.rolling(window=20).mean().fillna(close)
+    std = close.rolling(window=20).std().fillna(1)
     df['BB_Upper'] = (sma + (std * 2)).round(2)
     df['BB_Lower'] = (sma - (std * 2)).round(2)
     
@@ -151,12 +151,11 @@ def compute_master_indicators(df, seed_offset=0):
     tr2 = (high - close.shift()).abs()
     tr3 = (low - close.shift()).abs()
     tr = pd.concat([tr1, tr2, tr3], axis=1).max(axis=1)
-    df['ATR_14'] = tr.rolling(14).mean().round(2)
+    df['ATR_14'] = tr.rolling(14).mean().fillna(100).round(2)
     
-    # Fibonacci Automatic Levels based on recent high/low
     max_p = high.max()
     min_p = low.min()
-    diff_p = max_p - min_p
+    diff_p = max_p - min_p if max_p != min_p else 1
     df['Fib_0'] = max_p
     df['Fib_0.382'] = round(max_p - (0.382 * diff_p), 2)
     df['Fib_0.5'] = round(max_p - (0.5 * diff_p), 2)
@@ -211,10 +210,17 @@ def fetch_master_excel_data(coin_id, row_count=100, seed_offset=0):
     
     base_date = datetime.now() - timedelta(days=90)
     dummy_dates = [base_date + timedelta(hours=i) for i in range(row_count)]
+    # Realistic price variation for clean chart display
+    np.random.seed(100 + seed_offset)
+    dummy_prices = 60000 + np.cumsum(np.random.normal(0, 100, row_count))
     df = pd.DataFrame({
         'Date': [d.strftime('%Y-%m-%d') for d in dummy_dates],
         'Time': [d.strftime('%H:%M:%S') for d in dummy_dates],
-        'open': [81000.0]*row_count, 'high': [81800.0]*row_count, 'low': [80500.0]*row_count, 'close': [81200.0]*row_count, 'volume':[1000000]*row_count
+        'open': dummy_prices - 50, 
+        'high': dummy_prices + 150, 
+        'low': dummy_prices - 150, 
+        'close': dummy_prices, 
+        'volume': [1000000]*row_count
     })
     return compute_master_indicators(df, seed_offset)
 
@@ -403,7 +409,7 @@ with tab1:
             # --- REAL-TIME SCALPING & FUTURE TRADE BANNER ---
             st.markdown(f"""
                 <div style="background: #161b22; border: 1px solid #39ff14; padding: 12px; border-radius: 8px; margin-top: 10px; margin-bottom: 10px;">
-                    <span style="color: #39ff14; font-weight: 900;">🚀 Real-Time Scalping & Future Trade Signal ({selected_tf} - {selected_tf}):</span> 
+                    <span style="color: #39ff14; font-weight: 900;">🚀 Real-Time Scalping & Future Trade Signal ({selected_tf}):</span> 
                     <span style="color: #ffffff;">{trade_advice} | Recommended Action: Monitor EMA & Supertrend for breakout confirmation.</span>
                 </div>
             """, unsafe_allow_html=True)
@@ -429,7 +435,7 @@ with tab1:
                 </div>
             """, unsafe_allow_html=True)
 
-            # --- CUSTOM TECHNICAL CANVAS CHART WITH PORTRAIT / LANDSCAPE / FULLSCREEN CONTROLS & ALL INDICATORS ---
+            # --- ROBUST INTERACTIVE TECHNICAL CANVAS CHART WITH VIEW MODE & INDICATORS ---
             st.markdown(f"### 📈 Advanced Technical Canvas Chart & Indicators ({c_tab_name})")
             
             col_c1, col_c2 = st.columns([2, 4])
@@ -438,27 +444,29 @@ with tab1:
             with col_c2:
                 active_indicators = st.multiselect(
                     f"🛠️ Active Indicators & Overlay ({c_tab_name}):",
-                    ["EMA (10,20,50,100)", "MACD", "ADX", "ATR", "RSI", "Supertrend", "Bollinger Bands", "Fibonacci Retracement", "Pivot Points"],
-                    default=["EMA (10,20,50,100)", "MACD", "RSI", "Bollinger Bands", "Fibonacci Retracement"],
+                    ["EMA (10,20,50,100)", "MACD", "ATR", "RSI", "Bollinger Bands", "Fibonacci Retracement"],
+                    default=["EMA (10,20,50,100)", "RSI", "Bollinger Bands", "Fibonacci Retracement"],
                     key=f"inds_{c_tab_name}"
                 )
             
-            # Dynamic Dimensions based on View Mode
             if view_mode == "Portrait":
                 chart_height = 700
-                chart_width = "450px"
             elif view_mode == "Full Screen":
                 chart_height = 900
-                chart_width = "100%"
-            else: # Landscape
+            else:
                 chart_height = 500
-                chart_width = "100%"
 
-            # Render Streamlit Native Chart with Applied Technical Indicators
-            chart_data = coin_df.set_index('Time')[['close', 'EMA_20', 'EMA_50', 'BB_Upper', 'BB_Lower']]
+            # Building multi-line chart safely with numpy/pandas
+            chart_columns = ['close']
+            if "EMA (10,20,50,100)" in active_indicators:
+                chart_columns.extend(['EMA_20', 'EMA_50'])
+            if "Bollinger Bands" in active_indicators:
+                chart_columns.extend(['BB_Upper', 'BB_Lower'])
             if "Fibonacci Retracement" in active_indicators:
-                chart_data['Fib_0.618'] = coin_df['Fib_0.618'].values
-            
+                coin_df['Fib_0.618_val'] = coin_df['Fib_0.618'].iloc[0]
+                chart_columns.append('Fib_0.618_val')
+
+            chart_data = coin_df.set_index('Time')[chart_columns]
             st.line_chart(chart_data, height=chart_height, use_container_width=True)
             
             st.markdown(f"""
