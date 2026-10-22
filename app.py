@@ -20,7 +20,6 @@ st.markdown("""
     * { box-sizing: border-box; }
     .main { background-color: #05070b; color: #00ffcc; font-family: 'Inter', sans-serif; }
     
-    /* Eye-Catching RGB Color-Changing Neon Animation for All Texts & Titles */
     @keyframes rgbNeonGlow {
         0% { color: #ff0055; text-shadow: 0 0 10px #ff0055, 0 0 20px #ff0055; }
         33% { color: #00ffcc; text-shadow: 0 0 10px #00ffcc, 0 0 20px #00ffcc; }
@@ -46,7 +45,6 @@ st.markdown("""
         font-family: 'Orbitron', sans-serif !important; 
     }
     
-    /* Tabs Styling */
     .stTabs [data-baseweb="tab-list"] { gap: 8px; background-color: #0d1117; padding: 10px; border-radius: 12px; border: 1px solid #ff0055; flex-wrap: wrap; }
     .stTabs [data-baseweb="tab"] { background-color: #161b22; color: #00ffcc; border-radius: 6px; padding: 10px 20px; font-weight: 600; border: 1px solid #30363d; font-family: 'Orbitron', sans-serif; }
     .stTabs [aria-selected="true"] { background: linear-gradient(135deg, #ff0055 0%, #7928ca 100%) !important; color: white !important; box-shadow: 0 0 20px rgba(255, 0, 85, 0.6); border-color: #00ffcc !important; }
@@ -58,7 +56,6 @@ st.markdown("""
         border-right: 1px solid #ff0055;
     }
 
-    /* YouTube Neon Wrapper & Sizing */
     .neon-player-wrapper {
         border-radius: 14px;
         border: 2px solid #00ffcc;
@@ -150,9 +147,10 @@ def fetch_market_data(symbol):
     df['datetime'] = pd.to_datetime(df['timestamp'], unit='ms')
     return df
 
-# Helper to extract YouTube video ID cleanly from any link format
+# Robust YouTube Video ID Parser
 def get_youtube_embed_url(url, mute_state=0, action_state="play"):
     vid_id = "5qap5aO4i9A"
+    url = url.strip()
     if "list=" in url and not "watch?v=" in url:
         playlist_id = url.split("list=")[1].split("&")[0]
         vid_id = f"videoseries?list={playlist_id}"
@@ -162,15 +160,15 @@ def get_youtube_embed_url(url, mute_state=0, action_state="play"):
         vid_id = url.split("watch?v=")[1].split("&")[0]
     elif "shorts/" in url:
         vid_id = url.split("shorts/")[1].split("?")[0]
-    elif len(url.strip()) == 11:
-        vid_id = url.strip()
+    elif len(url) == 11:
+        vid_id = url
     
     autoplay = 1 if action_state == "play" else 0
     if "videoseries" in vid_id:
         return f"https://www.youtube.com/embed/{vid_id}&autoplay={autoplay}&mute={mute_state}&enablejsapi=1"
     return f"https://www.youtube.com/embed/{vid_id}?autoplay={autoplay}&mute={mute_state}&enablejsapi=1"
 
-# Function to fetch 100% Original Video Title using YouTube oEmbed API
+# Function to fetch Original Video Title using YouTube oEmbed API
 def get_original_video_title(url):
     try:
         oembed_url = f"https://www.youtube.com/oembed?url={urllib.parse.quote(url)}&format=json"
@@ -270,29 +268,31 @@ with tab4:
 # --- TAB 5: CYBER YOUTUBE & DOWNLOAD SUITE ---
 with tab5:
     st.markdown('<div class="rgb-neon-title">📺 🔴 CYBERPUNK YOUTUBE STREAM & DOWNLOAD SUITE</div>', unsafe_allow_html=True)
-    st.markdown("Stream seamlessly with working Play/Pause controls, live audio toggle, and direct HD video/audio download links.")
+    st.markdown("Stream seamlessly with instant URL loading, active controls, and direct HD download links.")
 
-    if 'custom_yt_url' not in st.session_state:
-        st.session_state.custom_yt_url = "https://www.youtube.com/watch?v=5qap5aO4i9A"
-    
+    # Session State Initialization
+    if 'active_yt_url' not in st.session_state:
+        st.session_state.active_yt_url = "https://www.youtube.com/watch?v=5qap5aO4i9A"
     if 'player_action' not in st.session_state:
         st.session_state.player_action = "play"
 
-    # Search bar with Clear and Load action buttons
-    col_inp1, col_inp2, col_inp3 = st.columns([5, 1, 1])
-    with col_inp1:
-        user_link_input = st.text_input("🔍 Search / Paste YouTube Video or Playlist Link:", value=st.session_state.custom_yt_url)
-    with col_inp2:
-        st.markdown("<br>", unsafe_allow_html=True)
-        if st.button("🧹 Clear", use_container_width=True):
-            st.session_state.custom_yt_url = ""
-            st.rerun()
-    with col_inp3:
-        st.markdown("<br>", unsafe_allow_html=True)
-        if st.button("🚀 Load", use_container_width=True):
-            st.session_state.custom_yt_url = user_link_input
-            st.session_state.player_action = "play"
-            st.rerun()
+    # Search Bar with Direct Input Form for Seamless Loading
+    with st.form(key="youtube_search_form"):
+        col_f1, col_f2, col_f3 = st.columns([6, 1, 1])
+        with col_f1:
+            input_url = st.text_input("🔍 Search / Paste YouTube Video or Playlist Link:", value=st.session_state.active_yt_url, label_visibility="collapsed")
+        with col_f2:
+            clear_btn = st.form_submit_button("🧹 Clear", use_container_width=True)
+        with col_f3:
+            load_btn = st.form_submit_button("🚀 Load", use_container_width=True)
+
+    if clear_btn:
+        st.session_state.active_yt_url = ""
+        st.rerun()
+    if load_btn and input_url:
+        st.session_state.active_yt_url = input_url.strip()
+        st.session_state.player_action = "play"
+        st.rerun()
 
     # Playback Controls & Audio Settings Row
     ctrl_c1, ctrl_c2 = st.columns(2)
@@ -305,8 +305,8 @@ with tab5:
 
     st.markdown("---")
 
-    # Render Properly Sized Neon Player Frame with Working Animated Toolbar
-    embed_url = get_youtube_embed_url(st.session_state.custom_yt_url, mute_state=mute_val, action_state=st.session_state.player_action)
+    # Render Properly Sized Neon Player Frame
+    embed_url = get_youtube_embed_url(st.session_state.active_yt_url, mute_state=mute_val, action_state=st.session_state.player_action)
     st.markdown(f"""
         <div class="neon-player-wrapper">
             <div class="youtube-container">
@@ -319,7 +319,7 @@ with tab5:
         </div>
     """, unsafe_allow_html=True)
 
-    # Interactive Working Stream Control Buttons with Neon Text
+    # Interactive Working Stream Control Buttons
     st.markdown('<div class="rgb-neon-title" style="font-size: 16px; margin-bottom: 5px;">🎛️ PLAYER COMMAND CENTER</div>', unsafe_allow_html=True)
     sc_btn1, sc_btn2, sc_btn3, sc_btn4 = st.columns(4)
     with sc_btn1:
@@ -341,8 +341,8 @@ with tab5:
     st.markdown("---")
     st.markdown("### 📥 100% Working HD Video & Audio Download Suite")
 
-    original_title = get_original_video_title(st.session_state.custom_yt_url)
-    encoded_url = urllib.parse.quote(st.session_state.custom_yt_url)
+    original_title = get_original_video_title(st.session_state.active_yt_url)
+    encoded_url = urllib.parse.quote(st.session_state.active_yt_url)
 
     st.info(f"📌 **Detected Media Title:** `{original_title}`")
 
@@ -365,7 +365,7 @@ with tab5:
         """, unsafe_allow_html=True)
     with dl_col3:
         st.markdown(f"""
-            <a href="{st.session_state.custom_yt_url}" target="_blank">
+            <a href="{st.session_state.active_yt_url}" target="_blank">
                 <button style="width:100%; background:#161b22; color:#00ffcc; border:1px solid #00ffcc; padding:12px; border-radius:8px; font-family:'Orbitron'; font-weight:bold; cursor:pointer;">
                     🔗 Open on Official YouTube
                 </button>
@@ -378,19 +378,19 @@ with tab5:
     qp_col1, qp_col2, qp_col3, qp_col4 = st.columns(4)
     with qp_col1:
         if st.button("🎵 Trading Lofi Beats", use_container_width=True):
-            st.session_state.custom_yt_url = "https://www.youtube.com/watch?v=5qap5aO4i9A"
+            st.session_state.active_yt_url = "https://www.youtube.com/watch?v=5qap5aO4i9A"
             st.rerun()
     with qp_col2:
         if st.button("📈 Crypto Price Action", use_container_width=True):
-            st.session_state.custom_yt_url = "https://www.youtube.com/watch?v=jfKfPfyJRdk"
+            st.session_state.active_yt_url = "https://www.youtube.com/watch?v=jfKfPfyJRdk"
             st.rerun()
     with qp_col3:
         if st.button("🎬 Diljit Top Hits", use_container_width=True):
-            st.session_state.custom_yt_url = "https://www.youtube.com/watch?v=5qap5aO4i9A"
+            st.session_state.active_yt_url = "https://www.youtube.com/watch?v=5qap5aO4i9A"
             st.rerun()
     with qp_col4:
         if st.button("🚀 Elliott Wave Masterclass", use_container_width=True):
-            st.session_state.custom_yt_url = "https://www.youtube.com/watch?v=jfKfPfyJRdk"
+            st.session_state.active_yt_url = "https://www.youtube.com/watch?v=jfKfPfyJRdk"
             st.rerun()
 
 # --- TAB 6: TAX & PNL LEDGER ---
