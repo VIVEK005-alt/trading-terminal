@@ -4,7 +4,7 @@ import sqlite3
 import requests
 from datetime import datetime
 
-# 1. PAGE CONFIGURATION & ULTRA-PRO DARK ARCHITECTURE
+# 1. PAGE CONFIGURATION & ULTRA-PRO RESPONSIVE ARCHITECTURE
 st.set_page_config(
     page_title="Master Autonomous Trading Terminal",
     layout="wide",
@@ -14,20 +14,44 @@ st.set_page_config(
 
 st.markdown("""
     <style>
-    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Inter:wght@300;400;600&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Orbitron:wght@500;700&display=swap');
     
-    .main { background-color: #0f0f0f; color: #f1f1f1; font-family: 'Inter', sans-serif; }
+    * { box-sizing: border-box; }
+    .main { background-color: #0f0f0f; color: #f1f1f1; font-family: 'Roboto', sans-serif; }
     h1, h2, h3 { font-family: 'Orbitron', sans-serif; letter-spacing: 0.5px; }
     
-    .stTabs [data-baseweb="tab-list"] { gap: 8px; background-color: #121212; padding: 10px; border-radius: 10px; border: 1px solid #272727; }
+    .stTabs [data-baseweb="tab-list"] { gap: 8px; background-color: #121212; padding: 10px; border-radius: 10px; border: 1px solid #272727; flex-wrap: wrap; }
     .stTabs [data-baseweb="tab"] { background-color: #212121; color: #aaa; border-radius: 6px; padding: 10px 20px; font-weight: 600; border: none; }
     .stTabs [aria-selected="true"] { background: linear-gradient(135deg, #cc0000 0%, #ff0000 100%) !important; color: white !important; box-shadow: 0 0 15px rgba(255, 0, 0, 0.4); }
     
-    .metric-card { background: linear-gradient(145deg, #212121, #181818); padding: 20px; border-radius: 12px; border: 1px solid #3f3f3f; box-shadow: 0 4px 12px rgba(0,0,0,0.5); }
+    .metric-card { background: linear-gradient(145deg, #212121, #181818); padding: 20px; border-radius: 12px; border: 1px solid #3f3f3f; box-shadow: 0 4px 12px rgba(0,0,0,0.5); width: 100%; }
     .ai-box { background: rgba(33, 33, 33, 0.9); border-left: 4px solid #ff0000; padding: 15px; border-radius: 0 8px 8px 0; margin-bottom: 15px; }
     
-    /* YouTube Grid & Player Styling */
-    .yt-card { background: #181818; border-radius: 10px; padding: 10px; border: 1px solid #272727; margin-bottom: 15px; }
+    /* YouTube Homepage Grid & Thumbnail Styling */
+    .yt-thumbnail-card {
+        background: #181818;
+        border-radius: 12px;
+        overflow: hidden;
+        border: 1px solid #272727;
+        margin-bottom: 16px;
+        transition: transform 0.2s ease;
+    }
+    .yt-thumbnail-card:hover {
+        transform: scale(1.02);
+        border-color: #ff0000;
+    }
+    .yt-title {
+        font-size: 14px;
+        font-weight: 500;
+        color: #f1f1f1;
+        margin: 8px 8px 4px 8px;
+        line-height: 1.4;
+    }
+    .yt-channel {
+        font-size: 12px;
+        color: #aaa;
+        margin: 0 8px 12px 8px;
+    }
     .youtube-container {
         position: relative;
         width: 100%;
@@ -38,6 +62,7 @@ st.markdown("""
         overflow: hidden;
         border: 1px solid #3f3f3f;
         box-shadow: 0 8px 24px rgba(0,0,0,0.8);
+        margin-bottom: 20px;
     }
     .youtube-container iframe {
         position: absolute;
@@ -146,9 +171,12 @@ with tab1:
         df['RSI'] = compute_rsi(df['close'], window=14)
         
         c1, c2, c3 = st.columns(3)
-        c1.metric("Live Price", f"${df['close'].iloc[-1]:,.2f}", "+2.4% 🟢")
-        c2.metric("RSI (14)", f"{df['RSI'].iloc[-1]:,.2f}", "Neutral")
-        c3.metric("24h Volume", f"${df['volume'].sum():,.0f}")
+        with c1:
+            st.metric("Live Price", f"${df['close'].iloc[-1]:,.2f}", "+2.4% 🟢")
+        with c2:
+            st.metric("RSI (14)", f"{df['RSI'].iloc[-1]:,.2f}", "Neutral")
+        with c3:
+            st.metric("24h Volume", f"${df['volume'].sum():,.0f}")
         
         st.dataframe(df.tail(10), use_container_width=True)
     except Exception as e:
@@ -164,7 +192,7 @@ with tab2:
     """, unsafe_allow_html=True)
     try:
         if df is not None and not df.empty:
-            st.line_chart(df.set_index('datetime')['close'])
+            st.line_chart(df.set_index('datetime')['close'], use_container_width=True)
         else:
             st.info("⚠️ Please load market data from Tab 1 first to render chart lines.")
     except Exception as e:
@@ -185,55 +213,64 @@ with tab3:
 with tab4:
     st.subheader("🎮 Risk-Free Paper Trading Simulator")
     st.write("**Virtual Wallet Balance:** $10,000.00")
-    t_type = st.radio("Order Type:", ["BUY / LONG", "SELL / SHORT"])
+    t_type = st.radio("Order Order Type:", ["BUY / LONG", "SELL / SHORT"])
     t_qty = st.number_input("Position Size / Quantity:", value=1.0)
-    if st.button("🚀 Execute Simulated Order"):
+    if st.button("🚀 Execute Simulated Order", use_container_width=True):
         st.success(f"Successfully placed {t_type} for {search_query} with Auto-Trailing Stop-Loss!")
 
-# --- TAB 5: YOUTUBE HOME & STREAM HUB (EXACT YOUTUBE UI) ---
+# --- TAB 5: YOUTUBE HOME & STREAM HUB (EXACT YOUTUBE HOMEPAGE GRID UI) ---
 with tab5:
-    st.subheader("📺 YouTube Home & Live Broadcast Grid")
+    st.subheader("🔴 YouTube Home & Live Broadcast Feed")
     
-    # YouTube style category pills/buttons
+    # YouTube Category Chips Bar
     cols_cat = st.columns(8)
     categories = ["All", "Music", "Live", "Podcasts", "Trading", "Crypto", "Mixes", "Comedy"]
-    selected_cat = "All"
     for idx, cat in enumerate(categories):
-        if cols_cat[idx].button(cat, use_container_width=True):
-            selected_cat = cat
+        cols_cat[idx].button(cat, use_container_width=True)
 
     st.markdown("---")
     
-    # Search bar like YouTube UI inside the tab
-    yt_search = st.text_input("🔍 Search YouTube Videos or Playlists:", value="Diljit Singh Playlist / Trading Lofi")
-    
-    # Preset quick recommendation links resembling YouTube homepage feed
-    st.markdown("### Recommended / Trending Streams")
-    col_v1, col_v2, col_v3 = st.columns(3)
-    
-    v_url = "https://www.youtube.com/watch?v=5qap5aO4i9A"
-    with col_v1:
-        st.markdown('<div class="yt-card"><b>🎵 Lofi Trading Beats</b><br>Live Lo-Fi Hip Hop Radio</div>', unsafe_allow_html=True)
-        if st.button("▶ Play Lofi Stream"):
-            v_url = "https://www.youtube.com/watch?v=5qap5aO4i9A"
-    with col_v2:
-        st.markdown('<div class="yt-card"><b>📈 Crypto Market Analysis</b><br>Live Price Action Breakdown</div>', unsafe_allow_html=True)
-        if st.button("▶ Play Crypto Stream"):
-            v_url = "https://www.youtube.com/watch?v=jfKfPfyJRdk"
-    with col_v3:
-        st.markdown('<div class="yt-card"><b>🚀 Elliott Wave Masterclass</b><br>Advanced Technical Trading</div>', unsafe_allow_html=True)
-        if st.button("▶ Play Masterclass"):
-            v_url = "https://www.youtube.com/watch?v=5qap5aO4i9A"
+    # State storage for active playing video URL
+    if 'yt_active_url' not in st.session_state:
+        st.session_state.yt_active_url = "https://www.youtube.com/watch?v=5qap5aO4i9A"
 
-    st.markdown("---")
-    st.markdown("### Now Playing / Active Player")
-    embed_url = get_youtube_embed_url(v_url)
-    
+    st.markdown("### 📺 Active Video Player")
+    embed_url = get_youtube_embed_url(st.session_state.yt_active_url)
     st.markdown(f"""
         <div class="youtube-container">
             <iframe src="{embed_url}" title="YouTube video player" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
         </div>
     """, unsafe_allow_html=True)
+
+    st.markdown("---")
+    st.markdown("### 🎬 YouTube Homepage Grid Feed (Click any card to play)")
+
+    # Grid row 1 (Trending / Featured items matching your screenshot)
+    r1_c1, r1_c2, r1_c3, r1_c4 = st.columns(4)
+
+    with r1_c1:
+        st.markdown('<div class="yt-thumbnail-card"><img src="https://img.youtube.com/vi/5qap5aO4i9A/hqdefault.jpg" style="width:100%; border-radius:10px 10px 0 0;"><div class="yt-title">PAN INDIA - Full Video | Diljit Singh & T-Series</div><div class="yt-channel">T-Series • 3.2M views • 1y ago</div></div>', unsafe_allow_html=True)
+        if st.button("▶ Watch Pan India", use_container_width=True):
+            st.session_state.yt_active_url = "https://www.youtube.com/watch?v=5qap5aO4i9A"
+            st.rerun()
+
+    with r1_c2:
+        st.markdown('<div class="yt-thumbnail-card"><img src="https://img.youtube.com/vi/jfKfPfyJRdk/hqdefault.jpg" style="width:100%; border-radius:10px 10px 0 0;"><div class="yt-title">Elliott Wave Price Action Explained (LIVE)</div><div class="yt-channel">DT4B Trader • 162 watching</div></div>', unsafe_allow_html=True)
+        if st.button("▶ Watch Live Stream", use_container_width=True):
+            st.session_state.yt_active_url = "https://www.youtube.com/watch?v=jfKfPfyJRdk"
+            st.rerun()
+
+    with r1_c3:
+        st.markdown('<div class="yt-thumbnail-card"><img src="https://img.youtube.com/vi/5qap5aO4i9A/hqdefault.jpg" style="width:100%; border-radius:10px 10px 0 0;"><div class="yt-title">The 5,999/- Rupees Portable Monitor Review</div><div class="yt-channel">Miner TechTips • 226K views</div></div>', unsafe_allow_html=True)
+        if st.button("▶ Watch Monitor Review", use_container_width=True):
+            st.session_state.yt_active_url = "https://www.youtube.com/watch?v=5qap5aO4i9A"
+            st.rerun()
+
+    with r1_c4:
+        st.markdown('<div class="yt-thumbnail-card"><img src="https://img.youtube.com/vi/jfKfPfyJRdk/hqdefault.jpg" style="width:100%; border-radius:10px 10px 0 0;"><div class="yt-title">Do Not Overthink, It Is Futile! (Masterclass)</div><div class="yt-channel">The Ultimate Truth • 106K views</div></div>', unsafe_allow_html=True)
+        if st.button("▶ Watch Masterclass", use_container_width=True):
+            st.session_state.yt_active_url = "https://www.youtube.com/watch?v=jfKfPfyJRdk"
+            st.rerun()
 
 # --- TAB 6: TAX & PNL LEDGER ---
 with tab6:
@@ -246,15 +283,15 @@ with tab6:
         "Status": ["Audited", "Audited", "Verified"]
     })
     st.dataframe(tax_df, use_container_width=True)
-    if st.button("📥 Export CA-Ready Report"):
+    if st.button("📥 Export CA-Ready Report", use_container_width=True):
         st.success("Report successfully generated and downloaded!")
 
 # --- TAB 7: PUBLIC DEMAND & AI DEVELOPER BOX ---
 with tab7:
     st.subheader("🤖 Public Demand & Autonomous Developer AI Hub")
-    st.markdown("Type any requirement below to modify app architecture instantly.")
-    user_demand = st.text_area("What do you want to add or change in the app?", placeholder="e.g., Add a crypto news feed...")
-    if st.button("✨ Submit Demand to Developer AI"):
+    st.markdown("Type any requirement below to update app architecture instantly.")
+    user_demand = st.text_area("What do you want to add or change in the app?", placeholder="e.g., Add crypto fear & greed index...")
+    if st.button("✨ Submit Demand to Developer AI", use_container_width=True):
         if user_demand:
             st.info(f"🔄 **Developer AI is processing your request:** '{user_demand}'...")
             st.success("✅ **Architecture Updated Successfully!**")
