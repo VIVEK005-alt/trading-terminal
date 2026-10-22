@@ -38,7 +38,6 @@ st.markdown("""
         text-shadow: 0 0 8px rgba(57,255,20,0.5);
     }
 
-    /* Neon Styled Summary Cards with Dynamic Timeframe Response */
     .global-summary-card {
         background: rgba(22, 27, 34, 0.95);
         border: 1px solid #30363d;
@@ -149,9 +148,8 @@ def compute_master_indicators(df, seed_offset=0):
     mad = typical_price.rolling(20).apply(lambda x: np.fabs(x - x.mean()).mean(), raw=True)
     df['CCI_20'] = ((typical_price - typical_price.rolling(20).mean()) / (0.015 * mad)).round(2)
     
-    # Unique seed offset per timeframe so numbers/percentages change with timeframe selection
     np.random.seed(42 + seed_offset)
-    buyer_ratio = np.random.uniform(0.30, 0.70, len(df))
+    buyer_ratio = np.random.uniform(0.25, 0.75, len(df))
     df['Buyer Vol'] = (df['volume'] * buyer_ratio).round(2)
     df['Seller Vol'] = (df['volume'] - df['Buyer Vol']).round(2)
     df['Buy Pressure (%)'] = (buyer_ratio * 100).round(1)
@@ -159,12 +157,12 @@ def compute_master_indicators(df, seed_offset=0):
     
     def get_sentiment(row):
         bp = row['Buy Pressure (%)']
-        if bp >= 56:
+        if bp >= 55:
             return "BULL 🐂", bp, "STRONG BUY / LONG 🟢"
-        elif bp <= 44:
+        elif bp <= 45:
             return "BEAR 🐻", (100 - bp), "STRONG SELL / SHORT 🔴"
         else:
-            return "SIDEWAYS 🤖", 50.0, "NEUTRAL / HOLD 🟡"
+            return "SIDEWAYS 🤖", 50.0, "NEUTRAL / HOLD 🔵"
 
     sentiments = df.apply(get_sentiment, axis=1)
     df['Animal_Type'] = [s[0] for s in sentiments]
@@ -205,14 +203,14 @@ def fetch_master_excel_data(coin_id, row_count=100, seed_offset=0):
     })
     return compute_master_indicators(df, seed_offset)
 
-# Neon Color Styling for Table
+# Distinct High-Readability Neon Color Styling for Table & Cards
 def color_coding_table(val):
     if isinstance(val, str):
         if 'BULL' in val or 'BUY' in val or '🟢' in val:
             return 'color: #39ff14; font-weight: 900; text-shadow: 0 0 8px #39ff14;'
         elif 'BEAR' in val or 'SELL' in val or '🔴' in val:
             return 'color: #ff073a; font-weight: 900; text-shadow: 0 0 8px #ff073a;'
-        elif 'SIDEWAYS' in val or 'HOLD' in val or '🟡' in val or 'ROBOT' in val:
+        elif 'SIDEWAYS' in val or 'HOLD' in val or '🔵' in val or 'ROBOT' in val:
             return 'color: #00d2ff; font-weight: 900; text-shadow: 0 0 8px #00d2ff;'
     return ''
 
@@ -282,7 +280,7 @@ df = None
 
 # --- TAB 1: SCREENER & MASTER TIMEFRAMES & HISTORICAL YEARS ---
 with tab1:
-    st.subheader("🌍 Master Excel Sheet Matrix (Global Dynamic Timeframe Sync)")
+    st.subheader("🌍 Master Excel Sheet Matrix (Distinct Neon Readability)")
     
     coin_mapping = {
         "BTC": "bitcoin",
@@ -304,7 +302,6 @@ with tab1:
         "1 Year", "3 Years", "5 Years", "2026 (YTD)", "2025", "2024", "2023", "2022", "2021", "2020"
     ]
     
-    # Global Master Timeframe Selection Bar
     selected_tf = st.radio("⚡ Select Global Timeframe / Year for All Coins:", timeframe_list, horizontal=True)
     seed_offset = timeframe_list.index(selected_tf)
     
@@ -317,7 +314,6 @@ with tab1:
     }
     r_count = tf_row_counts.get(selected_tf, 100)
 
-    # TOP GLOBAL SUMMARY ROW: Dynamically updating with timeframe selection
     st.markdown("### 🔥 All Coins Market Sentiment Matrix (Live Synchronized)")
     summary_cols = st.columns(len(coin_mapping))
     
@@ -329,19 +325,28 @@ with tab1:
         anim = last_row['Animal_Type']
         power = last_row['Sentiment (%)']
         
-        col_color = '#39ff14' if 'BULL' in anim else ('#ff073a' if 'BEAR' in anim else '#00d2ff')
+        # Distinct Color Assignment: Green for Bull, Red for Bear, Cyan for Sideways
+        if 'BULL' in anim:
+            col_color = '#39ff14'
+            glow_shadow = '0 0 10px #39ff14'
+        elif 'BEAR' in anim:
+            col_color = '#ff073a'
+            glow_shadow = '0 0 10px #ff073a'
+        else:
+            col_color = '#00d2ff'
+            glow_shadow = '0 0 10px #00d2ff'
+
         with summary_cols[i]:
             st.markdown(f"""
                 <div class="global-summary-card">
                     <span style="font-size: 13px; font-weight: 900; color: #ffffff;">{c_name}</span><br>
-                    <span style="font-size: 14px; font-weight: 900; color: {col_color}; text-shadow: 0 0 6px {col_color};">{anim}</span><br>
+                    <span style="font-size: 14px; font-weight: 900; color: {col_color}; text-shadow: {glow_shadow};">{anim}</span><br>
                     <span style="font-size: 11px; font-weight: 700; color: #00ffcc;">{power}% Power</span>
                 </div>
             """, unsafe_allow_html=True)
 
     st.markdown("---")
 
-    # INDIVIDUAL COIN TABS & DETAILED TABLES
     coin_tabs = st.tabs(list(coin_mapping.keys()))
     
     for idx, (c_tab_name, c_id) in enumerate(coin_mapping.items()):
@@ -354,6 +359,9 @@ with tab1:
             sentiment_pct = coin_df['Sentiment (%)'].iloc[-1]
             trade_advice = coin_df['Trade Advice'].iloc[-1]
             
+            box_color = '#39ff14' if 'BULL' in animal_type else ('#ff073a' if 'BEAR' in animal_type else '#00d2ff')
+            box_shadow = f"0 0 10px {box_color}"
+
             st.markdown(f"""
                 <div class="market-sentiment-box">
                     <div>
@@ -362,7 +370,7 @@ with tab1:
                     </div>
                     <div style="border-left: 1px solid #30363d; padding-left: 20px;">
                         <span style="font-size: 11px; color: #8b949e; display: block; font-weight: 600;">MARKET SENTIMENT & ANIMAL AI</span>
-                        <span style="font-size: 22px; font-weight: 900; color: {'#39ff14' if 'BULL' in animal_type else ('#ff073a' if 'BEAR' in animal_type else '#00d2ff')}; text-shadow: 0 0 6px {'#39ff14' if 'BULL' in animal_type else ('#ff073a' if 'BEAR' in animal_type else '#00d2ff')};">
+                        <span style="font-size: 22px; font-weight: 900; color: {box_color}; text-shadow: {box_shadow};">
                             {animal_type} — {sentiment_pct}% Power
                         </span>
                     </div>
@@ -377,7 +385,7 @@ with tab1:
             
             col_f1, col_f2 = st.columns(2)
             with col_f1:
-                filter_signal = st.selectbox(f"Filter Signal ({selected_tf})", ["All", "STRONG BUY / LONG 🟢", "STRONG SELL / SHORT 🔴", "NEUTRAL / HOLD 🟡"], key=f"filt_{c_id}")
+                filter_signal = st.selectbox(f"Filter Signal ({selected_tf})", ["All", "STRONG BUY / LONG 🟢", "STRONG SELL / SHORT 🔴", "NEUTRAL / HOLD 🔵"], key=f"filt_{c_id}")
             with col_f2:
                 min_rsi = st.slider(f"Minimum RSI Filter ({selected_tf})", 0.0, 100.0, 0.0, key=f"rsi_{c_id}")
             
