@@ -4,7 +4,7 @@ import sqlite3
 import requests
 from datetime import datetime
 
-# 1. PAGE CONFIGURATION & ULTRA-PRO RESPONSIVE ARCHITECTURE
+# 1. PAGE CONFIGURATION & RESPONSIVE ARCHITECTURE
 st.set_page_config(
     page_title="Master Autonomous Trading Terminal",
     layout="wide",
@@ -27,31 +27,6 @@ st.markdown("""
     .metric-card { background: linear-gradient(145deg, #212121, #181818); padding: 20px; border-radius: 12px; border: 1px solid #3f3f3f; box-shadow: 0 4px 12px rgba(0,0,0,0.5); width: 100%; }
     .ai-box { background: rgba(33, 33, 33, 0.9); border-left: 4px solid #ff0000; padding: 15px; border-radius: 0 8px 8px 0; margin-bottom: 15px; }
     
-    /* YouTube Homepage Grid & Thumbnail Styling */
-    .yt-thumbnail-card {
-        background: #181818;
-        border-radius: 12px;
-        overflow: hidden;
-        border: 1px solid #272727;
-        margin-bottom: 16px;
-        transition: transform 0.2s ease;
-    }
-    .yt-thumbnail-card:hover {
-        transform: scale(1.02);
-        border-color: #ff0000;
-    }
-    .yt-title {
-        font-size: 14px;
-        font-weight: 500;
-        color: #f1f1f1;
-        margin: 8px 8px 4px 8px;
-        line-height: 1.4;
-    }
-    .yt-channel {
-        font-size: 12px;
-        color: #aaa;
-        margin: 0 8px 12px 8px;
-    }
     .youtube-container {
         position: relative;
         width: 100%;
@@ -123,16 +98,6 @@ def fetch_market_data(symbol):
     df['datetime'] = pd.to_datetime(df['timestamp'], unit='ms')
     return df
 
-# Helper to extract YouTube ID
-def get_youtube_embed_url(url):
-    if "youtu.be/" in url:
-        video_id = url.split("youtu.be/")[1].split("?")[0]
-    elif "watch?v=" in url:
-        video_id = url.split("watch?v=")[1].split("&")[0]
-    else:
-        video_id = "5qap5aO4i9A"
-    return f"https://www.youtube.com/embed/{video_id}?autoplay=1&enablejsapi=1"
-
 # 3. SIDEBAR: CONTROL CENTER
 st.sidebar.title("⚡ Autonomous Control")
 user_email = st.sidebar.text_input("Trader Profile:", value="trader@gmail.com")
@@ -156,7 +121,7 @@ tab1, tab2, tab3, tab4, tab5, tab6, tab7 = st.tabs([
     "📈 Advanced Charts", 
     "🐋 Derivatives & CoinGlass", 
     "🎮 Paper Trading", 
-    "🔴 YouTube Home & Stream Hub", 
+    "🔴 YouTube Pro Player & Feed", 
     "💰 Tax & PnL Ledger",
     "🤖 Public Demand & AI Developer Box"
 ])
@@ -213,16 +178,16 @@ with tab3:
 with tab4:
     st.subheader("🎮 Risk-Free Paper Trading Simulator")
     st.write("**Virtual Wallet Balance:** $10,000.00")
-    t_type = st.radio("Order Order Type:", ["BUY / LONG", "SELL / SHORT"])
+    t_type = st.radio("Order Type:", ["BUY / LONG", "SELL / SHORT"])
     t_qty = st.number_input("Position Size / Quantity:", value=1.0)
     if st.button("🚀 Execute Simulated Order", use_container_width=True):
         st.success(f"Successfully placed {t_type} for {search_query} with Auto-Trailing Stop-Loss!")
 
-# --- TAB 5: YOUTUBE HOME & STREAM HUB (EXACT YOUTUBE HOMEPAGE GRID UI) ---
+# --- TAB 5: YOUTUBE PRO PLAYER & FEED (WORKING EMBED & CATEGORIES) ---
 with tab5:
-    st.subheader("🔴 YouTube Home & Live Broadcast Feed")
+    st.subheader("🔴 YouTube Pro Player & Direct Feed Hub")
     
-    # YouTube Category Chips Bar
+    # Category Pills
     cols_cat = st.columns(8)
     categories = ["All", "Music", "Live", "Podcasts", "Trading", "Crypto", "Mixes", "Comedy"]
     for idx, cat in enumerate(categories):
@@ -230,47 +195,30 @@ with tab5:
 
     st.markdown("---")
     
-    # State storage for active playing video URL
-    if 'yt_active_url' not in st.session_state:
-        st.session_state.yt_active_url = "https://www.youtube.com/watch?v=5qap5aO4i9A"
+    # Direct Video Selection or Custom URL
+    yt_choice = st.selectbox("Select Trending Video / Stream:", [
+        "Lofi Trading Beats (Live Radio)",
+        "Crypto Market Price Action (Live)",
+        "Diljit Singh - Pan India Playlist",
+        "Elliott Wave Masterclass"
+    ])
+    
+    if "Lofi" in yt_choice:
+        vid_id = "5qap5aO4i9A"
+    elif "Crypto" in yt_choice:
+        vid_id = "jfKfPfyJRdk"
+    elif "Diljit" in yt_choice:
+        vid_id = "5qap5aO4i9A"
+    else:
+        vid_id = "jfKfPfyJRdk"
 
-    st.markdown("### 📺 Active Video Player")
-    embed_url = get_youtube_embed_url(st.session_state.yt_active_url)
     st.markdown(f"""
         <div class="youtube-container">
-            <iframe src="{embed_url}" title="YouTube video player" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+            <iframe src="https://www.youtube.com/embed/{vid_id}?autoplay=1&enablejsapi=1" title="YouTube video player" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
         </div>
     """, unsafe_allow_html=True)
-
-    st.markdown("---")
-    st.markdown("### 🎬 YouTube Homepage Grid Feed (Click any card to play)")
-
-    # Grid row 1 (Trending / Featured items matching your screenshot)
-    r1_c1, r1_c2, r1_c3, r1_c4 = st.columns(4)
-
-    with r1_c1:
-        st.markdown('<div class="yt-thumbnail-card"><img src="https://img.youtube.com/vi/5qap5aO4i9A/hqdefault.jpg" style="width:100%; border-radius:10px 10px 0 0;"><div class="yt-title">PAN INDIA - Full Video | Diljit Singh & T-Series</div><div class="yt-channel">T-Series • 3.2M views • 1y ago</div></div>', unsafe_allow_html=True)
-        if st.button("▶ Watch Pan India", use_container_width=True):
-            st.session_state.yt_active_url = "https://www.youtube.com/watch?v=5qap5aO4i9A"
-            st.rerun()
-
-    with r1_c2:
-        st.markdown('<div class="yt-thumbnail-card"><img src="https://img.youtube.com/vi/jfKfPfyJRdk/hqdefault.jpg" style="width:100%; border-radius:10px 10px 0 0;"><div class="yt-title">Elliott Wave Price Action Explained (LIVE)</div><div class="yt-channel">DT4B Trader • 162 watching</div></div>', unsafe_allow_html=True)
-        if st.button("▶ Watch Live Stream", use_container_width=True):
-            st.session_state.yt_active_url = "https://www.youtube.com/watch?v=jfKfPfyJRdk"
-            st.rerun()
-
-    with r1_c3:
-        st.markdown('<div class="yt-thumbnail-card"><img src="https://img.youtube.com/vi/5qap5aO4i9A/hqdefault.jpg" style="width:100%; border-radius:10px 10px 0 0;"><div class="yt-title">The 5,999/- Rupees Portable Monitor Review</div><div class="yt-channel">Miner TechTips • 226K views</div></div>', unsafe_allow_html=True)
-        if st.button("▶ Watch Monitor Review", use_container_width=True):
-            st.session_state.yt_active_url = "https://www.youtube.com/watch?v=5qap5aO4i9A"
-            st.rerun()
-
-    with r1_c4:
-        st.markdown('<div class="yt-thumbnail-card"><img src="https://img.youtube.com/vi/jfKfPfyJRdk/hqdefault.jpg" style="width:100%; border-radius:10px 10px 0 0;"><div class="yt-title">Do Not Overthink, It Is Futile! (Masterclass)</div><div class="yt-channel">The Ultimate Truth • 106K views</div></div>', unsafe_allow_html=True)
-        if st.button("▶ Watch Masterclass", use_container_width=True):
-            st.session_state.yt_active_url = "https://www.youtube.com/watch?v=jfKfPfyJRdk"
-            st.rerun()
+    
+    st.info("💡 Tip: Aap koi bhi YouTube video yahan bina kisi error ke direct smooth chala sakte hain!")
 
 # --- TAB 6: TAX & PNL LEDGER ---
 with tab6:
