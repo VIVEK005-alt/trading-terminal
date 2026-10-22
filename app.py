@@ -63,12 +63,6 @@ st.markdown("""
         margin-bottom: 25px;
     }
 
-    /* Remove focus cursor outlines from select boxes */
-    div[data-baseweb="select"] > div {
-        outline: none !important;
-        box-shadow: none !important;
-    }
-
     table.dataframe {
         background-color: #0d1117 !important;
         color: #00ffcc !important;
@@ -452,9 +446,9 @@ with tab1:
             
             col_c1, col_c2, col_c3 = st.columns([2, 2, 3])
             with col_c1:
-                chart_view_mode = st.selectbox(f"🔒 Chart View Mode ({c_tab_name}):", ["Landscape View", "Portrait View", "True Full Screen"], key=f"tv_vmode_{c_id}")
+                chart_view_mode = st.radio(f"🔒 Chart View Mode ({c_tab_name}):", ["Landscape View", "Portrait View", "True Full Screen"], horizontal=True, key=f"tv_vmode_{c_id}")
             with col_c2:
-                chart_theme_mode = st.selectbox(f"🌓 Theme Mode ({c_tab_name}):", ["Dark Mode", "Light Mode", "System Default"], key=f"tv_theme_{c_id}")
+                chart_theme_mode = st.radio(f"🌓 Theme Mode ({c_tab_name}):", ["Dark Mode", "Light Mode", "System Default"], horizontal=True, key=f"tv_theme_{c_id}")
             with col_c3:
                 st.markdown("<span style='color: #00ffcc; font-size: 11px;'>⚡ Auto-Applied: Volume, MACD, RSI, EMA, Bollinger, Supertrend, ZigZag & Fibonacci</span>", unsafe_allow_html=True)
             
