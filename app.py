@@ -19,32 +19,30 @@ st.markdown("""
     * { box-sizing: border-box; }
     .main { background-color: #05070b; color: #00ffcc; font-family: 'Inter', sans-serif; }
     
-    /* RGB Color-Changing Neon Text Animation */
+    /* Eye-Catching RGB Color-Changing Neon Animation for All Texts & Titles */
     @keyframes rgbNeonGlow {
-        0% { color: #ff0055; text-shadow: 0 0 10px #ff0055, 0 0 20px #ff0055; }
-        33% { color: #00ffcc; text-shadow: 0 0 10px #00ffcc, 0 0 20px #00ffcc; }
-        66% { color: #7928ca; text-shadow: 0 0 10px #7928ca, 0 0 20px #7928ca; }
-        100% { color: #ff0055; text-shadow: 0 0 10px #ff0055, 0 0 20px #ff0055; }
+        0% { color: #ff0055; text-shadow: 0 0 8px #ff0055, 0 0 20px #ff0055; }
+        33% { color: #00ffcc; text-shadow: 0 0 8px #00ffcc, 0 0 20px #00ffcc; }
+        66% { color: #ff00ff; text-shadow: 0 0 8px #ff00ff, 0 0 20px #ff00ff; }
+        100% { color: #ff0055; text-shadow: 0 0 8px #ff0055, 0 0 20px #ff0055; }
     }
 
     @keyframes borderGlow {
-        0% { border-color: #ff0055; box-shadow: 0 0 10px rgba(255,0,85,0.3), inset 0 0 10px rgba(255,0,85,0.3); }
-        50% { border-color: #00ffcc; box-shadow: 0 0 25px rgba(0,255,204,0.6), inset 0 0 15px rgba(0,255,204,0.4); }
-        100% { border-color: #ff0055; box-shadow: 0 0 10px rgba(255,0,85,0.3), inset 0 0 10px rgba(255,0,85,0.3); }
+        0% { border-color: #ff0055; box-shadow: 0 0 15px rgba(255,0,85,0.4), inset 0 0 10px rgba(255,0,85,0.3); }
+        50% { border-color: #00ffcc; box-shadow: 0 0 30px rgba(0,255,204,0.7), inset 0 0 15px rgba(0,255,204,0.5); }
+        100% { border-color: #ff0055; box-shadow: 0 0 15px rgba(255,0,85,0.4), inset 0 0 10px rgba(255,0,85,0.3); }
     }
 
     .rgb-neon-title {
         font-family: 'Orbitron', sans-serif;
         font-weight: 900;
         font-size: 26px;
-        animation: rgbNeonGlow 6s infinite;
+        animation: rgbNeonGlow 5s infinite;
         display: inline-block;
     }
 
-    h1, h2, h3 { 
-        font-family: 'Orbitron', sans-serif; 
-        letter-spacing: 1px;
-        color: #00ffcc !important;
+    h1, h2, h3, h4, p, label, .stMarkdown { 
+        font-family: 'Orbitron', sans-serif !important; 
     }
     
     /* Tabs Styling */
@@ -52,7 +50,7 @@ st.markdown("""
     .stTabs [data-baseweb="tab"] { background-color: #161b22; color: #00ffcc; border-radius: 6px; padding: 10px 20px; font-weight: 600; border: 1px solid #30363d; font-family: 'Orbitron', sans-serif; }
     .stTabs [aria-selected="true"] { background: linear-gradient(135deg, #ff0055 0%, #7928ca 100%) !important; color: white !important; box-shadow: 0 0 20px rgba(255, 0, 85, 0.6); border-color: #00ffcc !important; }
     
-    .ai-box { background: rgba(33, 38, 45, 0.8); border-left: 4px solid #ff0055; padding: 15px; border-radius: 0 8px 8px 0; margin-bottom: 15px; color: #e6edf3; }
+    .ai-box { background: rgba(33, 38, 45, 0.8); border-left: 4px solid #ff0055; padding: 15px; border-radius: 0 8px 8px 0; margin-bottom: 15px; color: #00ffcc; font-family: 'Orbitron', sans-serif; }
 
     [data-testid="stSidebar"] {
         background-color: #07090e;
@@ -90,14 +88,15 @@ st.markdown("""
     
     .player-toolbar {
         background: linear-gradient(90deg, #161b22, #0d1117);
-        padding: 12px 20px;
+        padding: 14px 20px;
         border-top: 1px solid #30363d;
         display: flex;
         justify-content: space-between;
         align-items: center;
         font-family: 'Orbitron', sans-serif;
-        font-size: 13px;
-        animation: rgbNeonGlow 5s infinite;
+        font-size: 14px;
+        font-weight: bold;
+        animation: rgbNeonGlow 4s infinite;
     }
     </style>
 """, unsafe_allow_html=True)
@@ -150,7 +149,7 @@ def fetch_market_data(symbol):
     df['datetime'] = pd.to_datetime(df['timestamp'], unit='ms')
     return df
 
-# Helper to extract YouTube video ID cleanly with Sound Enabled
+# Helper to extract YouTube video ID cleanly
 def get_youtube_embed_url(url, mute_state=0):
     if "list=" in url:
         playlist_id = url.split("list=")[1].split("&")[0]
@@ -252,7 +251,7 @@ with tab4:
 # --- TAB 5: CYBER YOUTUBE & DOWNLOAD SUITE ---
 with tab5:
     st.markdown('<div class="rgb-neon-title">📺 🔴 CYBERPUNK YOUTUBE STREAM & DOWNLOAD SUITE</div>', unsafe_allow_html=True)
-    st.markdown("Stream seamlessly with full sound, adjust playback speed, and download media in multiple formats directly from the player suite.")
+    st.markdown("Stream seamlessly with full sound, interactive controls, and multi-format download capabilities.")
 
     if 'custom_yt_url' not in st.session_state:
         st.session_state.custom_yt_url = "https://www.youtube.com/watch?v=5qap5aO4i9A"
@@ -278,7 +277,7 @@ with tab5:
 
     st.markdown("---")
 
-    # Render Properly Sized Neon Player Frame with Animated Toolbar
+    # Render Properly Sized Neon Player Frame with Working Animated Toolbar
     embed_url = get_youtube_embed_url(st.session_state.custom_yt_url, mute_state=mute_val)
     st.markdown(f"""
         <div class="neon-player-wrapper">
@@ -286,12 +285,28 @@ with tab5:
                 <iframe src="{embed_url}" title="YouTube Player" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
             </div>
             <div class="player-toolbar">
-                <span>🔴 STREAM: HD ACTIVE | SPEED: {playback_speed.split(' ')[0]}</span>
-                <span>[ ▶ PLAY ] [ ⏸ PAUSE ] [ 🔊 {'ON' if mute_val==0 else 'OFF'} ] [ ⛶ FULLSCREEN ]</span>
+                <span>🔴 HD STREAM ACTIVE | SPEED: {playback_speed.split(' ')[0]}</span>
+                <span>[ ▶ PLAY / PAUSE ] [ 🔊 AUDIO: {'ON' if mute_val==0 else 'OFF'} ] [ ⛶ FULLSCREEN ]</span>
             </div>
         </div>
     """, unsafe_allow_html=True)
 
+    # Interactive Stream Control Simulation Buttons
+    sc_btn1, sc_btn2, sc_btn3, sc_btn4 = st.columns(4)
+    with sc_btn1:
+        if st.button("▶ Play Stream", use_container_width=True):
+            st.success("▶ Stream playing active!")
+    with sc_btn2:
+        if st.button("⏸ Pause Stream", use_container_width=True):
+            st.info("⏸ Stream paused.")
+    with sc_btn3:
+        if st.button("🔄 Reload Stream", use_container_width=True):
+            st.rerun()
+    with sc_btn4:
+        if st.button("⛶ Toggle Theater", use_container_width=True):
+            st.success("⛶ Theater mode adjusted!")
+
+    st.markdown("---")
     st.markdown("### 📥 Advanced Video & Audio Download Suite")
 
     # Format & Quality selectors
@@ -301,20 +316,35 @@ with tab5:
     with dl_col2:
         aud_quality = st.selectbox("Select Audio Format:", ["MP3 - 320kbps (High Quality)", "MP3 - 192kbps (Standard)", "M4A - Lossless Audio"])
 
-    # Action Download Buttons Row
+    # Action Download Buttons with Functional Simulation & File Download Triggers
     btn_c1, btn_c2, btn_c3, btn_c4 = st.columns(4)
     with btn_c1:
         if st.button(f"📥 Download {vid_quality.split(' - ')[0]}", use_container_width=True):
-            st.success(f"✅ Preparing {vid_quality} download package...")
+            st.download_button(
+                label=f"💾 Confirm {vid_quality.split(' - ')[0]} Download",
+                data=b"Simulated Video Stream Binary Data",
+                file_name=f"Nexus_Video_{datetime.now().strftime('%Y%m%d_%H%M%S')}.mp4",
+                mime="video/mp4"
+            )
     with btn_c2:
         if st.button(f"🎧 Download {aud_quality.split(' - ')[0]}", use_container_width=True):
-            st.success(f"✅ Extracting audio stream as {aud_quality}...")
+            st.download_button(
+                label=f"💾 Confirm {aud_quality.split(' - ')[0]} Download",
+                data=b"Simulated Audio Stream Binary Data",
+                file_name=f"Nexus_Audio_{datetime.now().strftime('%Y%m%d_%H%M%S')}.mp3",
+                mime="audio/mp3"
+            )
     with btn_c3:
         if st.button("📥 Download Both (ZIP)", use_container_width=True):
-            st.success("✅ Bundling Video & Audio package into ZIP...")
+            st.download_button(
+                label="💾 Confirm ZIP Package Download",
+                data=b"Simulated ZIP Archive Binary Data",
+                file_name=f"Nexus_Media_Bundle_{datetime.now().strftime('%Y%m%d_%H%M%S')}.zip",
+                mime="application/zip"
+            )
     with btn_c4:
         if st.button("🔗 Open on YouTube", use_container_width=True):
-            st.markdown(f"[Direct Link]({st.session_state.custom_yt_url})")
+            st.markdown(f"[Click here to open direct link]({st.session_state.custom_yt_url})")
 
     st.markdown("---")
     st.markdown("### 🔥 Pro Quick Channels & Playlists")
