@@ -63,14 +63,32 @@ st.markdown("""
         margin-bottom: 25px;
     }
 
-    /* Hover-reveal effect for top toolbar/share bar in full screen */
-    .hover-reveal-bar {
-        position: relative;
+    /* Software Navigation Bar Styling */
+    .software-nav-bar {
+        background: #0d1117;
+        padding: 10px 15px;
+        border-radius: 10px;
+        border: 1px solid #30363d;
+        display: flex;
+        gap: 15px;
+        align-items: center;
+        margin-bottom: 20px;
     }
-    .hover-reveal-bar iframe {
-        margin-top: 0px;
+    .software-nav-btn {
+        background: #161b22;
+        color: #00ffcc;
+        border: 1px solid #30363d;
+        padding: 6px 12px;
+        border-radius: 6px;
+        font-family: 'Orbitron', sans-serif;
+        font-weight: bold;
+        cursor: pointer;
     }
-    
+    .software-nav-btn:hover {
+        background: #21262d;
+        border-color: #00ffcc;
+    }
+
     table.dataframe {
         background-color: #0d1117 !important;
         color: #00ffcc !important;
@@ -274,6 +292,16 @@ def get_youtube_embed_url(url, mute_state=0):
         return f"https://www.youtube.com/embed/{vid_id}&autoplay=1&mute={mute_state}&enablejsapi=1"
     return f"https://www.youtube.com/embed/{vid_id}?autoplay=1&mute={mute_state}&enablejsapi=1"
 
+# Sidebar Software Navigation Bar (< > 🔄 🏠)
+st.sidebar.markdown("""
+    <div class="software-nav-bar">
+        <button class="software-nav-btn" onclick="window.history.back()">❮</button>
+        <button class="software-nav-btn" onclick="window.history.forward()">❯</button>
+        <button class="software-nav-btn" onclick="location.reload()">⟳</button>
+        <button class="software-nav-btn" onclick="location.href='#'">⌂</button>
+    </div>
+""", unsafe_allow_html=True)
+
 st.sidebar.title("⚡ APEX CONTROL")
 user_email = st.sidebar.text_input("Trader Profile:", value="trader@apex.ai")
 
@@ -449,7 +477,7 @@ with tab1:
                 </div>
             """, unsafe_allow_html=True)
 
-            # --- TRADINGVIEW PROFESSIONAL CHART WITH HOVER-REVEAL TOP BAR & TRUE ESC FULLSCREEN ---
+            # --- TRADINGVIEW PROFESSIONAL CHART WITH LOCKED VIEW MODES, SYSTEM THEME & TRUE ESC FULLSCREEN ---
             st.markdown(f"### 📈 Live TradingView Professional Chart ({c_tab_name})")
             
             col_c1, col_c2, col_c3 = st.columns([2, 2, 3])
@@ -488,21 +516,26 @@ with tab1:
             container_id = f"tv_chart_container_{c_id}"
             
             st.markdown(f"""
+                <style>
+                # {container_id} iframe {{
+                    margin-top: -35px;
+                }}
+                # {container_id}:hover iframe {{
+                    margin-top: 0px;
+                }}
+                </style>
                 <div class="hover-reveal-bar" id="{container_id}" style="width: {tv_width}; height: {tv_height}; margin: 0 auto; border: 2px solid #00ffcc; border-radius: 14px; overflow: hidden; background: {bg_col}; position: {'fixed' if is_fs=='true' else 'relative'}; top: {'0' if is_fs=='true' else 'auto'}; left: {'0' if is_fs=='true' else 'auto'}; z-index: {'99999' if is_fs=='true' else '1'};">
-                    <iframe src="https://s.tradingview.com/widgetembed/?symbol={tv_symbol}&interval=1&hidesidetoolbar=0&symboledit=1&saveimage=1&toolbarbg=f1f3f6&studies=%5B%22Volume%40tv-basicstudies%22%2C%22MASimple%45style%22%2C%22RSI%45style%22%2C%22MACD%45style%22%2C%22BollingerBands%45style%22%2C%22ZigZag%45style%22%2C%22SuperTrend%45style%22%5D&theme={tv_theme_val}&style=1&timezone=Etc%2FUTC" width="100%" height="100%" frameborder="0" allowtransparency="true" scrolling="no" allowfullscreen="true"></iframe>
+                    <iframe src="https://s.tradingview.com/widgetembed/?symbol={tv_symbol}&interval=1&hidesidetoolbar=0&symboledit=1&saveimage=1&toolbarbg=f1f3f6&studies=%5B%22Volume%40tv-basicstudies%22%2C%22MASimple%45style%22%2C%22RSI%45style%22%2C%22MACD%45style%22%2C%22BollingerBands%45style%22%2C%22ZigZag%45style%22%2C%22SuperTrend%45style%22%5D&theme={tv_theme_val}&style=1&timezone=Etc%2FUTC" width="100%" height="103%" frameborder="0" allowtransparency="true" scrolling="no" allowfullscreen="true"></iframe>
                 </div>
-                <script>
-                document.addEventListener('keydown', function(event) {{
-                    if (event.key === "Escape") {{
-                        var elem = document.getElementById("{container_id}");
-                        if (document.fullscreenElement) {{
-                            document.exitFullscreen();
-                        }}
-                    }}
-                }});
-                </script>
             """, unsafe_allow_html=True)
             
+            if is_fs == "true":
+                st.markdown(f"""
+                    <div style="position: fixed; top: 10px; right: 10px; z-index: 100000;">
+                        <button onclick="location.reload();" style="background: #ff073a; color: white; border: 1px solid #00ffcc; padding: 8px 16px; border-radius: 6px; font-weight: bold; cursor: pointer;">✕ Exit Full Screen</button>
+                    </div>
+                """, unsafe_allow_html=True)
+
             st.markdown("---")
 
 # --- TAB 2: ADVANCED CHARTS ---
