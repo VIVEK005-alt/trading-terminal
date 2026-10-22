@@ -63,7 +63,7 @@ st.markdown("""
         margin-bottom: 25px;
     }
 
-    /* Clean, Modern Sidebar Layout with Proper Fonts & Padding */
+    /* Clean, Modern Sidebar Layout with Properly Visible Navigation Buttons */
     [data-testid="stSidebar"] {
         background-color: #12141c;
         border-right: 1px solid #2d333b;
@@ -99,17 +99,19 @@ st.markdown("""
     }
     .software-nav-btn {
         background: #21262d;
-        color: #58a6ff;
+        color: #00ffcc;
         border: 1px solid #30363d;
-        padding: 6px 14px;
+        padding: 8px 14px;
         border-radius: 6px;
         font-size: 14px;
-        font-weight: 600;
+        font-weight: 700;
         cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
     }
     .software-nav-btn:hover {
         background: #30363d;
-        color: #00ffcc;
         border-color: #00ffcc;
     }
 
@@ -311,13 +313,13 @@ def get_youtube_embed_url(url, mute_state=0):
         return f"https://www.youtube.com/embed/{vid_id}&autoplay=1&mute={mute_state}&enablejsapi=1"
     return f"https://www.youtube.com/embed/{vid_id}?autoplay=1&mute={mute_state}&enablejsapi=1"
 
-# Sidebar Software Navigation Bar (< > 🔄 🏠)
+# Sidebar Software Navigation Bar with Clean Visible Buttons (< > 🔄 🏠)
 st.sidebar.markdown("""
     <div class="software-nav-bar">
-        <button class="software-nav-btn" onclick="window.history.back()">❮</button>
-        <button class="software-nav-btn" onclick="window.history.forward()">❯</button>
-        <button class="software-nav-btn" onclick="location.reload()">⟳</button>
-        <button class="software-nav-btn" onclick="location.href='#'">⌂</button>
+        <button class="software-nav-btn" onclick="window.history.back()" title="Back">❮</button>
+        <button class="software-nav-btn" onclick="window.history.forward()" title="Forward">❯</button>
+        <button class="software-nav-btn" onclick="location.reload()" title="Refresh">⟳</button>
+        <button class="software-nav-btn" onclick="location.href='#'" title="Home">⌂</button>
     </div>
 """, unsafe_allow_html=True)
 
