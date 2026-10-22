@@ -38,9 +38,9 @@ st.markdown("""
         text-shadow: 0 0 8px rgba(57,255,20,0.5);
     }
 
-    /* Summary Cards with Background Theme & Overlay for High Readability */
+    /* Summary Cards with Bitcoin / Crypto High-Quality Background & Dark Overlay */
     .summary-card-bull {
-        background: linear-gradient(rgba(13, 17, 23, 0.85), rgba(13, 17, 23, 0.85)), url('https://images.unsplash.com/photo-1639762681485-074b7f938ba0?q=80&w=400&auto=format&fit=crop');
+        background: linear-gradient(rgba(13, 17, 23, 0.90), rgba(13, 17, 23, 0.90)), url('https://images.unsplash.com/photo-1621416894569-0f39ed31d247?q=80&w=400&auto=format&fit=crop');
         background-size: cover;
         background-position: center;
         border: 2px solid #39ff14;
@@ -52,7 +52,7 @@ st.markdown("""
     }
 
     .summary-card-bear {
-        background: linear-gradient(rgba(13, 17, 23, 0.85), rgba(13, 17, 23, 0.85)), url('https://images.unsplash.com/photo-1621416894569-0f39ed31d247?q=80&w=400&auto=format&fit=crop');
+        background: linear-gradient(rgba(13, 17, 23, 0.90), rgba(13, 17, 23, 0.90)), url('https://images.unsplash.com/photo-1621416894569-0f39ed31d247?q=80&w=400&auto=format&fit=crop');
         background-size: cover;
         background-position: center;
         border: 2px solid #ff073a;
@@ -64,7 +64,7 @@ st.markdown("""
     }
 
     .summary-card-side {
-        background: linear-gradient(rgba(13, 17, 23, 0.85), rgba(13, 17, 23, 0.85)), url('https://images.unsplash.com/photo-1642543492481-44e81e3914a7?q=80&w=400&auto=format&fit=crop');
+        background: linear-gradient(rgba(13, 17, 23, 0.90), rgba(13, 17, 23, 0.90)), url('https://images.unsplash.com/photo-1621416894569-0f39ed31d247?q=80&w=400&auto=format&fit=crop');
         background-size: cover;
         background-position: center;
         border: 2px solid #ffa500;
@@ -189,7 +189,7 @@ def compute_master_indicators(df, seed_offset=0):
         elif bp <= 45:
             return "BEAR 🐻", (100 - bp), "STRONG SELL / SHORT 🔴"
         else:
-            return "SIDEWAYS 🐺", 50.0, "NEUTRAL / HOLD 🟡"
+            return "SIDEWAYS 🤖", 50.0, "NEUTRAL / HOLD 🟡"
 
     sentiments = df.apply(get_sentiment, axis=1)
     df['Animal_Type'] = [s[0] for s in sentiments]
@@ -307,7 +307,7 @@ df = None
 
 # --- TAB 1: SCREENER & MASTER TIMEFRAMES & HISTORICAL YEARS ---
 with tab1:
-    st.subheader("🌍 Master Excel Sheet Matrix (Background Theme Card Design)")
+    st.subheader("🌍 Master Excel Sheet Matrix (Crypto Background Theme)")
     
     coin_mapping = {
         "BTC": "bitcoin",
@@ -352,7 +352,6 @@ with tab1:
         anim = last_row['Animal_Type']
         power = last_row['Sentiment (%)']
         
-        # Assigning Card Styles & Neon Glow based on Sentiment
         if 'BULL' in anim:
             card_class = "summary-card-bull"
             col_color = '#39ff14'
@@ -551,7 +550,7 @@ with tab5:
     with dl_c1:
         st.link_button("🔗 Open & Watch on Official YouTube", st.session_state.active_yt_url, use_container_width=True)
     with dl_c2:
-        st.link_code = st.link_button("🚀 Direct Stream External Hub", st.session_state.active_yt_url, use_container_width=True)
+        st.link_button("🚀 Direct Stream External Hub", st.session_state.active_yt_url, use_container_width=True)
 
 # --- TAB 6: TAX & PNL LEDGER ---
 with tab6:
@@ -570,7 +569,7 @@ with tab6:
 # --- TAB 7: PUBLIC DEMAND & AI DEVELOPER BOX ---
 with tab7:
     st.subheader("🤖 Autonomous Developer AI Core")
-    st.markdown("Type any requirement below to update app architecture instantly.")
+    st.markdown("Type any requirement below to update app architecture insights instantly.")
     user_demand = st.text_area("What do you want to add or change in the app?", placeholder="e.g., Add crypto fear & greed index...")
     if st.button("✨ Submit Demand to Developer AI", use_container_width=True):
         if user_demand:
