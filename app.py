@@ -55,7 +55,34 @@ st.markdown("""
         box-shadow: 0 4px 15px rgba(0,0,0,0.5);
     }
 
-    /* Bold Excel Table Typography */
+    /* Horizontal Scrollable Slider Bar for Timeframes */
+    .timeframe-slider-container {
+        display: flex;
+        overflow-x: auto;
+        gap: 8px;
+        padding: 10px 5px;
+        background: #0d1117;
+        border: 1px solid #30363d;
+        border-radius: 12px;
+        white-space: nowrap;
+        margin-bottom: 15px;
+        scrollbar-width: thin;
+        scrollbar-color: #00ffcc #161b22;
+    }
+    
+    .timeframe-slider-container::-webkit-scrollbar {
+        height: 8px;
+    }
+    .timeframe-slider-container::-webkit-scrollbar-track {
+        background: #161b22;
+        border-radius: 4px;
+    }
+    .timeframe-slider-container::-webkit-scrollbar-thumb {
+        background: #00ffcc;
+        border-radius: 4px;
+    }
+
+    /* Bold Excel Table Typography & Scrollbars */
     table.dataframe th {
         font-family: 'Orbitron', sans-serif !important;
         font-weight: 900 !important;
@@ -172,7 +199,7 @@ def compute_master_indicators(df):
     
     return df
 
-# MASTER EXCEL DATA FETCHER (SUPPORTS UP TO 500+ ROWS FOR FULL YEAR DATA)
+# MASTER EXCEL DATA FETCHER
 def fetch_master_excel_data(coin_id, row_count=200):
     url = f"https://api.coingecko.com/api/v3/coins/{coin_id}/market_chart?vs_currency=usd&days=365"
     try:
@@ -195,7 +222,6 @@ def fetch_master_excel_data(coin_id, row_count=200):
     except:
         pass
     
-    # Fallback Extended Master Sheet Data
     base_date = datetime.now() - timedelta(days=365)
     dummy_dates = [base_date + timedelta(hours=i) for i in range(row_count)]
     df = pd.DataFrame({
@@ -295,13 +321,15 @@ with tab1:
         with coin_tabs[idx]:
             st.markdown(f"### ⚡ {c_tab_name} Full Master Sheet & Historical Matrix")
             
-            # Master Timeframes + Historical Years (2026 down to 2020)
-            tf_tabs = st.tabs([
+            # Master Timeframes + Historical Years with Horizontal Slider Navigation Bar
+            timeframe_list = [
                 "1 Min", "3 Min", "5 Min", "15 Min", "30 Min", "75 Min", 
                 "1 Hour", "2 Hour", "3 Hour", "4 Hour", "6 Hour", "12 Hour", 
                 "1 Day", "1 Week", "1 Month", "3 Months", "6 Months", 
                 "1 Year", "3 Years", "5 Years", "2026 (YTD)", "2025", "2024", "2023", "2022", "2021", "2020"
-            ])
+            ]
+            
+            selected_tf = st.radio(f"Select Timeframe / Year ({c_tab_name}):", timeframe_list, horizontal=True, key=f"radio_{c_id}")
             
             tf_row_counts = {
                 "1 Min": 150, "3 Min": 150, "5 Min": 150, "15 Min": 150, "30 Min": 150, "75 Min": 150, 
@@ -311,58 +339,57 @@ with tab1:
                 "2026 (YTD)": 300, "2025": 365, "2024": 366, "2023": 365, "2022": 365, "2021": 365, "2020": 366
             }
 
-            for tf_name, r_count in tf_row_counts.items():
-                with tf_tabs[list(tf_row_counts.keys()).index(tf_name)]:
-                    coin_df = fetch_master_excel_data(c_id, row_count=r_count)
-                    current_price = coin_df['close'].iloc[-1]
-                    animal_type = coin_df['Animal_Type'].iloc[-1]
-                    sentiment_pct = coin_df['Sentiment (%)'].iloc[-1]
-                    trade_advice = coin_df['Trade Advice'].iloc[-1]
-                    
-                    st.markdown(f"""
-                        <div class="market-sentiment-box">
-                            <div>
-                                <span style="font-size: 11px; color: #8b949e; display: block; font-weight: 600;">⚡ LIVE RUNNING PRICE</span>
-                                <span class="live-running-price">${current_price:,.2f}</span>
-                            </div>
-                            <div style="border-left: 1px solid #30363d; padding-left: 20px;">
-                                <span style="font-size: 11px; color: #8b949e; display: block; font-weight: 600;">MARKET SENTIMENT & ANIMAL AI</span>
-                                <span style="font-size: 22px; font-weight: 900; color: {'#39ff14' if 'BULL' in animal_type else ('#ff073a' if 'BEAR' in animal_type else '#ffa500')};">
-                                    {animal_type} — {sentiment_pct}% Power
-                                </span>
-                            </div>
-                            <div style="border-left: 1px solid #30363d; padding-left: 20px;">
-                                <span style="font-size: 11px; color: #8b949e; display: block; font-weight: 600;">ACTIONABLE ADVICE</span>
-                                <span style="font-size: 18px; font-weight: 900; color: #ffffff;">{trade_advice}</span>
-                            </div>
-                        </div>
-                    """, unsafe_allow_html=True)
-                    
-                    st.markdown("<br>", unsafe_allow_html=True)
-                    
-                    # Interactive Filter System
-                    col_f1, col_f2 = st.columns(2)
-                    with col_f1:
-                        filter_signal = st.selectbox(f"Filter Signal ({tf_name})", ["All", "STRONG BUY / LONG 🟢", "STRONG SELL / SHORT 🔴", "NEUTRAL / HOLD ⚠️"], key=f"filt_{c_id}_{tf_name}")
-                    with col_f2:
-                        min_rsi = st.slider(f"Minimum RSI Filter ({tf_name})", 0.0, 100.0, 0.0, key=f"rsi_{c_id}_{tf_name}")
-                    
-                    filtered_df = coin_df.copy()
-                    if filter_signal != "All":
-                        filtered_df = filtered_df[filtered_df['Trade Advice'] == filter_signal]
-                    filtered_df = filtered_df[filtered_df['RSI_14'] >= min_rsi]
-                    
-                    excel_display_cols = [
-                        'Date', 'Time', 'open', 'high', 'low', 'close', 'volume', 
-                        'EMA_10', 'EMA_20', 'EMA_50', 'EMA_100', 'EMA_200', 
-                        'WMA_10', 'WMA_20', 'RSI_14', 'MACD', 'MACD_Signal', 
-                        'CCI_20', 'BB_Upper', 'BB_Lower', 'ATR_14', 'VWAP', 
-                        'Buyer Vol', 'Seller Vol', 'Buy Pressure (%)', 'Sell Pressure (%)', 
-                        'Animal_Type', 'Trade Advice'
-                    ]
-                    
-                    # Full Excel-Style Long Scrollable Table (Height 600px for massive data view)
-                    st.dataframe(filtered_df[excel_display_cols], use_container_width=True, height=600)
+            r_count = tf_row_counts.get(selected_tf, 200)
+            coin_df = fetch_master_excel_data(c_id, row_count=r_count)
+            current_price = coin_df['close'].iloc[-1]
+            animal_type = coin_df['Animal_Type'].iloc[-1]
+            sentiment_pct = coin_df['Sentiment (%)'].iloc[-1]
+            trade_advice = coin_df['Trade Advice'].iloc[-1]
+            
+            st.markdown(f"""
+                <div class="market-sentiment-box">
+                    <div>
+                        <span style="font-size: 11px; color: #8b949e; display: block; font-weight: 600;">⚡ LIVE RUNNING PRICE</span>
+                        <span class="live-running-price">${current_price:,.2f}</span>
+                    </div>
+                    <div style="border-left: 1px solid #30363d; padding-left: 20px;">
+                        <span style="font-size: 11px; color: #8b949e; display: block; font-weight: 600;">MARKET SENTIMENT & ANIMAL AI</span>
+                        <span style="font-size: 22px; font-weight: 900; color: {'#39ff14' if 'BULL' in animal_type else ('#ff073a' if 'BEAR' in animal_type else '#ffa500')};">
+                            {animal_type} — {sentiment_pct}% Power
+                        </span>
+                    </div>
+                    <div style="border-left: 1px solid #30363d; padding-left: 20px;">
+                        <span style="font-size: 11px; color: #8b949e; display: block; font-weight: 600;">ACTIONABLE ADVICE</span>
+                        <span style="font-size: 18px; font-weight: 900; color: #ffffff;">{trade_advice}</span>
+                    </div>
+                </div>
+            """, unsafe_allow_html=True)
+            
+            st.markdown("<br>", unsafe_allow_html=True)
+            
+            # Interactive Filter System
+            col_f1, col_f2 = st.columns(2)
+            with col_f1:
+                filter_signal = st.selectbox(f"Filter Signal ({selected_tf})", ["All", "STRONG BUY / LONG 🟢", "STRONG SELL / SHORT 🔴", "NEUTRAL / HOLD ⚠️"], key=f"filt_{c_id}_{selected_tf}")
+            with col_f2:
+                min_rsi = st.slider(f"Minimum RSI Filter ({selected_tf})", 0.0, 100.0, 0.0, key=f"rsi_{c_id}_{selected_tf}")
+            
+            filtered_df = coin_df.copy()
+            if filter_signal != "All":
+                filtered_df = filtered_df[filtered_df['Trade Advice'] == filter_signal]
+            filtered_df = filtered_df[filtered_df['RSI_14'] >= min_rsi]
+            
+            excel_display_cols = [
+                'Date', 'Time', 'open', 'high', 'low', 'close', 'volume', 
+                'EMA_10', 'EMA_20', 'EMA_50', 'EMA_100', 'EMA_200', 
+                'WMA_10', 'WMA_20', 'RSI_14', 'MACD', 'MACD_Signal', 
+                'CCI_20', 'BB_Upper', 'BB_Lower', 'ATR_14', 'VWAP', 
+                'Buyer Vol', 'Seller Vol', 'Buy Pressure (%)', 'Sell Pressure (%)', 
+                'Animal_Type', 'Trade Advice'
+            ]
+            
+            # Full Excel-Style Long Scrollable Table with Horizontal & Vertical Scrollbars
+            st.dataframe(filtered_df[excel_display_cols], use_container_width=True, height=650)
 
 # --- TAB 2: ADVANCED CHARTS ---
 with tab2:
