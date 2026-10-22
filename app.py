@@ -925,4 +925,175 @@ with tabs[5]:
             st.error("Live price nahi mila. Order nahi hua.")
         elif qty <= 0:
             st.error("Quantity 0 se zyada honi chahiye.")
-        elif side == "BUY" and
+        elif side == "BUY" and qty * price_now > cash:
+            st.error(f"Virtual cash kam hai. Max BUY qty: {cash / price_now:.6f} {base}")
+        elif side == "SELL" and qty > held["qty"] + 1e-12:
+            st.error(f"Itne {base} holdings me nahi hain (held: {held['qty']:.6f}).")
+        else:
+            pnl = (price_now - held["avg"]) * qty if side == "SELL" else 0.0
+            add_trade(base, side, qty, price_now, pnl)
+            flash(f"{side} {qty} {base} @ ${price_now:,.4f} executed.")
+            st.rerun()
+
+    st.markdown("#### 📦 Open positions")
+    if positions:
+        prow = []
+        for s, p in positions.items():
+            sn = get_snapshot(s)
+            lp = sn["price"] if sn else p["avg"]
+            prow.append({"Symbol": s, "Qty": round(p["qty"], 6),
+                         "Avg cost (USD)": round(p["avg"], 6), "Last (USD)": round(lp, 6),
+                         "Market value": fmt_money(p["qty"] * lp, rate, sym),
+                         "Unrealized PnL": round((lp - p["avg"]) * p["qty"] * rate, 2)})
+        st.dataframe(pd.DataFrame(prow).style.map(color_pct, subset=["Unrealized PnL"]),
+                     use_container_width=True, hide_index=True)
+    else:
+        st.info("Koi open position nahi hai.")
+
+    st.markdown("#### 🧾 Trade history")
+    if not trades.empty:
+        st.dataframe(trades.tail(100).iloc[::-1], use_container_width=True, hide_index=True)
+    if st.button("🗑️ Reset paper account", use_container_width=True):
+        db_write("DELETE FROM trades")
+        st.rerun()
+
+# ---------- TAB 7: TAX & PNL ----------
+with tabs[6]:
+    st.subheader("💰 Paper Trade Tax & PnL Ledger (India style)")
+    trades = load_trades()
+    if trades.empty:
+        st.info("Abhi koi trade nahi hai. Paper Trading tab me trade karo.")
+    else:
+        sells = trades[trades["side"] == "SELL"].copy()
+        sells["FY"] = sells["ts"].apply(fy_label)
+        fy = (sells.assign(gain=sells["pnl"].clip(lower=0), loss=sells["pnl"].clip(upper=0))
+              .groupby("FY")[["gain", "loss"]].sum().reset_index())
+        fy_disp = pd.DataFrame({
+            "Financial year": fy["FY"],
+            f"Gains ({currency})": fy["gain"] * rate,
+            f"Losses ({currency}, no set-off)": fy["loss"] * rate,
+            f"Tax @30% + 4% cess ({currency})": fy["gain"] * 0.30 * 1.04 * rate,
+        })
+        total_gain = fy["gain"].sum()
+        m1, m2, m3 = st.columns(3)
+        m1.metric("Total realized PnL", fmt_money(sells["pnl"].sum(), rate, sym))
+        m2.metric("Total trades", len(trades))
+        m3.metric("Est. tax (30% + cess)", fmt_money(total_gain * 0.30 * 1.04, rate, sym))
+
+        st.markdown("#### Financial-year summary")
+        st.dataframe(fy_disp, use_container_width=True, hide_index=True)
+        st.warning(
+            "⚠️ Ye sirf paper trading ka learning ledger hai, real tax calculation nahi. India me Virtual Digital "
+            "Assets (crypto) ke gains par flat 30% tax (Sec 115BBH) + cess lagta hai, crypto losses ko kisi aur income "
+            "se set-off nahi kiya ja sakta, aur 1% TDS (Sec 194S) bhi hota hai. Exact filing ke liye CA se milo."
+        )
+        ledger = trades[["ts", "symbol", "side", "qty", "price", "pnl"]].copy()
+        ledger.columns = ["Timestamp (UTC)", "Symbol", "Side", "Qty", "Price (USD)", "PnL (USD)"]
+        st.dataframe(ledger, use_container_width=True, hide_index=True)
+        st.download_button("📥 Download ledger (CSV)", ledger.to_csv(index=False).encode("utf-8"),
+                           file_name="apex_paper_ledger.csv", mime="text/csv", use_container_width=True)
+
+# ---------- TAB 8: TOKEN SCREENER ----------
+with tabs[7]:
+    st.subheader("🪙 Crypto Token Screener (Top 150 by market cap — live CoinGecko)")
+    if universe.empty:
+        st.warning("CoinGecko se data nahi aaya (rate limit ho sakta hai). Sidebar se Refresh dabao.")
+    else:
+        search = st.text_input("🔍 Filter by symbol or name", key="tok_search", placeholder="e.g. PEPE, SOL, Layer")
+        view = universe.copy()
+        if search:
+            mask = view["Symbol"].str.contains(search.upper(), regex=False) | \
+                   view["Name"].str.contains(search, case=False, regex=False)
+            view = view[mask]
+        view["Price (USD)"] = view["Price (USD)"] * rate
+        view = view.rename(columns={"Price (USD)": f"Price ({currency})"})
+        st.dataframe(
+            view.style.format({f"Price ({currency})": "{:,.6g}", "Market Cap": "{:,.0f}",
+                               "Volume 24h": "{:,.0f}", "24h %": "{:+.2f}%"}, na_rep="—")
+            .map(color_pct, subset=["24h %"]),
+            use_container_width=True, hide_index=True, height=520,
+        )
+        pick_opts = view["Symbol"].tolist() or ["BTC"]
+        pick = st.selectbox("Pro Chart me kholne ke liye coin chuno", pick_opts, key="tok_pick")
+        if st.button("📈 Open in Pro Chart", use_container_width=True):
+            st.session_state["pending_q"] = f"{pick}/USDT"
+            st.rerun()
+        st.caption("Data: CoinGecko. Price conversion approx hai (Frankfurter/ECB rates).")
+
+# ---------- TAB 9: NSE / BSE ----------
+with tabs[8]:
+    st.subheader("🇮🇳 NSE / BSE Terminal (INR) — Yahoo Finance data")
+    if not HAS_YF:
+        st.warning("Indian stocks ke liye requirements.txt me yfinance hona chahiye.")
+    else:
+        icols = st.columns(4)
+        for col, (name, tk) in zip(icols, INDEX_TICKERS.items()):
+            ix = get_stock(tk)
+            if ix is not None and len(ix) > 1:
+                lp, pv = ix["close"].iloc[-1], ix["close"].iloc[-2]
+                col.metric(name, f"₹{lp:,.2f}", f"{(lp / pv - 1) * 100:+.2f}%")
+            else:
+                col.metric(name, "N/A")
+
+        saved_nse = json.loads(get_setting("nse_watch", json.dumps(NSE_DEFAULT)))
+
+        def _save_nse():
+            set_setting("nse_watch", json.dumps(st.session_state["nse_ms"]))
+
+        nse_opts = sorted(set(NSE_DEFAULT) | set(saved_nse))
+        st.multiselect("NSE/BSE watchlist (saved)", nse_opts, default=saved_nse,
+                       key="nse_ms", on_change=_save_nse)
+
+        a1, a2, a3 = st.columns([2, 1, 1])
+        new_sym = a1.text_input("Add symbol (e.g. IRCTC, ZOMATO)", key="nse_add").strip().upper()
+        exch = a2.selectbox("Exchange", [".NS (NSE)", ".BO (BSE)"], key="nse_ex")
+        if a3.button("➕ Add", use_container_width=True) and new_sym:
+            full = new_sym + exch.split()[0]
+            if full not in saved_nse:
+                set_setting("nse_watch", json.dumps(saved_nse + [full]))
+                st.rerun()
+
+        rows = []
+        with st.spinner("Stock data load ho raha hai..."):
+            for full in json.loads(get_setting("nse_watch", json.dumps(NSE_DEFAULT))):
+                d = get_stock(full)
+                if d is None or len(d) < 2:
+                    continue
+                last, prev = d.iloc[-1], d.iloc[-2]
+                rows.append({
+                    "Symbol": full, "LTP (₹)": round(last["close"], 2),
+                    "Chg %": round((last["close"] / prev["close"] - 1) * 100, 2),
+                    "RSI (14)": round(last["RSI"], 1), "ADX (14)": round(last["ADX"], 1),
+                    "SuperTrend": "UP 🟢" if last["ST_DIR"] == 1 else "DOWN 🔴",
+                    "Signal": last["SIGNAL"],
+                })
+        if rows:
+            st.dataframe(pd.DataFrame(rows).style.map(color_pct, subset=["Chg %"])
+                         .map(color_signal, subset=["SuperTrend", "Signal"]),
+                         use_container_width=True, hide_index=True)
+        else:
+            st.info("Data nahi mila. NSE ka exact symbol check karo.")
+        st.caption("Yahoo Finance daily data par signals hain (~15 min delay). Official NSE/BSE API public nahi hai.")
+
+# ---------- TAB 10: MEDIA ----------
+with tabs[9]:
+    st.subheader("🎬 YouTube Stream")
+    url = st.text_input("YouTube video / Shorts / playlist link",
+                        value="https://www.youtube.com/watch?v=jNQXAC9IVRw")
+    muted = st.toggle("🔇 Mute", value=False)
+    vid = re.search(r"(?:v=|youtu\.be/|shorts/|embed/)([A-Za-z0-9_-]{11})", url)
+    plist = re.search(r"[?&]list=([A-Za-z0-9_-]+)", url)
+    if vid:
+        src_url = f"https://www.youtube.com/embed/{vid.group(1)}?autoplay=1&mute={int(muted)}"
+    elif plist:
+        src_url = f"https://www.youtube.com/embed/videoseries?list={plist.group(1)}&autoplay=1&mute={int(muted)}"
+    else:
+        src_url = None
+    if src_url:
+        components.html(
+            f'<iframe width="100%" height="500" src="{src_url}" frameborder="0" '
+            f'allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" '
+            f'allowfullscreen></iframe>', height=520)
+        st.link_button("Open on YouTube ↗", url)
+    else:
+        st.error("Valid YouTube link paste karo.")
