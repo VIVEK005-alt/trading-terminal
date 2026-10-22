@@ -496,16 +496,16 @@ with tab1:
                 </div>
             """, unsafe_allow_html=True)
 
-            # --- TRADINGVIEW PROFESSIONAL CHART WITH UNTOUCHED CHART BUTTONS & FULL NATIVE TOOLBAR ---
+            # --- TRADINGVIEW PROFESSIONAL ADVANCED EMBED CHART (EXACT TRADINGVIEW NATIVE BEHAVIOR) ---
             st.markdown(f"### 📈 Live TradingView Professional Chart ({c_tab_name})")
             
             col_c1, col_c2, col_c3 = st.columns([2, 2, 3])
             with col_c1:
                 chart_view_mode = st.selectbox(f"🔒 Chart View Mode ({c_tab_name}):", ["Landscape View", "Portrait View", "True Full Screen"], key=f"tv_vmode_{c_id}")
             with col_c2:
-                chart_trade_mode = st.selectbox(f"🚀 Trading Mode ({c_tab_name}):", ["Standard View", "Scalping Mode (1m-5m)", "Long Trade Setup (1h-1D)", "Short Trade Setup"], key=f"tv_tmode_{c_id}")
-            with col_c3:
                 chart_theme_mode = st.selectbox(f"🌓 Theme Mode ({c_tab_name}):", ["Dark Mode", "Light Mode", "System Default"], key=f"tv_theme_{c_id}")
+            with col_c3:
+                st.markdown("<span style='color: #00ffcc; font-size: 11px;'>⚡ TradingView Advanced Native Widget: Fully Interactive Tools, Studies & Timeframes</span>", unsafe_allow_html=True)
             
             if chart_view_mode == "Portrait View":
                 tv_width = "450px"
@@ -517,7 +517,7 @@ with tab1:
                 is_fs = "true"
             else: # Landscape View
                 tv_width = "100%"
-                tv_height = "600px"
+                tv_height = "620px"
                 is_fs = "false"
 
             tv_symbol = f"BINANCE:{c_tab_name}USDT"
@@ -534,12 +534,10 @@ with tab1:
 
             container_id = f"tv_chart_container_{c_id}"
             
+            # Using TradingView advanced widget URL format for native drawing, timeframes & right-click tools
             st.markdown(f"""
-                <div style="background: #161b22; border: 1px solid #00ffcc; padding: 10px; border-radius: 8px; margin-bottom: 8px;">
-                    <span style="color: #39ff14; font-weight: bold;">⚡ Active Trading Mode:</span> <span style="color: #ffffff;">{chart_trade_mode} | TradingView Native Drawing & Indicators Enabled</span>
-                </div>
                 <div id="{container_id}" style="width: {tv_width}; height: {tv_height}; margin: 0 auto; border: 2px solid #00ffcc; border-radius: 14px; overflow: hidden; background: {bg_col}; position: {'fixed' if is_fs=='true' else 'relative'}; top: {'0' if is_fs=='true' else 'auto'}; left: {'0' if is_fs=='true' else 'auto'}; z-index: {'99999' if is_fs=='true' else '1'};">
-                    <iframe src="https://s.tradingview.com/widgetembed/?symbol={tv_symbol}&interval=1&hidesidetoolbar=0&symboledit=1&saveimage=1&toolbarbg=f1f3f6&studies=%5B%22Volume%40tv-basicstudies%22%2C%22MASimple%45style%22%2C%22RSI%45style%22%2C%22MACD%45style%22%2C%22BollingerBands%45style%22%2C%22ZigZag%45style%22%2C%22SuperTrend%45style%22%5D&theme={tv_theme_val}&style=1&timezone=Etc%2FUTC" width="100%" height="100%" frameborder="0" allowtransparency="true" scrolling="no" allowfullscreen="true"></iframe>
+                    <iframe src="https://s.tradingview.com/widgetembed/?symbol={tv_symbol}&interval=1&hidesidetoolbar=0&symboledit=1&saveimage=1&toolbarbg=f1f3f6&studies=%5B%22Volume%40tv-basicstudies%22%2C%22RSI%40tv-basicstudies%22%2C%22MACD%40tv-basicstudies%22%2C%22BB%40tv-basicstudies%22%5D&theme={tv_theme_val}&style=1&timezone=Etc%2FUTC&withdateranges=1&showpopupbutton=1&studies_overrides=%7B%7D" width="100%" height="100%" frameborder="0" allowtransparency="true" scrolling="no" allowfullscreen="true"></iframe>
                 </div>
             """, unsafe_allow_html=True)
             
