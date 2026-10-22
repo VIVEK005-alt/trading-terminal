@@ -16,27 +16,28 @@ st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Inter:wght@300;400;600&display=swap');
     
-    .main { background-color: #07090e; color: #e6edf3; font-family: 'Inter', sans-serif; }
+    .main { background-color: #0f0f0f; color: #f1f1f1; font-family: 'Inter', sans-serif; }
     h1, h2, h3 { font-family: 'Orbitron', sans-serif; letter-spacing: 0.5px; }
     
-    .stTabs [data-baseweb="tab-list"] { gap: 8px; background-color: #0d1117; padding: 10px; border-radius: 10px; border: 1px solid #21262d; }
-    .stTabs [data-baseweb="tab"] { background-color: #161b22; color: #8b949e; border-radius: 6px; padding: 10px 20px; font-weight: 600; border: none; }
-    .stTabs [aria-selected="true"] { background: linear-gradient(135deg, #238636 0%, #2ea043 100%) !important; color: white !important; box-shadow: 0 0 15px rgba(35, 134, 54, 0.4); }
+    .stTabs [data-baseweb="tab-list"] { gap: 8px; background-color: #121212; padding: 10px; border-radius: 10px; border: 1px solid #272727; }
+    .stTabs [data-baseweb="tab"] { background-color: #212121; color: #aaa; border-radius: 6px; padding: 10px 20px; font-weight: 600; border: none; }
+    .stTabs [aria-selected="true"] { background: linear-gradient(135deg, #cc0000 0%, #ff0000 100%) !important; color: white !important; box-shadow: 0 0 15px rgba(255, 0, 0, 0.4); }
     
-    .metric-card { background: linear-gradient(145deg, #161b22, #0d1117); padding: 20px; border-radius: 12px; border: 1px solid #30363d; box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
-    .ai-box { background: rgba(33, 38, 45, 0.7); border-left: 4px solid #58a6ff; padding: 15px; border-radius: 0 8px 8px 0; margin-bottom: 15px; }
+    .metric-card { background: linear-gradient(145deg, #212121, #181818); padding: 20px; border-radius: 12px; border: 1px solid #3f3f3f; box-shadow: 0 4px 12px rgba(0,0,0,0.5); }
+    .ai-box { background: rgba(33, 33, 33, 0.9); border-left: 4px solid #ff0000; padding: 15px; border-radius: 0 8px 8px 0; margin-bottom: 15px; }
     
-    /* YouTube Custom Autoscale & Pro UI Wrapper */
+    /* YouTube Grid & Player Styling */
+    .yt-card { background: #181818; border-radius: 10px; padding: 10px; border: 1px solid #272727; margin-bottom: 15px; }
     .youtube-container {
         position: relative;
         width: 100%;
-        padding-bottom: 56.25%; /* 16:9 Aspect Ratio */
+        padding-bottom: 56.25%;
         height: 0;
         background: #000;
         border-radius: 12px;
         overflow: hidden;
-        border: 1px solid #30363d;
-        box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+        border: 1px solid #3f3f3f;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.8);
     }
     .youtube-container iframe {
         position: absolute;
@@ -97,17 +98,17 @@ def fetch_market_data(symbol):
     df['datetime'] = pd.to_datetime(df['timestamp'], unit='ms')
     return df
 
-# Helper to extract YouTube ID for embed iframe
+# Helper to extract YouTube ID
 def get_youtube_embed_url(url):
     if "youtu.be/" in url:
         video_id = url.split("youtu.be/")[1].split("?")[0]
     elif "watch?v=" in url:
         video_id = url.split("watch?v=")[1].split("&")[0]
     else:
-        video_id = "5qap5aO4i9A" # Default lofi
-    return f"https://www.youtube.com/embed/{video_id}?autoplay=0&enablejsapi=1"
+        video_id = "5qap5aO4i9A"
+    return f"https://www.youtube.com/embed/{video_id}?autoplay=1&enablejsapi=1"
 
-# 3. SIDEBAR: CONTROL CENTER & MULTI-AGENT STATUS
+# 3. SIDEBAR: CONTROL CENTER
 st.sidebar.title("⚡ Autonomous Control")
 user_email = st.sidebar.text_input("Trader Profile:", value="trader@gmail.com")
 
@@ -115,17 +116,6 @@ st.sidebar.markdown("---")
 st.sidebar.subheader("🤖 Dual-AI System Status")
 st.sidebar.success("🟢 **Trading Expert AI**: Active & Scanning Markets")
 st.sidebar.success("🟢 **Developer AI**: Ready for Architecture Updates")
-
-st.sidebar.markdown("---")
-st.sidebar.subheader("🌍 Seasonal & Festival Skin")
-current_month = datetime.now().month
-if current_month in [10, 11]:
-    festival_theme = "🪔 Diwali / Festive Golden Mode"
-elif current_month == 12:
-    festival_theme = "🎄 Christmas & Year-End Rally Mode"
-else:
-    festival_theme = "⚡ Cyberpunk Neon Mode (Standard)"
-st.sidebar.info(f"Active Skin: **{festival_theme}**")
 
 st.sidebar.markdown("---")
 selected_exchange = st.sidebar.selectbox("Exchange Feed", ["CoinGecko Global Feed", "Global Cloud Node"])
@@ -141,7 +131,7 @@ tab1, tab2, tab3, tab4, tab5, tab6, tab7 = st.tabs([
     "📈 Advanced Charts", 
     "🐋 Derivatives & CoinGlass", 
     "🎮 Paper Trading", 
-    "📺 YouTube Pro Hub", 
+    "🔴 YouTube Home & Stream Hub", 
     "💰 Tax & PnL Ledger",
     "🤖 Public Demand & AI Developer Box"
 ])
@@ -200,22 +190,47 @@ with tab4:
     if st.button("🚀 Execute Simulated Order"):
         st.success(f"Successfully placed {t_type} for {search_query} with Auto-Trailing Stop-Loss!")
 
-# --- TAB 5: YOUTUBE PRO HUB (AUTO-FIT & ZOOM INTERFACE) ---
+# --- TAB 5: YOUTUBE HOME & STREAM HUB (EXACT YOUTUBE UI) ---
 with tab5:
-    st.subheader("🔴 YouTube Pro Broadcast & Entertainment Hub")
-    st.markdown("Autofit player with native YouTube theater controls, zoom capability, and custom stream loading.")
+    st.subheader("📺 YouTube Home & Live Broadcast Grid")
     
-    col_a, col_b = st.columns([3, 1])
-    with col_a:
-        yt_input = st.text_input("🔗 Paste YouTube URL / Song / Podcast Link:", value="https://www.youtube.com/watch?v=5qap5aO4i9A")
-    with col_b:
-        view_mode = st.selectbox("Display Mode", ["Standard Fit", "Theater Mode"])
+    # YouTube style category pills/buttons
+    cols_cat = st.columns(8)
+    categories = ["All", "Music", "Live", "Podcasts", "Trading", "Crypto", "Mixes", "Comedy"]
+    selected_cat = "All"
+    for idx, cat in enumerate(categories):
+        if cols_cat[idx].button(cat, use_container_width=True):
+            selected_cat = cat
 
-    embed_url = get_youtube_embed_url(yt_input)
+    st.markdown("---")
     
-    # Render professional embedded YouTube player with auto-fit styling
+    # Search bar like YouTube UI inside the tab
+    yt_search = st.text_input("🔍 Search YouTube Videos or Playlists:", value="Diljit Singh Playlist / Trading Lofi")
+    
+    # Preset quick recommendation links resembling YouTube homepage feed
+    st.markdown("### Recommended / Trending Streams")
+    col_v1, col_v2, col_v3 = st.columns(3)
+    
+    v_url = "https://www.youtube.com/watch?v=5qap5aO4i9A"
+    with col_v1:
+        st.markdown('<div class="yt-card"><b>🎵 Lofi Trading Beats</b><br>Live Lo-Fi Hip Hop Radio</div>', unsafe_allow_html=True)
+        if st.button("▶ Play Lofi Stream"):
+            v_url = "https://www.youtube.com/watch?v=5qap5aO4i9A"
+    with col_v2:
+        st.markdown('<div class="yt-card"><b>📈 Crypto Market Analysis</b><br>Live Price Action Breakdown</div>', unsafe_allow_html=True)
+        if st.button("▶ Play Crypto Stream"):
+            v_url = "https://www.youtube.com/watch?v=jfKfPfyJRdk"
+    with col_v3:
+        st.markdown('<div class="yt-card"><b>🚀 Elliott Wave Masterclass</b><br>Advanced Technical Trading</div>', unsafe_allow_html=True)
+        if st.button("▶ Play Masterclass"):
+            v_url = "https://www.youtube.com/watch?v=5qap5aO4i9A"
+
+    st.markdown("---")
+    st.markdown("### Now Playing / Active Player")
+    embed_url = get_youtube_embed_url(v_url)
+    
     st.markdown(f"""
-        <div class="youtube-container" style="max-width: {'100%' if view_mode=='Theater Mode' else '850px'}; margin: auto;">
+        <div class="youtube-container">
             <iframe src="{embed_url}" title="YouTube video player" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
         </div>
     """, unsafe_allow_html=True)
@@ -237,14 +252,12 @@ with tab6:
 # --- TAB 7: PUBLIC DEMAND & AI DEVELOPER BOX ---
 with tab7:
     st.subheader("🤖 Public Demand & Autonomous Developer AI Hub")
-    st.markdown("Type any requirement below (e.g., *'Add a new MACD indicator tab', 'Change theme to neon purple', 'Add a crypto news feed'*). **Developer AI** will process your demand instantly!")
-    
-    user_demand = st.text_area("What do you want to add or change in the app?", placeholder="e.g., Add a crypto fear and greed index card in Tab 3...")
-    
+    st.markdown("Type any requirement below to modify app architecture instantly.")
+    user_demand = st.text_area("What do you want to add or change in the app?", placeholder="e.g., Add a crypto news feed...")
     if st.button("✨ Submit Demand to Developer AI"):
         if user_demand:
             st.info(f"🔄 **Developer AI is processing your request:** '{user_demand}'...")
-            st.success("✅ **Architecture Updated Successfully!** The requested feature has been integrated into system runtime.")
+            st.success("✅ **Architecture Updated Successfully!**")
             st.balloons()
         else:
-            st.warning("Please enter a valid requirement or demand.")
+            st.warning("Please enter a valid requirement.")
