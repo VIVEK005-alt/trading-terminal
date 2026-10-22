@@ -1,7 +1,7 @@
 import streamlit as st
-import ccxt
 import pandas as pd
 import sqlite3
+import requests
 from datetime import datetime
 
 # 1. PAGE CONFIGURATION & ULTRA-PRO DARK ARCHITECTURE
@@ -39,13 +39,42 @@ def init_db():
 
 init_db()
 
-# PURE PANDAS RSI FUNCTION (No external dependency needed)
+# PURE PANDAS RSI FUNCTION
 def compute_rsi(data, window=14):
     delta = data.diff()
     gain = (delta.where(delta > 0, 0)).rolling(window=window).mean()
     loss = (-delta.where(delta < 0, 0)).rolling(window=window).mean()
     rs = gain / loss
     return 100 - (100 / (1 + rs))
+
+# CLOUD-FRIENDLY COINGECKO DATA FETCHER
+def fetch_market_data(symbol):
+    mapping = {
+        'BTC/USDT': 'bitcoin',
+        'ETH/USDT': 'ethereum',
+        'SOL/USDT': 'solana',
+        'XRP/USDT': 'ripple',
+        'ADA/USDT': 'cardano',
+        'DOGE/USDT': 'dogecoin'
+    }
+    coin_id = mapping.get(symbol.upper(), 'bitcoin')
+    url = f"https://api.coingecko.com/api/v3/coins/{coin_id}/market_chart?vs_currency=usd&days=1"
+    
+    response = requests.get(url)
+    data = response.json()
+    prices = data.get('prices', [])
+    volumes = data.get('total_volumes', [])
+    
+    df_rows = []
+    for i in range(len(prices)):
+        ts = prices[i][0]
+        p = prices[i][1]
+        v = volumes[i][1] if i < len(volumes) else 0
+        df_rows.append([ts, p, p, p, p, v])
+        
+    df = pd.DataFrame(df_rows, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
+    df['datetime'] = pd.to_datetime(df['timestamp'], unit='ms')
+    return df
 
 # 3. SIDEBAR: CONTROL CENTER & MULTI-AGENT STATUS
 st.sidebar.title("⚡ Autonomous Control")
@@ -68,12 +97,12 @@ else:
 st.sidebar.info(f"Active Skin: **{festival_theme}**")
 
 st.sidebar.markdown("---")
-selected_exchange = st.sidebar.selectbox("Exchange", ["bybit", "okx", "binance"])
+selected_exchange = st.sidebar.selectbox("Exchange Feed", ["CoinGecko Global Feed", "Global Cloud Node"])
 timeframe = st.sidebar.selectbox("Timeframe", ["1m", "5m", "15m", "1h", "4h", "1D"])
 
 # 4. UNIVERSAL SEARCH BAR
 st.title("🚀 Master Universal Trading Terminal")
-search_query = st.text_input("🔍 Global Search Bar (Coins, Forex, Futures i.e., BTC/USDT, ETH/USDT):", value="BTC/USDT")
+search_query = st.text_input("🔍 Global Search Bar (e.g., BTC/USDT, ETH/USDT, SOL/USDT):", value="BTC/USDT")
 
 # 5. MAIN NAVIGATION TABS
 tab1, tab2, tab3, tab4, tab5, tab6, tab7 = st.tabs([
@@ -90,12 +119,9 @@ df = None
 
 # --- TAB 1: SCREENER & SEARCH ---
 with tab1:
-    st.subheader(f"🌍 Live Market Feed: {search_query} ({selected_exchange.upper()})")
+    st.subheader(f"🌍 Live Market Feed: {search_query}")
     try:
-        ex_class = getattr(ccxt, selected_exchange)()
-        ohlcv = ex_class.fetch_ohlcv(search_query, timeframe, limit=30)
-        df = pd.DataFrame(ohlcv, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
-        df['datetime'] = pd.to_datetime(df['timestamp'], unit='ms')
+        df = fetch_market_data(search_query)
         df['RSI'] = compute_rsi(df['close'], window=14)
         
         c1, c2, c3 = st.columns(3)
