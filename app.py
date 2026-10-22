@@ -361,7 +361,7 @@ st.sidebar.success("🟢 **Developer AI**: Synced")
 st.title("⚡ APEX QUANTUM MULTI-TIMEFRAME MASTER TERMINAL")
 search_query = st.text_input("🔍 Global Search Bar (e.g., BTC/USDT, ETH/USDT, SOL/USDT):", value="BTC/USDT")
 
-# --- FULL TABS SUITE ---
+# --- FULL PROFESSIONAL TABS SUITE ---
 tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9 = st.tabs([
     "📊 Master Excel", 
     "📈 Advanced Charts", 
@@ -624,19 +624,65 @@ with tab1:
 
             st.markdown("---")
 
-# --- TAB 2: ADVANCED CHARTS ---
+# --- TAB 2: ADVANCED CHARTS (UPGRADED TO FULL PRO INTERACTIVE WIDGET) ---
 with tab2:
     st.subheader("📊 Pro Interactive Chart Engine")
     st.markdown("""
-        <div class="ai-box">
-            <b>🤖 Trading Expert AI Insight:</b> Multi-timeframe trend alignment verified across all master structures.
+        <div class="unique-strategy-box">
+            <b>🤖 Trading Expert AI Insight:</b> Multi-timeframe trend alignment verified across all master structures with full TradingView integration.
         </div>
     """, unsafe_allow_html=True)
-    try:
-        sample_df = fetch_master_excel_data('bitcoin', 100)
-        st.line_chart(sample_df.set_index(pd.to_datetime(sample_df['Date'] + ' ' + sample_df['Time']))['close'], use_container_width=True)
-    except Exception as e:
-        st.info(f"Chart rendering note: {e}")
+    
+    selected_chart_coin = st.selectbox("Select Asset for Advanced Chart Studio:", list(all_coins_dict.keys()), index=0, key="adv_chart_symbol_sel")
+    chart_symbol_str = f"BINANCE:{selected_chart_coin}USDT"
+    
+    chart_tab_html = f"""
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <style>
+        html, body {{
+          margin: 0;
+          padding: 0;
+          width: 100%;
+          height: 100%;
+          background-color: #05070b;
+          overflow: hidden;
+        }}
+      </style>
+    </head>
+    <body>
+      <div class="tradingview-widget-container" style="height:100%;width:100%">
+        <div class="tradingview-widget-container__widget" style="height:100%;width:100%"></div>
+        <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js" async>
+        {{
+          "autosize": true,
+          "symbol": "{chart_symbol_str}",
+          "interval": "D",
+          "timezone": "Etc/UTC",
+          "theme": "dark",
+          "style": "1",
+          "locale": "en",
+          "enable_publishing": false,
+          "allow_symbol_change": true,
+          "watchlist": ["BINANCE:BTCUSDT", "BINANCE:ETHUSDT", "BINANCE:SOLUSDT", "BINANCE:BNBUSDT", "BINANCE:XRPUSDT"],
+          "details": true,
+          "hotlist": true,
+          "calendar": false,
+          "support_host": "https://www.tradingview.com"
+        }}
+        </script>
+      </div>
+    </body>
+    </html>
+    """
+    encoded_chart_tab_html = urllib.parse.quote(chart_tab_html)
+    st.markdown(f"""
+        <div style="width: 100%; height: 700px; border: 2px solid #00ffcc; border-radius: 14px; overflow: hidden; background: #05070b;">
+            <iframe src="data:text/html;charset=utf-8,{encoded_chart_tab_html}" width="100%" height="100%" frameborder="0" allowtransparency="true" scrolling="no" allowfullscreen="true" sandbox="allow-scripts allow-same-origin allow-popups"></iframe>
+        </div>
+    """, unsafe_allow_html=True)
 
 # --- TAB 3: DERIVATIVES & COINGLASS ---
 with tab3:
