@@ -25,6 +25,27 @@ st.markdown("""
     
     .metric-card { background: linear-gradient(145deg, #161b22, #0d1117); padding: 20px; border-radius: 12px; border: 1px solid #30363d; box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
     .ai-box { background: rgba(33, 38, 45, 0.7); border-left: 4px solid #58a6ff; padding: 15px; border-radius: 0 8px 8px 0; margin-bottom: 15px; }
+    
+    /* YouTube Custom Autoscale & Pro UI Wrapper */
+    .youtube-container {
+        position: relative;
+        width: 100%;
+        padding-bottom: 56.25%; /* 16:9 Aspect Ratio */
+        height: 0;
+        background: #000;
+        border-radius: 12px;
+        overflow: hidden;
+        border: 1px solid #30363d;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+    }
+    .youtube-container iframe {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        border: 0;
+    }
     </style>
 """, unsafe_allow_html=True)
 
@@ -76,6 +97,16 @@ def fetch_market_data(symbol):
     df['datetime'] = pd.to_datetime(df['timestamp'], unit='ms')
     return df
 
+# Helper to extract YouTube ID for embed iframe
+def get_youtube_embed_url(url):
+    if "youtu.be/" in url:
+        video_id = url.split("youtu.be/")[1].split("?")[0]
+    elif "watch?v=" in url:
+        video_id = url.split("watch?v=")[1].split("&")[0]
+    else:
+        video_id = "5qap5aO4i9A" # Default lofi
+    return f"https://www.youtube.com/embed/{video_id}?autoplay=0&enablejsapi=1"
+
 # 3. SIDEBAR: CONTROL CENTER & MULTI-AGENT STATUS
 st.sidebar.title("⚡ Autonomous Control")
 user_email = st.sidebar.text_input("Trader Profile:", value="trader@gmail.com")
@@ -110,7 +141,7 @@ tab1, tab2, tab3, tab4, tab5, tab6, tab7 = st.tabs([
     "📈 Advanced Charts", 
     "🐋 Derivatives & CoinGlass", 
     "🎮 Paper Trading", 
-    "🎵 Pro Media & YouTube Hub", 
+    "📺 YouTube Pro Hub", 
     "💰 Tax & PnL Ledger",
     "🤖 Public Demand & AI Developer Box"
 ])
@@ -169,26 +200,25 @@ with tab4:
     if st.button("🚀 Execute Simulated Order"):
         st.success(f"Successfully placed {t_type} for {search_query} with Auto-Trailing Stop-Loss!")
 
-# --- TAB 5: PRO MEDIA & YOUTUBE HUB ---
+# --- TAB 5: YOUTUBE PRO HUB (AUTO-FIT & ZOOM INTERFACE) ---
 with tab5:
-    st.subheader("📺 Pro YouTube Trading & Lofi Broadcast Center")
-    st.markdown("Stream live YouTube analysis, lofi concentration beats, or enter any custom YouTube link below:")
+    st.subheader("🔴 YouTube Pro Broadcast & Entertainment Hub")
+    st.markdown("Autofit player with native YouTube theater controls, zoom capability, and custom stream loading.")
     
-    media_preset = st.selectbox("Select Preset Channel / Stream:", [
-        "Custom YouTube URL",
-        "Lofi Trading Beats (Live)",
-        "Crypto Market Analysis & News"
-    ])
+    col_a, col_b = st.columns([3, 1])
+    with col_a:
+        yt_input = st.text_input("🔗 Paste YouTube URL / Song / Podcast Link:", value="https://www.youtube.com/watch?v=5qap5aO4i9A")
+    with col_b:
+        view_mode = st.selectbox("Display Mode", ["Standard Fit", "Theater Mode"])
+
+    embed_url = get_youtube_embed_url(yt_input)
     
-    if media_preset == "Lofi Trading Beats (Live)":
-        default_yt = "https://www.youtube.com/watch?v=5qap5aO4i9A"
-    elif media_preset == "Crypto Market Analysis & News":
-        default_yt = "https://www.youtube.com/watch?v=jfKfPfyJRdk"
-    else:
-        default_yt = "https://www.youtube.com/watch?v=5qap5aO4i9A"
-        
-    yt_link = st.text_input("YouTube Video / Stream URL:", value=default_yt)
-    st.video(yt_link)
+    # Render professional embedded YouTube player with auto-fit styling
+    st.markdown(f"""
+        <div class="youtube-container" style="max-width: {'100%' if view_mode=='Theater Mode' else '850px'}; margin: auto;">
+            <iframe src="{embed_url}" title="YouTube video player" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+        </div>
+    """, unsafe_allow_html=True)
 
 # --- TAB 6: TAX & PNL LEDGER ---
 with tab6:
