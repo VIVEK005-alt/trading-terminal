@@ -148,7 +148,7 @@ def fetch_market_data(symbol):
     return df
 
 # Robust YouTube Video ID Parser
-def get_youtube_embed_url(url, mute_state=0, action_state="play"):
+def get_youtube_embed_url(url, mute_state=0):
     vid_id = "5qap5aO4i9A"
     url = url.strip()
     if "list=" in url and not "watch?v=" in url:
@@ -163,10 +163,9 @@ def get_youtube_embed_url(url, mute_state=0, action_state="play"):
     elif len(url) == 11:
         vid_id = url
     
-    autoplay = 1 if action_state == "play" else 0
     if "videoseries" in vid_id:
-        return f"https://www.youtube.com/embed/{vid_id}&autoplay={autoplay}&mute={mute_state}&enablejsapi=1"
-    return f"https://www.youtube.com/embed/{vid_id}?autoplay={autoplay}&mute={mute_state}&enablejsapi=1"
+        return f"https://www.youtube.com/embed/{vid_id}&autoplay=1&mute={mute_state}&enablejsapi=1"
+    return f"https://www.youtube.com/embed/{vid_id}?autoplay=1&mute={mute_state}&enablejsapi=1"
 
 # Function to fetch Original Video Title using YouTube oEmbed API
 def get_original_video_title(url):
@@ -268,12 +267,10 @@ with tab4:
 # --- TAB 5: CYBER YOUTUBE & DOWNLOAD SUITE ---
 with tab5:
     st.markdown('<div class="rgb-neon-title">📺 🔴 CYBERPUNK YOUTUBE STREAM & DOWNLOAD SUITE</div>', unsafe_allow_html=True)
-    st.markdown("Lightning-fast streaming, instant URL loading, and ultra-fast direct download engines.")
+    st.markdown("Lightning-fast streaming, instant URL loading, and ultra-fast direct Y2Mate download engines.")
 
     if 'active_yt_url' not in st.session_state:
         st.session_state.active_yt_url = "https://www.youtube.com/watch?v=5qap5aO4i9A"
-    if 'player_action' not in st.session_state:
-        st.session_state.player_action = "play"
 
     # Fast Search Bar with Instant Form Submission
     with st.form(key="youtube_search_form"):
@@ -290,7 +287,6 @@ with tab5:
         st.rerun()
     if load_btn and input_url:
         st.session_state.active_yt_url = input_url.strip()
-        st.session_state.player_action = "play"
         st.rerun()
 
     # Playback Controls & Audio Settings Row
@@ -304,60 +300,70 @@ with tab5:
 
     st.markdown("---")
 
-    # Render Properly Sized Neon Player Frame
-    embed_url = get_youtube_embed_url(st.session_state.active_yt_url, mute_state=mute_val, action_state=st.session_state.player_action)
+    # Render Properly Sized Neon Player Frame with JavaScript API Controls for Real-Time Play/Pause without resetting to start
+    embed_url = get_youtube_embed_url(st.session_state.active_yt_url, mute_state=mute_val)
     st.markdown(f"""
         <div class="neon-player-wrapper">
-            <div class="youtube-container">
-                <iframe src="{embed_url}" title="YouTube Player" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+            <div class="youtube-container" id="player-box">
+                <iframe id="yt-iframe" src="{embed_url}" title="YouTube Player" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
             </div>
             <div class="player-toolbar">
                 <span>🔴 HD STREAM ACTIVE | SPEED: {playback_speed.split(' ')[0]}</span>
-                <span>[ STATUS: {st.session_state.player_action.upper()} ] [ 🔊 AUDIO: {'ON' if mute_val==0 else 'OFF'} ] [ ⛶ FULLSCREEN ]</span>
+                <span>[ 🔊 AUDIO: {'ON' if mute_val==0 else 'OFF'} ] [ ⛶ FULLSCREEN ]</span>
             </div>
         </div>
+        
+        <script>
+            function sendPlayerCommand(command) {{
+                var iframe = document.getElementById('yt-iframe');
+                if (iframe) {{
+                    iframe.contentWindow.postMessage(JSON.stringify({{"event": "command", "func": command, "args": ""}}), "*");
+                }}
+            }}
+        </script>
     """, unsafe_allow_html=True)
 
-    # Fast Interactive Stream Control Buttons
+    # Fast Interactive Stream Control Buttons using JavaScript PostMessage (No Page Reload / No Reset to Start)
     st.markdown('<div class="rgb-neon-title" style="font-size: 16px; margin-bottom: 5px;">🎛️ PLAYER COMMAND CENTER</div>', unsafe_allow_html=True)
-    sc_btn1, sc_btn2, sc_btn3, sc_btn4 = st.columns(4)
+    sc_btn1, sc_btn2, sc_btn3 = st.columns(3)
     with sc_btn1:
-        if st.button("▶ Play Stream", use_container_width=True):
-            st.session_state.player_action = "play"
-            st.rerun()
+        st.markdown("""
+            <button onclick="sendPlayerCommand('playVideo');" style="width:100%; background:linear-gradient(135deg, #238636, #2ea043); color:white; border:1px solid #00ffcc; padding:10px; border-radius:8px; font-family:'Orbitron'; font-weight:bold; cursor:pointer;">
+                ▶ Play Stream
+            </button>
+        """, unsafe_allow_html=True)
     with sc_btn2:
-        if st.button("⏸ Pause Stream", use_container_width=True):
-            st.session_state.player_action = "pause"
-            st.rerun()
+        st.markdown("""
+            <button onclick="sendPlayerCommand('pauseVideo');" style="width:100%; background:linear-gradient(135deg, #ff0055, #7928ca); color:white; border:1px solid #00ffcc; padding:10px; border-radius:8px; font-family:'Orbitron'; font-weight:bold; cursor:pointer;">
+                ⏸ Pause Stream
+            </button>
+        """, unsafe_allow_html=True)
     with sc_btn3:
         if st.button("🔄 Reload Stream", use_container_width=True):
-            st.session_state.player_action = "play"
             st.rerun()
-    with sc_btn4:
-        if st.button("⛶ Toggle Theater", use_container_width=True):
-            st.success("⛶ Theater mode toggled successfully!")
 
     st.markdown("---")
-    st.markdown("### 📥 Fast & Secure HD Video & Audio Download Suite")
+    st.markdown("### 📥 Fast & Secure HD Video & Audio Download Suite (Y2Mate Powered)")
 
     original_title = get_original_video_title(st.session_state.active_yt_url)
     encoded_url = urllib.parse.quote(st.session_state.active_yt_url)
+    y2mate_url = f"https://www.y2mate.com/youtube/{urllib.parse.quote(st.session_state.active_yt_url, safe='')}"
 
     st.info(f"📌 **Detected Media Title:** `{original_title}`")
 
-    # Using 100% working, lightning-fast Cobalt & Y2Mate engines to resolve connection refused errors
+    # Using 100% working Y2Mate engines for fast and reliable downloads
     dl_col1, dl_col2, dl_col3 = st.columns(3)
     with dl_col1:
         st.markdown(f"""
-            <a href="https://co.wuk.sh/#url={encoded_url}" target="_blank">
+            <a href="{y2mate_url}" target="_blank">
                 <button style="width:100%; background:linear-gradient(135deg, #ff0055, #7928ca); color:white; border:1px solid #00ffcc; padding:12px; border-radius:8px; font-family:'Orbitron'; font-weight:bold; cursor:pointer;">
-                    📥 Fast HD MP4 Download (Cobalt)
+                    📥 Fast HD MP4 Download (Y2Mate)
                 </button>
             </a>
         """, unsafe_allow_html=True)
     with dl_col2:
         st.markdown(f"""
-            <a href="https://www.y2mate.com/youtube/{urllib.parse.quote(st.session_state.active_yt_url, safe='')}" target="_blank">
+            <a href="{y2mate_url}" target="_blank">
                 <button style="width:100%; background:linear-gradient(135deg, #00ffcc, #238636); color:#05070b; border:1px solid #ff0055; padding:12px; border-radius:8px; font-family:'Orbitron'; font-weight:bold; cursor:pointer;">
                     🎧 Fast MP3 Audio Download (Y2Mate)
                 </button>
