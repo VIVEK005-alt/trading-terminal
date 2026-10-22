@@ -120,6 +120,20 @@ def init_db():
 
 init_db()
 
+@st.cache_data(ttl=300)
+def fetch_top_1000_coins():
+    try:
+        url = "https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=250&page=1&sparkline=false"
+        res = requests.get(url, timeout=3)
+        if res.status_code == 200:
+            data = res.json()
+            return {item['symbol'].upper(): item['id'] for item in data}
+    except:
+        pass
+    return {"BTC": "bitcoin", "ETH": "ethereum", "SOL": "solana", "BNB": "binancecoin", "XRP": "ripple", "DOGE": "dogecoin", "ADA": "cardano", "AVAX": "avalanche-2", "LINK": "chainlink", "SUI": "sui"}
+
+all_coins_dict = fetch_top_1000_coins()
+
 def compute_master_indicators(df, seed_offset=0):
     close = df['close']
     high = df['high']
@@ -252,18 +266,12 @@ def get_youtube_embed_url(url, mute_state=0):
         return f"https://www.youtube.com/embed/{vid_id}&autoplay=1&mute={mute_state}&enablejsapi=1"
     return f"https://www.youtube.com/embed/{vid_id}?autoplay=1&mute={mute_state}&enablejsapi=1"
 
-def get_original_video_title(url):
-    try:
-        oembed_url = f"https://www.youtube.com/oembed?url={urllib.parse.quote(url)}&format=json"
-        res = requests.get(oembed_url, timeout=3)
-        if res.status_code == 200:
-            return res.json().get("title", "YouTube_Media")
-    except:
-        pass
-    return "YouTube_Media_Stream"
-
 st.sidebar.title("⚡ APEX CONTROL")
 user_email = st.sidebar.text_input("Trader Profile:", value="trader@apex.ai")
+
+st.sidebar.markdown("---")
+st.sidebar.subheader("⭐ Multiple Watchlist (1K+ Coins)")
+user_watchlist = st.sidebar.multiselect("Select Coins to Watch:", options=list(all_coins_dict.keys()), default=["BTC", "ETH", "SOL", "BNB", "XRP"])
 
 st.sidebar.markdown("---")
 st.sidebar.subheader("🔄 Master Data Refresh")
@@ -297,10 +305,9 @@ with tab1:
     selected_lang = st.selectbox("🌐 Choose Language / भाषा चुनें:", ["Hinglish", "Hindi", "English"], key="inline_lang_selector")
     lang = LANG_DICT[selected_lang]
     
-    coin_mapping = {
-        "BTC": "bitcoin", "ETH": "ethereum", "SOL": "solana", "BNB": "binancecoin", "XRP": "ripple",
-        "DOGE": "dogecoin", "AVAX": "avalanche-2", "LINK": "chainlink", "NEAR": "near", "SUI": "sui"
-    }
+    coin_mapping = {k: all_coins_dict[k] for k in user_watchlist if k in all_coins_dict}
+    if not coin_mapping:
+        coin_mapping = {"BTC": "bitcoin", "ETH": "ethereum", "SOL": "solana"}
     
     timeframe_list = [
         "1 Min", "3 Min", "5 Min", "15 Min", "30 Min", "75 Min", 
@@ -434,14 +441,16 @@ with tab1:
                 </div>
             """, unsafe_allow_html=True)
 
-            # --- TRADINGVIEW PROFESSIONAL CHART WITH TRUE FULLSCREEN (F11 STYLE) & AUTO-APPLIED STUDIES ---
+            # --- TRADINGVIEW PROFESSIONAL CHART WITH DARK/LIGHT MODE TOGGLE & TRUE FULLSCREEN ---
             st.markdown(f"### 📈 Live TradingView Professional Chart ({c_tab_name})")
             
-            col_c1, col_c2 = st.columns([2, 4])
+            col_c1, col_c2, col_c3 = st.columns([2, 2, 3])
             with col_c1:
-                chart_view_mode = st.radio(f"📐 Chart View Mode ({c_tab_name}):", ["Landscape", "Portrait", "Full Screen"], horizontal=True, key=f"tv_vmode_{c_id}")
+                chart_view_mode = st.radio(f"📐 View Mode ({c_tab_name}):", ["Landscape", "Portrait", "Full Screen"], horizontal=True, key=f"tv_vmode_{c_id}")
             with col_c2:
-                st.markdown("<span style='color: #00ffcc; font-size: 12px;'>⚡ Auto-Applied: EMA (10,20,50,100), MACD, RSI, Bollinger, Supertrend, Fibonacci & ZigZag (0.5) (1px/2px styling)</span>", unsafe_allow_html=True)
+                chart_theme_mode = st.selectbox(f"🌓 Theme Mode ({c_tab_name}):", ["Dark Mode", "Light Mode"], key=f"tv_theme_{c_id}")
+            with col_c3:
+                st.markdown("<span style='color: #00ffcc; font-size: 11px;'>⚡ Auto-Applied: EMA, MACD, RSI, Bollinger, Supertrend, Fibonacci & ZigZag (0.5)</span>", unsafe_allow_html=True)
             
             if chart_view_mode == "Portrait":
                 tv_width = "450px"
@@ -454,12 +463,12 @@ with tab1:
                 tv_height = "600px"
 
             tv_symbol = f"BINANCE:{c_tab_name}USDT"
-            
-            # JavaScript for True Fullscreen (F11 style container trigger)
+            tv_theme_val = "dark" if chart_theme_mode == "Dark Mode" else "light"
             container_id = f"tv_chart_container_{c_id}"
+            
             st.markdown(f"""
-                <div id="{container_id}" style="width: {tv_width}; height: {tv_height}; margin: 0 auto; border: 2px solid #00ffcc; border-radius: 14px; overflow: hidden; background: #000; position: relative;">
-                    <iframe src="https://s.tradingview.com/widgetembed/?symbol={tv_symbol}&interval=1&hidesidetoolbar=0&symboledit=1&saveimage=1&toolbarbg=f1f3f6&studies=%5B%22MASimple%45style%22%2C%22RSI%45style%22%2C%22MACD%45style%22%2C%22BollingerBands%45style%22%2C%22ZigZag%45style%22%2C%22SuperTrend%45style%22%5D&theme=dark&style=1&timezone=Etc%2FUTC" width="100%" height="100%" frameborder="0" allowtransparency="true" scrolling="no" allowfullscreen="true"></iframe>
+                <div id="{container_id}" style="width: {tv_width}; height: {tv_height}; margin: 0 auto; border: 2px solid #00ffcc; border-radius: 14px; overflow: hidden; background: {'#000' if tv_theme_val=='dark' else '#fff'}; position: relative;">
+                    <iframe src="https://s.tradingview.com/widgetembed/?symbol={tv_symbol}&interval=1&hidesidetoolbar=0&symboledit=1&saveimage=1&toolbarbg=f1f3f6&studies=%5B%22MASimple%45style%22%2C%22RSI%45style%22%2C%22MACD%45style%22%2C%22BollingerBands%45style%22%2C%22ZigZag%45style%22%2C%22SuperTrend%45style%22%5D&theme={tv_theme_val}&style=1&timezone=Etc%2FUTC" width="100%" height="100%" frameborder="0" allowtransparency="true" scrolling="no" allowfullscreen="true"></iframe>
                 </div>
                 <script>
                 function toggleFullscreen_{c_id}() {{
