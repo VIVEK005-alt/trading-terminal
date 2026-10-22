@@ -68,7 +68,7 @@ else:
 st.sidebar.info(f"Active Skin: **{festival_theme}**")
 
 st.sidebar.markdown("---")
-selected_exchange = st.sidebar.selectbox("Exchange", ["binance", "bybit", "okx"])
+selected_exchange = st.sidebar.selectbox("Exchange", ["bybit", "okx", "binance"])
 timeframe = st.sidebar.selectbox("Timeframe", ["1m", "5m", "15m", "1h", "4h", "1D"])
 
 # 4. UNIVERSAL SEARCH BAR
