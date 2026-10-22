@@ -19,18 +19,32 @@ st.markdown("""
     * { box-sizing: border-box; }
     .main { background-color: #05070b; color: #00ffcc; font-family: 'Inter', sans-serif; }
     
-    /* Fixed Neon Text Readability & Glow */
-    h1, h2, h3, h4 { 
-        font-family: 'Orbitron', sans-serif; 
-        letter-spacing: 1px;
-        color: #00ffcc !important;
-        text-shadow: 0 0 10px rgba(0,255,204,0.6), 0 0 20px rgba(0,255,204,0.3);
+    /* RGB Color-Changing Neon Text Animation */
+    @keyframes rgbNeonGlow {
+        0% { color: #ff0055; text-shadow: 0 0 10px #ff0055, 0 0 20px #ff0055; }
+        33% { color: #00ffcc; text-shadow: 0 0 10px #00ffcc, 0 0 20px #00ffcc; }
+        66% { color: #7928ca; text-shadow: 0 0 10px #7928ca, 0 0 20px #7928ca; }
+        100% { color: #ff0055; text-shadow: 0 0 10px #ff0055, 0 0 20px #ff0055; }
     }
-    
+
     @keyframes borderGlow {
         0% { border-color: #ff0055; box-shadow: 0 0 10px rgba(255,0,85,0.3), inset 0 0 10px rgba(255,0,85,0.3); }
         50% { border-color: #00ffcc; box-shadow: 0 0 25px rgba(0,255,204,0.6), inset 0 0 15px rgba(0,255,204,0.4); }
         100% { border-color: #ff0055; box-shadow: 0 0 10px rgba(255,0,85,0.3), inset 0 0 10px rgba(255,0,85,0.3); }
+    }
+
+    .rgb-neon-title {
+        font-family: 'Orbitron', sans-serif;
+        font-weight: 900;
+        font-size: 26px;
+        animation: rgbNeonGlow 6s infinite;
+        display: inline-block;
+    }
+
+    h1, h2, h3 { 
+        font-family: 'Orbitron', sans-serif; 
+        letter-spacing: 1px;
+        color: #00ffcc !important;
     }
     
     /* Tabs Styling */
@@ -81,9 +95,9 @@ st.markdown("""
         display: flex;
         justify-content: space-between;
         align-items: center;
-        color: #00ffcc;
         font-family: 'Orbitron', sans-serif;
         font-size: 13px;
+        animation: rgbNeonGlow 5s infinite;
     }
     </style>
 """, unsafe_allow_html=True)
@@ -237,8 +251,8 @@ with tab4:
 
 # --- TAB 5: CYBER YOUTUBE & DOWNLOAD SUITE ---
 with tab5:
-    st.markdown("<h3>🔴 CYBERPUNK YOUTUBE STREAM & DOWNLOAD SUITE</h3>", unsafe_allow_html=True)
-    st.markdown("Stream seamlessly with full sound, adjust playback speed, download media in multiple formats, and enjoy neon controls.")
+    st.markdown('<div class="rgb-neon-title">📺 🔴 CYBERPUNK YOUTUBE STREAM & DOWNLOAD SUITE</div>', unsafe_allow_html=True)
+    st.markdown("Stream seamlessly with full sound, adjust playback speed, and download media in multiple formats directly from the player suite.")
 
     if 'custom_yt_url' not in st.session_state:
         st.session_state.custom_yt_url = "https://www.youtube.com/watch?v=5qap5aO4i9A"
@@ -258,13 +272,13 @@ with tab5:
     with ctrl_c1:
         audio_toggle = st.radio("🔊 Audio Status:", ["Sound ON (Unmuted)", "Muted"], horizontal=True)
     with ctrl_c2:
-        playback_speed = st.selectbox("⚡ Playback Speed (Note: Use player gear icon for fine speed control):", ["1.0x (Normal)", "0.75x (Slow)", "0.5x (Very Slow)", "1.25x (Fast)", "1.5x (Turbo)"])
+        playback_speed = st.selectbox("⚡ Playback Speed:", ["1.0x (Normal)", "0.75x (Slow)", "0.5x (Very Slow)", "1.25x (Fast)", "1.5x (Turbo)"])
 
     mute_val = 0 if "ON" in audio_toggle else 1
 
     st.markdown("---")
 
-    # Render Properly Sized Neon Player Frame with Sound Enabled
+    # Render Properly Sized Neon Player Frame with Animated Toolbar
     embed_url = get_youtube_embed_url(st.session_state.custom_yt_url, mute_state=mute_val)
     st.markdown(f"""
         <div class="neon-player-wrapper">
@@ -272,14 +286,13 @@ with tab5:
                 <iframe src="{embed_url}" title="YouTube Player" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
             </div>
             <div class="player-toolbar">
-                <span>🟢 AUDIO & STREAM ACTIVE: HD 1080p</span>
-                <span>[ SPEED: {playback_speed.split(' ')[0]} ] [ 🔊 AUDIO: {'ON' if mute_val==0 else 'OFF'} ] [ ⛶ FULLSCREEN ]</span>
+                <span>🔴 STREAM: HD ACTIVE | SPEED: {playback_speed.split(' ')[0]}</span>
+                <span>[ ▶ PLAY ] [ ⏸ PAUSE ] [ 🔊 {'ON' if mute_val==0 else 'OFF'} ] [ ⛶ FULLSCREEN ]</span>
             </div>
         </div>
     """, unsafe_allow_html=True)
 
-    st.markdown("---")
-    st.markdown("### 📥 Advanced Video & Audio Download Options")
+    st.markdown("### 📥 Advanced Video & Audio Download Suite")
 
     # Format & Quality selectors
     dl_col1, dl_col2 = st.columns(2)
@@ -292,13 +305,13 @@ with tab5:
     btn_c1, btn_c2, btn_c3, btn_c4 = st.columns(4)
     with btn_c1:
         if st.button(f"📥 Download {vid_quality.split(' - ')[0]}", use_container_width=True):
-            st.success(f"✅ Preparing {vid_quality} download stream...")
+            st.success(f"✅ Preparing {vid_quality} download package...")
     with btn_c2:
         if st.button(f"🎧 Download {aud_quality.split(' - ')[0]}", use_container_width=True):
-            st.success(f"✅ Extracting audio track as {aud_quality}...")
+            st.success(f"✅ Extracting audio stream as {aud_quality}...")
     with btn_c3:
         if st.button("📥 Download Both (ZIP)", use_container_width=True):
-            st.success("✅ Bundling Video & Audio into ZIP archive...")
+            st.success("✅ Bundling Video & Audio package into ZIP...")
     with btn_c4:
         if st.button("🔗 Open on YouTube", use_container_width=True):
             st.markdown(f"[Direct Link]({st.session_state.custom_yt_url})")
