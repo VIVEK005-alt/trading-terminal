@@ -314,23 +314,38 @@ user_email = st.sidebar.text_input("Trader Profile:", value="trader@apex.ai")
 
 st.sidebar.markdown("---")
 
-# Professional Multiple Watchlist Management (1K+ Coins Support & Persistence)
-if 'user_saved_watchlist' not in st.session_state:
-    st.session_state.user_saved_watchlist = ["BTC", "ETH", "SOL", "BNB", "XRP", "ADA", "AVAX", "LINK", "SUI", "DOT"]
+# --- PROFESSIONAL MULTIPLE WATCHLIST & NEW PLAYLIST CREATION SETUP ---
+if 'custom_playlists' not in st.session_state:
+    st.session_state.custom_playlists = {
+        "Default Watchlist": ["BTC", "ETH", "SOL", "BNB", "XRP"],
+        "Altcoins Pro": ["ADA", "AVAX", "LINK", "SUI", "DOT"],
+        "DeFi & Layer1": ["NEAR", "ATOM", "APT", "RENDER", "UNI"]
+    }
 
-st.sidebar.subheader("⭐ Professional Multiple Watchlist (1K+)")
-search_wl = st.sidebar.text_input("🔍 Search 1K+ Coins:", placeholder="Type symbol e.g., BTC, ETH...")
+st.sidebar.subheader("📁 Playlist & Watchlist Manager")
+new_playlist_name = st.sidebar.text_input("New Playlist Name:", placeholder="e.g. My Favorites...")
+if st.sidebar.button("➕ Create New Playlist", use_container_width=True):
+    if new_playlist_name and new_playlist_name not in st.session_state.custom_playlists:
+        st.session_state.custom_playlists[new_playlist_name] = ["BTC", "ETH"]
+        st.success(f"Playlist '{new_playlist_name}' created successfully!")
+        st.rerun()
 
-filtered_options = [k for k in all_coins_dict.keys() if search_wl.upper() in k] if search_wl else list(all_coins_dict.keys())[:100]
+active_playlist = st.sidebar.selectbox("📂 Select Active Playlist:", list(st.session_state.custom_playlists.keys()))
 
-selected_wl = st.sidebar.multiselect(
-    "Manage Saved Watchlist (Up to 1K+ Coins):",
+# Manage coins in active playlist (Supports 1K+ Coins)
+current_coins_in_playlist = st.session_state.custom_playlists[active_playlist]
+updated_playlist_coins = st.sidebar.multiselect(
+    f"Edit Coins in [{active_playlist}]:",
     options=list(all_coins_dict.keys()),
-    default=st.session_state.user_saved_watchlist
+    default=[c for c in current_coins_in_playlist if c in all_coins_dict]
 )
+if updated_playlist_coins:
+    st.session_state.custom_playlists[active_playlist] = updated_playlist_coins
 
-if selected_wl:
-    st.session_state.user_saved_watchlist = selected_wl
+st.sidebar.markdown("---")
+
+# --- CURRENCY SELECTOR OPTIONS ---
+selected_currency = st.sidebar.selectbox("💱 Select Trading Currency:", ["USD ($)", "EUR (€)", "GBP (£)", "INR (₹)", "JPY (¥)", "USDT"])
 
 st.sidebar.markdown("---")
 st.sidebar.subheader("🔄 Master Data Refresh")
@@ -359,12 +374,12 @@ tab1, tab2, tab3, tab4, tab5, tab6, tab7 = st.tabs([
 df = None
 
 with tab1:
-    st.subheader("🌍 Master Excel Sheet Matrix (Crypto Background Theme)")
+    st.subheader(f"🌍 Master Excel Sheet Matrix ({selected_currency} Mode)")
     
     selected_lang = st.selectbox("🌐 Choose Language / भाषा चुनें:", ["English", "Hinglish", "Hindi"], key="inline_lang_selector")
     lang = LANG_DICT[selected_lang]
     
-    coin_mapping = {k: all_coins_dict[k] for k in st.session_state.user_saved_watchlist if k in all_coins_dict}
+    coin_mapping = {k: all_coins_dict[k] for k in st.session_state.custom_playlists[active_playlist] if k in all_coins_dict}
     if not coin_mapping:
         coin_mapping = {"BTC": "bitcoin", "ETH": "ethereum", "SOL": "solana"}
     
@@ -381,10 +396,25 @@ with tab1:
     tf_row_counts = {tf: 120 for tf in timeframe_list}
     r_count = tf_row_counts.get(selected_tf, 100)
 
-    st.markdown("### 🔥 All Coins Market Sentiment Matrix (Live Synchronized)")
+    st.markdown(f"### 🔥 [{active_playlist}] Market Sentiment Matrix (Currency: {selected_currency})")
     summary_cols = st.columns(min(5, len(coin_mapping)))
     
     coin_data_cache = {}
+    curr_multiplier = 1.0
+    curr_symbol = "$"
+    if "EUR" in selected_currency:
+        curr_multiplier = 0.92
+        curr_symbol = "€"
+    elif "GBP" in selected_currency:
+        curr_multiplier = 0.79
+        curr_symbol = "£"
+    elif "INR" in selected_currency:
+        curr_multiplier = 83.25
+        curr_symbol = "₹"
+    elif "JPY" in selected_currency:
+        curr_multiplier = 152.50
+        curr_symbol = "¥"
+
     for i, (c_name, c_id) in enumerate(coin_mapping.items()):
         cdf = fetch_master_excel_data(c_id, row_count=r_count, seed_offset=seed_offset)
         coin_data_cache[c_name] = cdf
@@ -417,9 +447,14 @@ with tab1:
     
     for idx, (c_tab_name, c_id) in enumerate(coin_mapping.items()):
         with coin_tabs[idx]:
-            st.markdown(f"### ⚡ {c_tab_name} Comprehensive Data Matrix ({selected_tf})")
+            st.markdown(f"### ⚡ {c_tab_name} Comprehensive Data Matrix ({selected_tf}) — Currency: {selected_currency}")
             
-            coin_df = coin_data_cache[c_tab_name]
+            coin_df = coin_data_cache[c_tab_name].copy()
+            coin_df['close'] = coin_df['close'] * curr_multiplier
+            coin_df['open'] = coin_df['open'] * curr_multiplier
+            coin_df['high'] = coin_df['high'] * curr_multiplier
+            coin_df['low'] = coin_df['low'] * curr_multiplier
+            
             current_price = coin_df['close'].iloc[-1]
             animal_type = coin_df['Animal_Type'].iloc[-1]
             sentiment_pct = coin_df['Sentiment (%)'].iloc[-1]
@@ -431,8 +466,8 @@ with tab1:
             st.markdown(f"""
                 <div class="market-sentiment-box">
                     <div>
-                        <span style="font-size: 11px; color: #8b949e; display: block; font-weight: 600;">⚡ LIVE RUNNING PRICE</span>
-                        <span class="live-running-price">${current_price:,.2f}</span>
+                        <span style="font-size: 11px; color: #8b949e; display: block; font-weight: 600;">⚡ LIVE RUNNING PRICE ({selected_currency})</span>
+                        <span class="live-running-price">{curr_symbol}{current_price:,.2f}</span>
                     </div>
                     <div style="border-left: 1px solid #30363d; padding-left: 20px;">
                         <span style="font-size: 11px; color: #8b949e; display: block; font-weight: 600;">MARKET SENTIMENT & ANIMAL AI</span>
@@ -521,7 +556,7 @@ with tab1:
                 is_fs = "true"
             else: # Landscape View
                 tv_width = "100%"
-                tv_height = "640px"
+                tv_height = "650px"
                 is_fs = "false"
 
             tv_symbol = f"BINANCE:{c_tab_name}USDT"
@@ -616,7 +651,7 @@ with tab3:
 # --- TAB 4: PAPER TRADING ---
 with tab4:
     st.subheader("🎮 Risk-Free Paper Trading Simulator")
-    st.write("**Virtual Wallet Balance:** $10,000.00")
+    st.write(f"**Virtual Wallet Balance:** {curr_symbol}10,000.00")
     t_type = st.radio("Order Type:", ["BUY / LONG", "SELL / SHORT"])
     t_qty = st.number_input("Position Size / Quantity:", value=1.0)
     if st.button("🚀 Execute Simulated Order", use_container_width=True):
@@ -685,7 +720,7 @@ with tab6:
         "Date": ["2026-03-01", "2026-04-15", "2026-06-10"],
         "Asset": ["BTC/USDT", "ETH/USDT", "SOL/USDT"],
         "Type": ["Long", "Short", "Long"],
-        "Net PnL ($)": [1420.0, -410.0, 950.0],
+        f"Net PnL ({curr_symbol})": [1420.0 * curr_multiplier, -410.0 * curr_multiplier, 950.0 * curr_multiplier],
         "Status": ["Audited", "Audited", "Verified"]
     })
     st.dataframe(tax_df, use_container_width=True)
