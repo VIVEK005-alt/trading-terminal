@@ -105,9 +105,9 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 LANG_DICT = {
-    "Hinglish": {"strategy": "AI Pro Strategy & Scalping Signals", "chart": "Advanced Technical Canvas Chart"},
-    "Hindi": {"strategy": "एआई प्रो रणनीति और स्केलिंग सिग्नल", "chart": "एडवांस्ड टेक्निकल कैनवास चार्ट"},
-    "English": {"strategy": "AI Pro Strategy & Scalping Signals", "chart": "Advanced Technical Canvas Chart"}
+    "Hinglish": {"strategy": "AI Pro Strategy & Scalping Signals", "chart": "TradingView Professional Chart"},
+    "Hindi": {"strategy": "एआई प्रो रणनीति और स्केलिंग सिग्नल", "chart": "ट्रेडिंगव्यू प्रोफेशनल चार्ट"},
+    "English": {"strategy": "AI Pro Strategy & Scalping Signals", "chart": "TradingView Professional Chart"}
 }
 
 def init_db():
@@ -152,15 +152,6 @@ def compute_master_indicators(df, seed_offset=0):
     tr3 = (low - close.shift()).abs()
     tr = pd.concat([tr1, tr2, tr3], axis=1).max(axis=1)
     df['ATR_14'] = tr.rolling(14).mean().fillna(100).round(2)
-    
-    max_p = high.max()
-    min_p = low.min()
-    diff_p = max_p - min_p if max_p != min_p else 1
-    df['Fib_0'] = max_p
-    df['Fib_0.382'] = round(max_p - (0.382 * diff_p), 2)
-    df['Fib_0.5'] = round(max_p - (0.5 * diff_p), 2)
-    df['Fib_0.618'] = round(max_p - (0.618 * diff_p), 2)
-    df['Fib_1'] = min_p
     
     np.random.seed(42 + seed_offset)
     buyer_ratio = np.random.uniform(0.25, 0.75, len(df))
@@ -210,7 +201,6 @@ def fetch_master_excel_data(coin_id, row_count=100, seed_offset=0):
     
     base_date = datetime.now() - timedelta(days=90)
     dummy_dates = [base_date + timedelta(hours=i) for i in range(row_count)]
-    # Realistic price variation for clean chart display
     np.random.seed(100 + seed_offset)
     dummy_prices = 60000 + np.cumsum(np.random.normal(0, 100, row_count))
     df = pd.DataFrame({
@@ -435,43 +425,29 @@ with tab1:
                 </div>
             """, unsafe_allow_html=True)
 
-            # --- ROBUST INTERACTIVE TECHNICAL CANVAS CHART WITH VIEW MODE & INDICATORS ---
-            st.markdown(f"### 📈 Advanced Technical Canvas Chart & Indicators ({c_tab_name})")
+            # --- TRADINGVIEW PRO EMBED CHART WITH PORTRAIT / LANDSCAPE / FULL SCREEN CONTROLS ---
+            st.markdown(f"### 📈 Live TradingView Professional Chart ({c_tab_name})")
             
             col_c1, col_c2 = st.columns([2, 4])
             with col_c1:
-                view_mode = st.radio(f"📐 View Mode ({c_tab_name}):", ["Landscape", "Portrait", "Full Screen"], horizontal=True, key=f"vmode_{c_tab_name}")
+                chart_view_mode = st.radio(f"📐 Chart View Mode ({c_tab_name}):", ["Landscape", "Portrait", "Full Screen"], horizontal=True, key=f"tv_vmode_{c_id}")
             with col_c2:
-                active_indicators = st.multiselect(
-                    f"🛠️ Active Indicators & Overlay ({c_tab_name}):",
-                    ["EMA (10,20,50,100)", "MACD", "ATR", "RSI", "Bollinger Bands", "Fibonacci Retracement"],
-                    default=["EMA (10,20,50,100)", "RSI", "Bollinger Bands", "Fibonacci Retracement"],
-                    key=f"inds_{c_tab_name}"
-                )
+                st.markdown("<span style='color: #00ffcc; font-size: 12px;'>⚡ Auto-Applied: EMA (10,20,50,100), MACD, RSI, Bollinger Bands, Fibonacci & Supertrend</span>", unsafe_allow_html=True)
             
-            if view_mode == "Portrait":
-                chart_height = 700
-            elif view_mode == "Full Screen":
-                chart_height = 900
-            else:
-                chart_height = 500
+            if chart_view_mode == "Portrait":
+                tv_width = "450px"
+                tv_height = "750px"
+            elif chart_view_mode == "Full Screen":
+                tv_width = "100%"
+                tv_height = "900px"
+            else: # Landscape
+                tv_width = "100%"
+                tv_height = "600px"
 
-            # Building multi-line chart safely with numpy/pandas
-            chart_columns = ['close']
-            if "EMA (10,20,50,100)" in active_indicators:
-                chart_columns.extend(['EMA_20', 'EMA_50'])
-            if "Bollinger Bands" in active_indicators:
-                chart_columns.extend(['BB_Upper', 'BB_Lower'])
-            if "Fibonacci Retracement" in active_indicators:
-                coin_df['Fib_0.618_val'] = coin_df['Fib_0.618'].iloc[0]
-                chart_columns.append('Fib_0.618_val')
-
-            chart_data = coin_df.set_index('Time')[chart_columns]
-            st.line_chart(chart_data, height=chart_height, use_container_width=True)
-            
+            tv_symbol = f"BINANCE:{c_tab_name}USDT"
             st.markdown(f"""
-                <div style="background: #0d1117; border: 1px solid #30363d; padding: 10px; border-radius: 8px; font-size: 12px; color: #8b949e;">
-                    🟢 <b>Active Indicators Rendered:</b> {', '.join(active_indicators)} | 📐 <b>Mode:</b> {view_mode} | ⚡ <b>Timeframe:</b> {selected_tf}
+                <div style="width: {tv_width}; height: {tv_height}; margin: 0 auto; border: 2px solid #00ffcc; border-radius: 14px; overflow: hidden; background: #000;">
+                    <iframe src="https://s.tradingview.com/widgetembed/?symbol={tv_symbol}&interval=1&hidesidetoolbar=0&symboledit=1&saveimage=1&toolbarbg=f1f3f6&studies=%5B%22MASimple%45style%22%2C%22RSI%45style%22%2C%22MACD%45style%22%2C%22BollingerBands%45style%22%5D&theme=dark&style=1&timezone=Etc%2FUTC" width="100%" height="100%" frameborder="0" allowtransparency="true" scrolling="no"></iframe>
                 </div>
             """, unsafe_allow_html=True)
             st.markdown("---")
