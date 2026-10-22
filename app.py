@@ -267,7 +267,7 @@ with tab4:
 # --- TAB 5: CYBER YOUTUBE & DOWNLOAD SUITE ---
 with tab5:
     st.markdown('<div class="rgb-neon-title">📺 🔴 CYBERPUNK YOUTUBE STREAM & DOWNLOAD SUITE</div>', unsafe_allow_html=True)
-    st.markdown("Lightning-fast streaming, instant URL loading, and ultra-fast direct Y2Mate download engines.")
+    st.markdown("Lightning-fast streaming, instant URL loading, and ultra-fast direct multi-quality download suites.")
 
     if 'active_yt_url' not in st.session_state:
         st.session_state.active_yt_url = "https://www.youtube.com/watch?v=5qap5aO4i9A"
@@ -317,13 +317,13 @@ with tab5:
             function sendPlayerCommand(command) {{
                 var iframe = document.getElementById('yt-iframe');
                 if (iframe) {{
-                    iframe.contentWindow.postMessage(JSON.stringify({{"event": "command", "func": command, "args": ""}}), "*");
+                    iframe.contentWindow.postMessage(JSON.stringify({{"event": "command", "func": command, "args": []}}), "*");
                 }}
             }}
         </script>
     """, unsafe_allow_html=True)
 
-    # Fast Interactive Stream Control Buttons using JavaScript PostMessage (No Page Reload / No Reset to Start)
+    # Instant Working Stream Control Buttons using JavaScript PostMessage (No Page Reload / No Reset to Start)
     st.markdown('<div class="rgb-neon-title" style="font-size: 16px; margin-bottom: 5px;">🎛️ PLAYER COMMAND CENTER</div>', unsafe_allow_html=True)
     sc_btn1, sc_btn2, sc_btn3 = st.columns(3)
     with sc_btn1:
@@ -343,37 +343,45 @@ with tab5:
             st.rerun()
 
     st.markdown("---")
-    st.markdown("### 📥 Fast & Secure HD Video & Audio Download Suite (Y2Mate Powered)")
+    st.markdown("### 📥 Multi-Quality HD Video & Audio Download Suite (1080p, 720p, 480p, MP3)")
 
     original_title = get_original_video_title(st.session_state.active_yt_url)
     encoded_url = urllib.parse.quote(st.session_state.active_yt_url)
-    y2mate_url = f"https://www.y2mate.com/youtube/{urllib.parse.quote(st.session_state.active_yt_url, safe='')}"
+    y2mate_base = f"https://www.y2mate.com/youtube/{urllib.parse.quote(st.session_state.active_yt_url, safe='')}"
 
     st.info(f"📌 **Detected Media Title:** `{original_title}`")
 
-    # Using 100% working Y2Mate engines for fast and reliable downloads
-    dl_col1, dl_col2, dl_col3 = st.columns(3)
-    with dl_col1:
+    # Multiple Professional Download Quality Buttons (1080p, 720p, 480p, MP3)
+    dl_c1, dl_c2, dl_c3, dl_c4 = st.columns(4)
+    with dl_c1:
         st.markdown(f"""
-            <a href="{y2mate_url}" target="_blank">
-                <button style="width:100%; background:linear-gradient(135deg, #ff0055, #7928ca); color:white; border:1px solid #00ffcc; padding:12px; border-radius:8px; font-family:'Orbitron'; font-weight:bold; cursor:pointer;">
-                    📥 Fast HD MP4 Download (Y2Mate)
+            <a href="{y2mate_base}" target="_blank">
+                <button style="width:100%; background:linear-gradient(135deg, #ff0055, #7928ca); color:white; border:1px solid #00ffcc; padding:10px; border-radius:8px; font-family:'Orbitron'; font-weight:bold; cursor:pointer; font-size:12px;">
+                    📥 Download 1080p HD
                 </button>
             </a>
         """, unsafe_allow_html=True)
-    with dl_col2:
+    with dl_c2:
         st.markdown(f"""
-            <a href="{y2mate_url}" target="_blank">
-                <button style="width:100%; background:linear-gradient(135deg, #00ffcc, #238636); color:#05070b; border:1px solid #ff0055; padding:12px; border-radius:8px; font-family:'Orbitron'; font-weight:bold; cursor:pointer;">
-                    🎧 Fast MP3 Audio Download (Y2Mate)
+            <a href="{y2mate_base}" target="_blank">
+                <button style="width:100%; background:linear-gradient(135deg, #238636, #2ea043); color:white; border:1px solid #00ffcc; padding:10px; border-radius:8px; font-family:'Orbitron'; font-weight:bold; cursor:pointer; font-size:12px;">
+                    📥 Download 720p HD
                 </button>
             </a>
         """, unsafe_allow_html=True)
-    with dl_col3:
+    with dl_c3:
         st.markdown(f"""
-            <a href="{st.session_state.active_yt_url}" target="_blank">
-                <button style="width:100%; background:#161b22; color:#00ffcc; border:1px solid #00ffcc; padding:12px; border-radius:8px; font-family:'Orbitron'; font-weight:bold; cursor:pointer;">
-                    🔗 Open on Official YouTube
+            <a href="{y2mate_base}" target="_blank">
+                <button style="width:100%; background:linear-gradient(135deg, #1f6feb, #388bfd); color:white; border:1px solid #00ffcc; padding:10px; border-radius:8px; font-family:'Orbitron'; font-weight:bold; cursor:pointer; font-size:12px;">
+                    📥 Download 480p SD
+                </button>
+            </a>
+        """, unsafe_allow_html=True)
+    with dl_c4:
+        st.markdown(f"""
+            <a href="{y2mate_base}" target="_blank">
+                <button style="width:100%; background:linear-gradient(135deg, #00ffcc, #1f6feb); color:#05070b; border:1px solid #ff0055; padding:10px; border-radius:8px; font-family:'Orbitron'; font-weight:bold; cursor:pointer; font-size:12px;">
+                    🎧 Download MP3 Audio
                 </button>
             </a>
         """, unsafe_allow_html=True)
