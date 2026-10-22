@@ -86,42 +86,32 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# Language Dictionary
 LANG_DICT = {
     "Hinglish": {
         "title": "⚡ APEX PRO AI TRADING TERMINAL",
-        "price": "LIVE MARKET PRICE",
         "strategy": "AI Pro Strategy & Scalping Signals",
         "chart": "TradingView Professional Chart (9:16 Optimized)",
     },
     "Hindi": {
         "title": "⚡ एपेक्स प्रो एआई ट्रेडिंग टर्मिनल",
-        "price": "लाइव मार्केट प्राइस",
         "strategy": "एआई प्रो रणनीति और स्केलिंग सिग्नल",
         "chart": "ट्रेडिंगव्यू प्रोफेशनल चार्ट (9:16 ऑप्टिमाइज़्ड)",
     },
     "English": {
         "title": "⚡ APEX PRO AI TRADING TERMINAL",
-        "price": "LIVE MARKET PRICE",
         "strategy": "AI Pro Strategy & Scalping Signals",
         "chart": "TradingView Professional Chart (9:16 Optimized)",
     }
 }
 
-# Sidebar Controls
 st.sidebar.title("⚡ APEX CONTROL")
-selected_lang = st.sidebar.selectbox("Language / भाषा:", ["Hinglish", "Hindi", "English"])
-lang = LANG_DICT[selected_lang]
-
-st.sidebar.markdown("---")
 if st.sidebar.button("🔄 Refresh Data Matrix Now", use_container_width=True):
     st.cache_data.clear()
     st.rerun()
 
-st.title(lang["title"])
+st.title("⚡ APEX PRO AI TRADING TERMINAL")
 search_query = st.text_input("🔍 Global Search Bar (BTC/USDT, ETH/USDT, SOL/USDT):", value="BTC/USDT")
 
-# Main Navigation Tabs (Restored all 7 Master Tabs)
 tab1, tab2, tab3, tab4, tab5, tab6, tab7 = st.tabs([
     "📊 Master Screener & Strategy", 
     "📈 Pro TradingView Chart (9:16)", 
@@ -190,16 +180,30 @@ def generate_ai_strategy(df, lang_choice):
         "Detailed Execution Plan": [desc]
     })
 
-# --- TAB 1: SCREENER & STRATEGY ---
 with tab1:
     st.subheader("📊 Master Screener & AI Strategy Matrix")
     
-    coin_mapping = {"BTC": "bitcoin", "ETH": "ethereum", "SOL": "solana", "BNB": "binancecoin", "XRP": "ripple"}
+    # LANGUAGE SELECTOR INSIDE STRATEGY / SCREENER AREA AS REQUESTED
+    selected_lang = st.selectbox("🌐 Choose Language / भाषा चुनें:", ["Hinglish", "Hindi", "English"], key="inline_lang_selector")
+    lang = LANG_DICT[selected_lang]
+    
+    coin_mapping = {
+        "BTC": "bitcoin", 
+        "ETH": "ethereum", 
+        "SOL": "solana", 
+        "BNB": "binancecoin", 
+        "XRP": "ripple", 
+        "DOGE": "dogecoin", 
+        "AVAX": "avalanche-2", 
+        "LINK": "chainlink", 
+        "NEAR": "near", 
+        "SUI": "sui"
+    }
+    
     timeframe_list = ["1 Min", "5 Min", "15 Min", "1 Hour", "4 Hour", "1 Day", "2026 (YTD)", "2025"]
     selected_tf = st.radio("⚡ Select Timeframe / Year:", timeframe_list, horizontal=True)
     seed_off = timeframe_list.index(selected_tf)
     
-    # Top Sentiment Grid
     summary_cols = st.columns(len(coin_mapping))
     coin_cache = {}
     for i, (c_name, c_id) in enumerate(coin_mapping.items()):
@@ -212,8 +216,8 @@ with tab1:
         with summary_cols[i]:
             st.markdown(f"""
                 <div class="{c_class}">
-                    <span style="font-size:12px; font-weight:900; color:#fff;">{c_name}</span><br>
-                    <span style="font-size:11px; font-weight:700; color:#00ffcc;">{sig}</span>
+                    <span style="font-size:11px; font-weight:900; color:#fff;">{c_name}</span><br>
+                    <span style="font-size:10px; font-weight:700; color:#00ffcc;">{sig}</span>
                 </div>
             """, unsafe_allow_html=True)
 
@@ -226,12 +230,10 @@ with tab1:
             
             st.dataframe(cdf.tail(10), use_container_width=True, height=300)
             
-            # --- STRATEGY TABLE BELOW EACH MAIN TABLE ---
             st.markdown(f"### 🤖 AI Strategy & Indicator Action Plan ({c_name} - {selected_tf})")
             strat_df = generate_ai_strategy(cdf, selected_lang)
             st.dataframe(strat_df, use_container_width=True, height=100)
 
-# --- TAB 2: PRO TRADINGVIEW CHART (9:16 OPTIMIZED) ---
 with tab2:
     st.subheader(lang["chart"])
     st.markdown("<b>TradingView Pro Layout (9:16 Device Optimized - Volume, Supertrend, EMA, RSI, ATR, ADX, MACD Integrated)</b>", unsafe_allow_html=True)
@@ -241,21 +243,18 @@ with tab2:
         </div>
     """, unsafe_allow_html=True)
 
-# --- TAB 3: DERIVATIVES ---
 with tab3:
     st.subheader("🐋 Whales, Open Interest & Liquidations")
     c1, c2 = st.columns(2)
     c1.metric("Open Interest (OI)", "$5.82 Billion", "+6.2%")
     c2.metric("24h Liquidations", "$158 Million", "Short Squeeze Active")
 
-# --- TAB 4: PAPER TRADING ---
 with tab4:
     st.subheader("🎮 Risk-Free Paper Trading Simulator")
     st.write("**Virtual Wallet Balance:** $10,000.00")
     if st.button("🚀 Execute Simulated Order", use_container_width=True):
         st.success("Simulated order executed successfully!")
 
-# --- TAB 5: CYBER YOUTUBE SUITE ---
 with tab5:
     st.markdown('<div class="rgb-neon-title">📺 🔴 APEX MEDIA STREAM</div>', unsafe_allow_html=True)
     st.markdown("""
@@ -264,13 +263,11 @@ with tab5:
         </div>
     """, unsafe_allow_html=True)
 
-# --- TAB 6: TAX LEDGER ---
 with tab6:
     st.subheader("💰 CA-Ready Tax & PnL Ledger")
     tax_df = pd.DataFrame({"Date": ["2026-03-01"], "Asset": ["BTC/USDT"], "Net PnL ($)": [1420.0], "Status": ["Audited"]})
     st.dataframe(tax_df, use_container_width=True)
 
-# --- TAB 7: AI DEVELOPER CORE ---
 with tab7:
     st.subheader("🤖 AI Expert Core & Universal Assistant")
     user_prompt = st.text_input("Ask AI Assistant (Short & Precise Answers):", placeholder="e.g., Should I take a scalping trade now?")
