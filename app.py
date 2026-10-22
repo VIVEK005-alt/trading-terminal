@@ -169,7 +169,7 @@ def compute_master_indicators(df):
         elif bp <= 42:
             return "BEAR 🐻", (100 - bp), "STRONG SELL / SHORT 🔴"
         else:
-            return "WOLF 🐺", 50.0, "NEUTRAL / HOLD ⚠️"
+            return "WOLF 🐺", 50.0, "NEUTRAL / SIDEWAYS 🟡"
 
     sentiments = df.apply(get_sentiment, axis=1)
     df['Animal_Type'] = [s[0] for s in sentiments]
@@ -211,15 +211,15 @@ def fetch_master_excel_data(coin_id, row_count=100):
     })
     return compute_master_indicators(df)
 
-# Color Styling Function for Table
+# Neon Color Styling Function with Animal Emojis & Bold Neon Text
 def color_coding_table(val):
     if isinstance(val, str):
         if 'BULL' in val or 'BUY' in val or '🟢' in val:
-            return 'background-color: rgba(57, 255, 20, 0.15); color: #39ff14; font-weight: bold;'
+            return 'background-color: rgba(57, 255, 20, 0.2); color: #39ff14; font-weight: 900; text-shadow: 0 0 8px #39ff14;'
         elif 'BEAR' in val or 'SELL' in val or '🔴' in val:
-            return 'background-color: rgba(255, 7, 58, 0.15); color: #ff073a; font-weight: bold;'
-        elif 'WOLF' in val or 'HOLD' in val or '⚠️' in val:
-            return 'background-color: rgba(255, 165, 0, 0.15); color: #ffa500; font-weight: bold;'
+            return 'background-color: rgba(255, 7, 58, 0.2); color: #ff073a; font-weight: 900; text-shadow: 0 0 8px #ff073a;'
+        elif 'WOLF' in val or 'HOLD' in val or 'SIDEWAYS' in val or '🟡' in val:
+            return 'background-color: rgba(255, 255, 0, 0.2); color: #ffff00; font-weight: 900; text-shadow: 0 0 8px #ffff00;'
     return ''
 
 # Robust YouTube Video ID Parser
@@ -288,7 +288,7 @@ df = None
 
 # --- TAB 1: SCREENER & MASTER TIMEFRAMES & HISTORICAL YEARS ---
 with tab1:
-    st.subheader("🌍 Master Excel Sheet Matrix (Optimized & Stable)")
+    st.subheader("🌍 Master Excel Sheet Matrix (Neon Bold Animal AI)")
     
     coin_tabs = st.tabs(["BTC (Bitcoin)", "ETH (Ethereum)", "SOL (Solana)", "BNB", "XRP", "DOGE", "AVAX", "LINK", "NEAR", "SUI"])
     
@@ -341,7 +341,7 @@ with tab1:
                     </div>
                     <div style="border-left: 1px solid #30363d; padding-left: 20px;">
                         <span style="font-size: 11px; color: #8b949e; display: block; font-weight: 600;">MARKET SENTIMENT & ANIMAL AI</span>
-                        <span style="font-size: 22px; font-weight: 900; color: {'#39ff14' if 'BULL' in animal_type else ('#ff073a' if 'BEAR' in animal_type else '#ffa500')};">
+                        <span style="font-size: 22px; font-weight: 900; color: {'#39ff14' if 'BULL' in animal_type else ('#ff073a' if 'BEAR' in animal_type else '#ffff00')};">
                             {animal_type} — {sentiment_pct}% Power
                         </span>
                     </div>
@@ -356,7 +356,7 @@ with tab1:
             
             col_f1, col_f2 = st.columns(2)
             with col_f1:
-                filter_signal = st.selectbox(f"Filter Signal ({selected_tf})", ["All", "STRONG BUY / LONG 🟢", "STRONG SELL / SHORT 🔴", "NEUTRAL / HOLD ⚠️"], key=f"filt_{c_id}_{selected_tf}")
+                filter_signal = st.selectbox(f"Filter Signal ({selected_tf})", ["All", "STRONG BUY / LONG 🟢", "STRONG SELL / SHORT 🔴", "NEUTRAL / SIDEWAYS 🟡"], key=f"filt_{c_id}_{selected_tf}")
             with col_f2:
                 min_rsi = st.slider(f"Minimum RSI Filter ({selected_tf})", 0.0, 100.0, 0.0, key=f"rsi_{c_id}_{selected_tf}")
             
