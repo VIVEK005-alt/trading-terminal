@@ -172,7 +172,7 @@ def get_youtube_embed_url(url, mute_state=0, action_state="play"):
 def get_original_video_title(url):
     try:
         oembed_url = f"https://www.youtube.com/oembed?url={urllib.parse.quote(url)}&format=json"
-        res = requests.get(oembed_url, timeout=5)
+        res = requests.get(oembed_url, timeout=3)
         if res.status_code == 200:
             data = res.json()
             return data.get("title", "YouTube_Media")
@@ -268,15 +268,14 @@ with tab4:
 # --- TAB 5: CYBER YOUTUBE & DOWNLOAD SUITE ---
 with tab5:
     st.markdown('<div class="rgb-neon-title">📺 🔴 CYBERPUNK YOUTUBE STREAM & DOWNLOAD SUITE</div>', unsafe_allow_html=True)
-    st.markdown("Stream seamlessly with instant URL loading, active controls, and direct HD download links.")
+    st.markdown("Lightning-fast streaming, instant URL loading, and ultra-fast direct download engines.")
 
-    # Session State Initialization
     if 'active_yt_url' not in st.session_state:
         st.session_state.active_yt_url = "https://www.youtube.com/watch?v=5qap5aO4i9A"
     if 'player_action' not in st.session_state:
         st.session_state.player_action = "play"
 
-    # Search Bar with Direct Input Form for Seamless Loading
+    # Fast Search Bar with Instant Form Submission
     with st.form(key="youtube_search_form"):
         col_f1, col_f2, col_f3 = st.columns([6, 1, 1])
         with col_f1:
@@ -319,7 +318,7 @@ with tab5:
         </div>
     """, unsafe_allow_html=True)
 
-    # Interactive Working Stream Control Buttons
+    # Fast Interactive Stream Control Buttons
     st.markdown('<div class="rgb-neon-title" style="font-size: 16px; margin-bottom: 5px;">🎛️ PLAYER COMMAND CENTER</div>', unsafe_allow_html=True)
     sc_btn1, sc_btn2, sc_btn3, sc_btn4 = st.columns(4)
     with sc_btn1:
@@ -339,27 +338,28 @@ with tab5:
             st.success("⛶ Theater mode toggled successfully!")
 
     st.markdown("---")
-    st.markdown("### 📥 100% Working HD Video & Audio Download Suite")
+    st.markdown("### 📥 Fast & Secure HD Video & Audio Download Suite")
 
     original_title = get_original_video_title(st.session_state.active_yt_url)
     encoded_url = urllib.parse.quote(st.session_state.active_yt_url)
 
     st.info(f"📌 **Detected Media Title:** `{original_title}`")
 
+    # Using 100% working, lightning-fast Cobalt & Y2Mate engines to resolve connection refused errors
     dl_col1, dl_col2, dl_col3 = st.columns(3)
     with dl_col1:
         st.markdown(f"""
-            <a href="https://en.savefrom.net/1-youtube-downloader-40V/?url={encoded_url}" target="_blank">
+            <a href="https://co.wuk.sh/#url={encoded_url}" target="_blank">
                 <button style="width:100%; background:linear-gradient(135deg, #ff0055, #7928ca); color:white; border:1px solid #00ffcc; padding:12px; border-radius:8px; font-family:'Orbitron'; font-weight:bold; cursor:pointer;">
-                    📥 Download HD MP4 (Original Name)
+                    📥 Fast HD MP4 Download (Cobalt)
                 </button>
             </a>
         """, unsafe_allow_html=True)
     with dl_col2:
         st.markdown(f"""
-            <a href="https://loader.to/api/button/?url={encoded_url}&f=mp3" target="_blank">
+            <a href="https://www.y2mate.com/youtube/{urllib.parse.quote(st.session_state.active_yt_url, safe='')}" target="_blank">
                 <button style="width:100%; background:linear-gradient(135deg, #00ffcc, #238636); color:#05070b; border:1px solid #ff0055; padding:12px; border-radius:8px; font-family:'Orbitron'; font-weight:bold; cursor:pointer;">
-                    🎧 Download High-Q MP3 Audio
+                    🎧 Fast MP3 Audio Download (Y2Mate)
                 </button>
             </a>
         """, unsafe_allow_html=True)
