@@ -314,7 +314,7 @@ user_email = st.sidebar.text_input("Trader Profile:", value="trader@apex.ai")
 
 st.sidebar.markdown("---")
 
-# Professional Multiple Watchlist (1K+ Coins Management & Persistence)
+# Professional Multiple Watchlist Management (1K+ Coins Support & Persistence)
 if 'user_saved_watchlist' not in st.session_state:
     st.session_state.user_saved_watchlist = ["BTC", "ETH", "SOL", "BNB", "XRP", "ADA", "AVAX", "LINK", "SUI", "DOT"]
 
@@ -495,7 +495,7 @@ with tab1:
                 </div>
             """, unsafe_allow_html=True)
 
-            # --- TRADINGVIEW ADVANCED PRO EMBED CHART (OPTIMIZED HEIGHT FOR EXACT PRO FIT) ---
+            # --- TRADINGVIEW ADVANCED PRO EMBED CHART WITH BUILT-IN WATCHLIST & FULL INTERACTIVITY ---
             st.markdown(f"### 📈 Live TradingView Professional Chart ({c_tab_name})")
             
             col_c1, col_c2, col_c3 = st.columns([2, 2, 3])
@@ -560,7 +560,7 @@ with tab1:
                   "locale": "en",
                   "enable_publishing": false,
                   "allow_symbol_change": true,
-                  "watchlist": ["BINANCE:BTCUSDT", "BINANCE:ETHUSDT", "BINANCE:SOLUSDT", "BINANCE:BNBUSDT", "BINANCE:XRPUSDT"],
+                  "watchlist": ["BINANCE:BTCUSDT", "BINANCE:ETHUSDT", "BINANCE:SOLUSDT", "BINANCE:BNBUSDT", "BINANCE:XRPUSDT", "BINANCE:ADAUSDT", "BINANCE:AVAXUSDT", "BINANCE:LINKUSDT", "BINANCE:SUIUSDT", "BINANCE:DOTUSDT"],
                   "details": true,
                   "hotlist": true,
                   "calendar": false,
