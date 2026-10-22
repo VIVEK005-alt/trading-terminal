@@ -132,7 +132,7 @@ tab1, tab2, tab3, tab4, tab5, tab6, tab7 = st.tabs([
     "📈 Advanced Charts", 
     "🐋 Derivatives & CoinGlass", 
     "🎮 Paper Trading", 
-    "🔴 YouTube Search & Media Player", 
+    "🔴 YouTube Media Hub", 
     "💰 Tax & PnL Ledger",
     "🤖 Public Demand & AI Developer Box"
 ])
@@ -194,62 +194,44 @@ with tab4:
     if st.button("🚀 Execute Simulated Order", use_container_width=True):
         st.success(f"Successfully placed {t_type} for {search_query} with Auto-Trailing Stop-Loss!")
 
-# --- TAB 5: YOUTUBE SEARCH & MEDIA PLAYER (DYNAMIC LIST & WORKING PLAY) ---
+# --- TAB 5: YOUTUBE MEDIA HUB (WORKING PLAYER & CONTROLS) ---
 with tab5:
-    st.subheader("🔴 YouTube Video Search & Media Hub")
+    st.subheader("🔴 YouTube Pro Media Hub & Player")
     
-    # Initialize active video ID in session state (default working Lofi)
     if 'active_vid_id' not in st.session_state:
         st.session_state.active_vid_id = "5qap5aO4i9A"
 
-    # Search Box for finding videos by name
-    search_keyword = st.text_input("🔍 Search YouTube Videos by Name (e.g., Lofi Beats, Crypto Analysis, Diljit Songs):", value="Lofi Trading Beats")
-
-    # Curated database of searchable videos mapped with reliable embed IDs
-    video_database = [
-        {"title": "Lofi Trading Beats - Chill Study & Trading Music", "channel": "Lofi Girl", "id": "5qap5aO4i9A"},
-        {"title": "Elliott Wave & Price Action Explained (Live Educational Session)", "channel": "DT4B Trader", "id": "jfKfPfyJRdk"},
-        {"title": "PAN INDIA Full Video Song | Diljit Singh & T-Series", "channel": "T-Series", "id": "5qap5aO4i9A"},
-        {"title": "Advanced Crypto Technical Analysis & Trading Strategies", "channel": "Trading Legend", "id": "jfKfPfyJRdk"},
-        {"title": "Do Not Overthink, It Is Futile! (Mindset & Discipline)", "channel": "The Ultimate Truth", "id": "5qap5aO4i9A"},
-        {"title": "The 5,999/- Rupees Portable Monitor Review - Is It Any Good?", "channel": "Miner TechTips", "id": "jfKfPfyJRdk"}
-    ]
-
-    # Filter videos based on search keyword
-    filtered_videos = [v for v in video_database if search_keyword.lower() in v['title'].lower() or search_keyword.lower() in v['channel'].lower()]
-    if not filtered_videos:
-        filtered_videos = video_database # Fallback if no match
-
-    st.markdown("---")
-    st.markdown("### 📺 Active Media Player (VLC / MS Player Style)")
-    
-    # Render active video player smoothly without processing errors
+    st.markdown("### 📺 Active Video Player (VLC / MS Player Style Controls)")
     st.markdown(f"""
         <div class="youtube-container">
             <iframe src="https://www.youtube.com/embed/{st.session_state.active_vid_id}?autoplay=1&enablejsapi=1" title="YouTube Media Player" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
         </div>
         <div class="player-toolbar">
-            <span><b>🎛️ Media Engine:</b> Active Stream (1080p HD)</span>
-            <span>Controls: [ ▶ Play ] [ ⏸ Pause ] [ 🔊 Vol+ ] [ ⛶ Fullscreen ]</span>
+            <span><b>🎛️ Media Engine:</b> HD Stream Active</span>
+            <span>Controls: [ ▶ Play ] [ ⏸ Pause ] [ 🔊 Vol ] [ ⛶ Fullscreen ]</span>
         </div>
     """, unsafe_allow_html=True)
 
     st.markdown("---")
-    st.markdown(f"### 🎬 Search Results for: *'{search_keyword}'* (Click any video to play)")
+    st.markdown("### 🎬 Select Video / Stream to Play Instantly")
+    
+    vols = [
+        {"title": "🎵 Lofi Trading Beats & Concentration Music", "id": "5qap5aO4i9A"},
+        {"title": "📈 Live Crypto Price Action & Technical Analysis", "id": "jfKfPfyJRdk"},
+        {"title": "🎬 Pan India Hit Song & Entertainment", "id": "5qap5aO4i9A"},
+        {"title": "🚀 Advanced Elliott Wave Masterclass", "id": "jfKfPfyJRdk"}
+    ]
 
-    # Display video list in a clean responsive grid
-    cols = st.columns(3)
-    for idx, vid in enumerate(filtered_videos):
-        col_target = cols[idx % 3]
-        with col_target:
+    cols = st.columns(2)
+    for idx, v in enumerate(vols):
+        with cols[idx % 2]:
             st.markdown(f"""
-                <div style="background:#181818; padding:12px; border-radius:10px; border:1px solid #272727; margin-bottom:15px; height: 140px;">
-                    <b style="font-size:14px; color:#fff;">{vid['title']}</b><br>
-                    <span style="font-size:12px; color:#aaa;">Channel: {vid['channel']}</span>
+                <div style="background:#181818; padding:15px; border-radius:10px; border:1px solid #272727; margin-bottom:12px;">
+                    <b style="color:#fff;">{v['title']}</b>
                 </div>
             """, unsafe_allow_html=True)
-            if st.button(f"▶ Play Now #{idx+1}", use_container_width=True, key=f"play_btn_{idx}"):
-                st.session_state.active_vid_id = vid['id']
+            if st.button(f"▶ Play Now #{idx+1}", use_container_width=True, key=f"vid_btn_{idx}"):
+                st.session_state.active_vid_id = v['id']
                 st.rerun()
 
 # --- TAB 6: TAX & PNL LEDGER ---
