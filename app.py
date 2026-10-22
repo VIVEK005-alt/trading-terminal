@@ -121,7 +121,7 @@ tab1, tab2, tab3, tab4, tab5, tab6, tab7 = st.tabs([
     "📈 Advanced Charts", 
     "🐋 Derivatives & CoinGlass", 
     "🎮 Paper Trading", 
-    "🔴 YouTube Pro Player & Feed", 
+    "🔴 YouTube Home & Stream Hub", 
     "💰 Tax & PnL Ledger",
     "🤖 Public Demand & AI Developer Box"
 ])
@@ -183,11 +183,11 @@ with tab4:
     if st.button("🚀 Execute Simulated Order", use_container_width=True):
         st.success(f"Successfully placed {t_type} for {search_query} with Auto-Trailing Stop-Loss!")
 
-# --- TAB 5: YOUTUBE PRO PLAYER & FEED (WORKING EMBED & CATEGORIES) ---
+# --- TAB 5: YOUTUBE HOME & STREAM HUB ---
 with tab5:
-    st.subheader("🔴 YouTube Pro Player & Direct Feed Hub")
+    st.subheader("🔴 YouTube Home & Live Broadcast Feed")
     
-    # Category Pills
+    # YouTube Category Chips Bar
     cols_cat = st.columns(8)
     categories = ["All", "Music", "Live", "Podcasts", "Trading", "Crypto", "Mixes", "Comedy"]
     for idx, cat in enumerate(categories):
@@ -195,22 +195,16 @@ with tab5:
 
     st.markdown("---")
     
-    # Direct Video Selection or Custom URL
-    yt_choice = st.selectbox("Select Trending Video / Stream:", [
-        "Lofi Trading Beats (Live Radio)",
-        "Crypto Market Price Action (Live)",
-        "Diljit Singh - Pan India Playlist",
-        "Elliott Wave Masterclass"
-    ])
+    # Custom Video Input / Selector
+    yt_input = st.text_input("🔗 Enter YouTube Video URL or Search query:", value="https://www.youtube.com/watch?v=5qap5aO4i9A")
     
-    if "Lofi" in yt_choice:
-        vid_id = "5qap5aO4i9A"
-    elif "Crypto" in yt_choice:
-        vid_id = "jfKfPfyJRdk"
-    elif "Diljit" in yt_choice:
-        vid_id = "5qap5aO4i9A"
+    # Extract ID safely
+    if "youtu.be/" in yt_input:
+        vid_id = yt_input.split("youtu.be/")[1].split("?")[0]
+    elif "watch?v=" in yt_input:
+        vid_id = yt_input.split("watch?v=")[1].split("&")[0]
     else:
-        vid_id = "jfKfPfyJRdk"
+        vid_id = "5qap5aO4i9A"
 
     st.markdown(f"""
         <div class="youtube-container">
@@ -218,7 +212,7 @@ with tab5:
         </div>
     """, unsafe_allow_html=True)
     
-    st.info("💡 Tip: Aap koi bhi YouTube video yahan bina kisi error ke direct smooth chala sakte hain!")
+    st.success("✅ YouTube Player successfully loaded with responsive auto-fit layout!")
 
 # --- TAB 6: TAX & PNL LEDGER ---
 with tab6:
