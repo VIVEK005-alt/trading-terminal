@@ -63,20 +63,11 @@ st.markdown("""
         margin-bottom: 25px;
     }
 
-    /* Clean Sidebar & Prominent Collapse Button Styling */
     [data-testid="stSidebar"] {
         background-color: #12141c;
         border-right: 1px solid #2d333b;
         padding: 20px 14px;
         font-family: 'Inter', sans-serif;
-    }
-
-    /* Make collapse toggle button clearly visible */
-    [data-testid="collapsedControl"] {
-        background-color: #161b22 !important;
-        border: 1px solid #00ffcc !important;
-        color: #00ffcc !important;
-        border-radius: 8px !important;
     }
     
     .software-nav-bar {
@@ -305,7 +296,7 @@ def get_youtube_embed_url(url, mute_state=0):
         return f"https://www.youtube.com/embed/{vid_id}&autoplay=1&mute={mute_state}&enablejsapi=1"
     return f"https://www.youtube.com/embed/{vid_id}?autoplay=1&mute={mute_state}&enablejsapi=1"
 
-# Sidebar Software Navigation Bar with Clean Visible Buttons (< > 🔄 🏠)
+# Sidebar Software Navigation Bar (< > 🔄 🏠)
 st.sidebar.markdown("""
     <div class="software-nav-bar">
         <button class="software-nav-btn" onclick="window.history.back()" title="Back">❮</button>
@@ -505,16 +496,16 @@ with tab1:
                 </div>
             """, unsafe_allow_html=True)
 
-            # --- TRADINGVIEW PROFESSIONAL CHART WITH FULL TOOLBAR, CONTEXT MENU, ZIGZAG, VOLUME & STUDIES ---
+            # --- TRADINGVIEW PROFESSIONAL CHART WITH SCALPING & LONG TRADE MODES, DRAWING TOOLBAR & CONTEXT MENU ---
             st.markdown(f"### 📈 Live TradingView Professional Chart ({c_tab_name})")
             
             col_c1, col_c2, col_c3 = st.columns([2, 2, 3])
             with col_c1:
                 chart_view_mode = st.selectbox(f"🔒 Chart View Mode ({c_tab_name}):", ["Landscape View", "Portrait View", "True Full Screen"], key=f"tv_vmode_{c_id}")
             with col_c2:
-                chart_theme_mode = st.selectbox(f"🌓 Theme Mode ({c_tab_name}):", ["Dark Mode", "Light Mode", "System Default"], key=f"tv_theme_{c_id}")
+                chart_trade_mode = st.selectbox(f"🚀 Trading Mode ({c_tab_name}):", ["Standard View", "Scalping Mode (1m-5m)", "Long Trade Setup (1h-1D)", "Short Trade Setup"], key=f"tv_tmode_{c_id}")
             with col_c3:
-                st.markdown("<span style='color: #00ffcc; font-size: 11px;'>⚡ Auto-Applied: Volume, MACD, RSI, EMA, Bollinger, Supertrend, ZigZag & Fibonacci</span>", unsafe_allow_html=True)
+                chart_theme_mode = st.selectbox(f"🌓 Theme Mode ({c_tab_name}):", ["Dark Mode", "Light Mode", "System Default"], key=f"tv_theme_{c_id}")
             
             if chart_view_mode == "Portrait View":
                 tv_width = "450px"
@@ -543,8 +534,10 @@ with tab1:
 
             container_id = f"tv_chart_container_{c_id}"
             
-            # Enabled full toolbar (hidesidetoolbar=0) and full context menus for TradingView embed widget
             st.markdown(f"""
+                <div style="background: #161b22; border: 1px solid #00ffcc; padding: 10px; border-radius: 8px; margin-bottom: 8px;">
+                    <span style="color: #39ff14; font-weight: bold;">⚡ Active Trade Setup Mode:</span> <span style="color: #ffffff;">{chart_trade_mode} | Drawing Toolbar Enabled | Right-Click Menu Active</span>
+                </div>
                 <style>
                 # {container_id} iframe {{
                     margin-top: -35px;
