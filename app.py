@@ -654,10 +654,17 @@ with tab1:
             col_color = '#ffa500'
 
         with summary_cols[i % len(summary_cols)]:
-            # Interactive summary card button to view dedicated coin details
-            if st.button(f"{c_name}\n{anim}\n{power}% Power", key=f"card_btn_{c_name}_{i}", use_container_width=True):
-                st.session_state["detailed_coin"] = c_name
-                st.rerun()
+            with st.container():
+                st.markdown(f"""
+                    <div class="{card_class}" style="cursor: pointer;">
+                        <span style="font-size: 14px; font-weight: 900; color: #ffffff; text-shadow: 0 0 8px #000000, 0 0 12px #000000;">{c_name}</span><br>
+                        <span class="emoji-white-glow" style="font-size: 16px; font-weight: 900; color: {col_color};">{anim}</span><br>
+                        <span style="font-size: 12px; font-weight: 800; color: #ffffff; text-shadow: 0 0 6px #000000, 0 0 10px #000000;">{power}% Power</span>
+                    </div>
+                """, unsafe_allow_html=True)
+                if st.button(f"🔍 View {c_name} Chart", key=f"card_btn_{c_name}_{i}", use_container_width=True):
+                    st.session_state["detailed_coin"] = c_name
+                    st.rerun()
 
     st.markdown("---")
 
@@ -760,7 +767,7 @@ with tab1:
             with col_c1:
                 chart_view_mode = st.selectbox(f"🔒 Chart View Mode ({c_tab_name}):", ["Landscape View", "Portrait View", "True Full Screen"], key=f"tv_vmode_{c_id}")
             with col_c2:
-                chart_theme_mode = st.selectbox(f"🌓 Theme Mode ({c_tab_name}):", ["Dark Mode", "Light Mode", "System Default"], key=f"tv_theme_{c_id}")
+                chart_theme_mode = st.selectbox(f"🌓 Theme Mode ({c_tab_name}):", ["Dark Mode", "Light Mode"], key=f"tv_theme_{c_id}")
             with col_c3:
                 tv_link_url = f"https://www.tradingview.com/chart/?symbol=BINANCE:{c_tab_name}USDT"
                 st.markdown(f"""
