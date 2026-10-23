@@ -72,26 +72,11 @@ st.markdown("""
         text-shadow: 0 0 12px rgba(255,165,0,0.8);
     }
 
-    .summary-card-bull {
-        background: linear-gradient(rgba(10, 15, 25, 0.45), rgba(10, 15, 25, 0.45)), url('https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?q=80&w=400&auto=format&fit=crop');
-        background-size: cover; background-position: center; border: 2px solid #39ff14; padding: 15px; border-radius: 12px; text-align: center; box-shadow: 0 4px 20px rgba(57,255,20,0.5); margin-bottom: 20px;
-    }
-
-    .summary-card-bear {
-        background: linear-gradient(rgba(10, 15, 25, 0.45), rgba(10, 15, 25, 0.45)), url('https://images.unsplash.com/photo-1534177616072-ef7dc120449d?q=80&w=400&auto=format&fit=crop');
-        background-size: cover; background-position: center; border: 2px solid #ff073a; padding: 15px; border-radius: 12px; text-align: center; box-shadow: 0 4px 20px rgba(255,7,58,0.5); margin-bottom: 20px;
-    }
-
-    .summary-card-side {
-        background: linear-gradient(rgba(10, 15, 25, 0.45), rgba(10, 15, 25, 0.45)), url('https://images.unsplash.com/photo-1543466835-00a7907e9de1?q=80&w=400&auto=format&fit=crop');
-        background-size: cover; background-position: center; border: 2px solid #ffa500; padding: 15px; border-radius: 12px; text-align: center; box-shadow: 0 4px 20px rgba(255,165,0,0.5); margin-bottom: 20px;
-    }
-
     .emoji-white-glow {
         text-shadow: 0 0 12px rgba(255, 255, 255, 0.9), 0 0 25px rgba(255, 255, 255, 0.6);
     }
 
-    /* Equal Height & Equal Width Professional Card Containers with Auto-Fitting Bold Text */
+    /* Bold, Clear and Larger Equal Size Boxes with Auto-Fit */
     .equal-box-container {
         background: #0d1117;
         border: 2px solid #00ffcc;
@@ -116,6 +101,7 @@ st.markdown("""
         color: #00ffcc !important;
         border: 2px solid #30363d !important;
         border-collapse: collapse !important;
+        width: 100% !important;
     }
     
     table.dataframe th {
@@ -126,7 +112,7 @@ st.markdown("""
         background-color: #161b22 !important;
         border: 1px solid #30363d !important;
         text-align: center !important;
-        padding: 10px !important;
+        padding: 12px !important;
     }
     
     table.dataframe td {
@@ -137,7 +123,7 @@ st.markdown("""
         background-color: #0d1117 !important;
         border: 1px solid #21262d !important;
         text-align: center !important;
-        padding: 8px !important;
+        padding: 10px !important;
     }
 
     h1, h2, h3, h4, p, label, .stMarkdown { 
@@ -416,7 +402,20 @@ if "detailed_coin" in st.session_state and st.session_state["detailed_coin"]:
         curr_multiplier = 152.50
         curr_symbol = "¥"
 
-    df_detail = fetch_master_excel_data(c_id, row_count=120)
+    # --- ALL TIME-FRAMES SELECTION FOR THE DETAIL PAGE ---
+    timeframe_list = [
+        "1 Min", "3 Min", "5 Min", "15 Min", "30 Min", "75 Min", 
+        "1 Hour", "2 Hour", "3 Hour", "4 Hour", "6 Hour", "12 Hour", 
+        "1 Day", "1 Week", "1 Month", "3 Months", "6 Months", 
+        "1 Year", "3 Years", "5 Years", "2026 (YTD)", "2025", "2024", "2023", "2022", "2021", "2020"
+    ]
+    
+    selected_detail_tf = st.radio("⚡ Select Timeframe / Year for Detail View:", timeframe_list, horizontal=True, key="detail_tf_radio")
+    detail_seed_offset = timeframe_list.index(selected_detail_tf)
+    detail_row_counts = {tf: 120 for tf in timeframe_list}
+    detail_r_count = detail_row_counts.get(selected_detail_tf, 100)
+
+    df_detail = fetch_master_excel_data(c_id, row_count=detail_r_count, seed_offset=detail_seed_offset)
     df_detail['close'] = df_detail['close'] * curr_multiplier
     df_detail['open'] = df_detail['open'] * curr_multiplier
     df_detail['high'] = df_detail['high'] * curr_multiplier
@@ -434,13 +433,13 @@ if "detailed_coin" in st.session_state and st.session_state["detailed_coin"]:
     box_col = '#39ff14' if 'BULL' in anim_type else ('#ff073a' if 'BEAR' in anim_type else '#ffa500')
     px_cls = "live-running-price-bull" if 'BULL' in anim_type else ("live-running-price-bear" if 'BEAR' in anim_type else "live-running-price-side")
 
-    # First Image: Equal Size Bold & Clear Auto-Fitting Boxes with Dynamic Colors
+    # Equal Size Bold & Clear Auto-Fitting Boxes with Dynamic Colors
     d_col1, d_col2 = st.columns(2)
     with d_col1:
         st.markdown(f"""
             <div class="equal-box-container" style="border: 2px solid {box_col};">
                 <div>
-                    <span style="font-size: 13px; color: #00ffcc; display: block; font-weight: 800; letter-spacing: 1px;">LIVE RUNNING PRICE ({selected_currency})</span>
+                    <span style="font-size: 13px; color: #00ffcc; display: block; font-weight: 800; letter-spacing: 1px;">LIVE RUNNING PRICE ({selected_currency}) [{selected_detail_tf}]</span>
                     <span class="{px_cls}">{curr_symbol}{cur_px:,.2f}</span>
                 </div>
                 <div>
@@ -471,16 +470,16 @@ if "detailed_coin" in st.session_state and st.session_state["detailed_coin"]:
 
     st.markdown("---")
     
-    # Second Image: Excel-like Professional Table
+    # Excel-like Professional Table with Buy/Sell columns first
     first_cols = ['Trade Advice', 'Animal_Type', 'Date', 'Time', 'close', 'open', 'high', 'low', 'volume']
     other_cols = [c for c in df_detail.columns if c not in first_cols]
     final_detail_cols = first_cols + other_cols
     
-    st.subheader(f"📊 Professional Market Matrix for {target_coin}")
+    st.subheader(f"📊 Professional Market Matrix for {target_coin} ({selected_detail_tf})")
     styled_detail_df = df_detail[final_detail_cols].style.map(color_coding_table, subset=['Animal_Type', 'Trade Advice'])
     st.dataframe(styled_detail_df, use_container_width=True, height=400)
 
-    # Third Image: TradingView Chart with View Modes & Dark/Light Mode Freeze Buttons
+    # TradingView Chart with View Modes & Dark/Light Mode Freeze Buttons
     st.markdown(f"### 📈 Live TradingView Professional Chart ({target_coin})")
     
     dc1, dc2, dc3 = st.columns([2, 2, 3])
