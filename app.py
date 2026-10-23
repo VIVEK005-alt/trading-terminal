@@ -87,6 +87,11 @@ st.markdown("""
         background-size: cover; background-position: center; border: 2px solid #ffa500; padding: 15px; border-radius: 12px; text-align: center; box-shadow: 0 4px 20px rgba(255,165,0,0.5); margin-bottom: 20px;
     }
 
+    .gold-silver-card {
+        background: linear-gradient(rgba(10, 15, 25, 0.6), rgba(10, 15, 25, 0.6)), url('https://images.unsplash.com/photo-1610375461246-83df859d849d?q=80&w=400&auto=format&fit=crop');
+        background-size: cover; background-position: center; border: 2px solid #ffd700; padding: 15px; border-radius: 12px; text-align: center; box-shadow: 0 4px 20px rgba(255,215,0,0.6); margin-bottom: 20px;
+    }
+
     .emoji-white-glow {
         text-shadow: 0 0 12px rgba(255, 255, 255, 0.9), 0 0 25px rgba(255, 255, 255, 0.6);
     }
@@ -151,6 +156,15 @@ MASTER_COIN_LIST = [
     "AVAX", "DOT", "NEAR", "ATOM", "TON", "SUI", "APT", "SEI", "INJ", "KAS",
     "HBAR", "ICP", "FIL", "ETC", "XLM", "ALGO", "VET", "XTZ"
 ]
+
+TOP_TOKENS_LIST = [
+    "LINK", "UNI", "AAVE", "SHIB", "PEPE", "LEO", "OKB", "ONDO", "RENDER", "FET",
+    "ENA", "ARB", "OP", "POL", "IMX", "GRT", "THETA", "CRV", "JUP", "RAY",
+    "PENDLE", "CAKE", "COMP", "SAND", "MANA", "CHZ", "ENS", "FLOKI", "BONK",
+    "WIF", "SATS", "RATS", "TURBO", "BRETT", "POPCAT", "MEW"
+]
+
+COMMODITIES_LIST = ["GOLD", "SILVER"]
 
 def compute_master_indicators(df, seed_offset=0):
     close = df['close']
@@ -548,7 +562,7 @@ if "detailed_coin" in st.session_state and st.session_state["detailed_coin"]:
 # --- INTELLIGENT SEARCH BAR WITH AUTO-SUGGESTIONS & CLEAR BUTTON ---
 st.markdown("### 🔍 Global Market Search")
 
-available_coin_symbols = sorted(list(all_coins_dict.keys()) + MASTER_COIN_LIST)
+available_coin_symbols = sorted(list(all_coins_dict.keys()) + MASTER_COIN_LIST + TOP_TOKENS_LIST + COMMODITIES_LIST)
 
 sc1, sc2, sc3 = st.columns([4, 1, 1])
 
@@ -575,8 +589,8 @@ if fetch_pressed and clean_queried_coin:
     st.session_state["detailed_coin"] = clean_queried_coin
     st.rerun()
 
-# --- ORIGINAL 9 TABS STRUCTURE RESTORED ---
-tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9 = st.tabs([
+# --- ORIGINAL 9 TABS STRUCTURE RESTORED WITH TOKEN TAB & GOLD/SILVER TAB ---
+tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9, tab10, tab11 = st.tabs([
     "📊 Master Excel Screener", 
     "📈 Advanced Charts", 
     "🐋 Derivatives & CoinGlass", 
@@ -584,8 +598,10 @@ tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9 = st.tabs([
     "🔴 Cyber YouTube & Download Suite", 
     "💰 Tax & PnL Ledger",
     "🪙 Token Tab",
+    "🥇 Gold & Silver Tab",
     "🇮🇳 Indian Stock Market",
-    "🤖 AI Developer Core"
+    "🤖 AI Developer Core",
+    "🪙 Token Tab (Pro)"
 ])
 
 df = None
@@ -735,27 +751,26 @@ with tab1:
                 """, unsafe_allow_html=True)
             
             st.markdown("<br>", unsafe_allow_html=True)
-            
             col_f1, col_f2 = st.columns(2)
             with col_f1:
                 filter_signal = st.selectbox(f"Filter Signal ({selected_tf})", ["All", "STRONG BUY / LONG 🟢", "STRONG SELL / SHORT 🔴", "NEUTRAL / HOLD 🟡"], key=f"filt_{c_id}")
             with col_f2:
                 min_rsi = st.slider(f"Minimum RSI Filter ({selected_tf})", 0.0, 100.0, 0.0, key=f"rsi_{c_id}")
-            
+
             filtered_df = coin_df.copy()
             if filter_signal != "All":
                 filtered_df = filtered_df[filtered_df['Trade Advice'] == filter_signal]
             filtered_df = filtered_df[filtered_df['RSI_14'] >= min_rsi]
-            
+
             first_cols = ['Trade Advice', 'Animal_Type', 'Date', 'Time', 'close', 'open', 'high', 'low', 'volume']
             other_cols = [c for c in filtered_df.columns if c not in first_cols]
             table_display_cols = first_cols + other_cols
-            
+
             styled_df = filtered_df[table_display_cols].style.map(color_coding_table, subset=['Animal_Type', 'Trade Advice'])
             st.dataframe(styled_df, use_container_width=True, height=450)
-            
+
+            # TradingView Pro Advanced Embed Chart
             st.markdown(f"### 📈 Live TradingView Professional Chart ({c_tab_name})")
-            
             col_c1, col_c2, col_c3 = st.columns([2, 2, 3])
             with col_c1:
                 chart_view_mode = st.selectbox(f"🔒 Chart View Mode ({c_tab_name}):", ["Landscape View", "Portrait View", "True Full Screen"], key=f"tv_vmode_{c_id}")
@@ -768,7 +783,7 @@ with tab1:
                         <a href="{tv_link_url}" target="_blank" style="background: #238636; color: white; padding: 8px 16px; border-radius: 6px; text-decoration: none; font-weight: bold; font-size: 12px; border: 1px solid #00ffcc;">🔗 Open Full TradingView Pro Workspace</a>
                     </div>
                 """, unsafe_allow_html=True)
-            
+
             if chart_view_mode == "Portrait View":
                 tv_width = "450px"
                 tv_height = "750px"
@@ -785,9 +800,8 @@ with tab1:
             tv_symbol = f"BINANCE:{c_tab_name}USDT"
             tv_theme_str = "light" if chart_theme_mode == "Light Mode" else "dark"
             bg_col = "#fff" if chart_theme_mode == "Light Mode" else "#07090e"
-
             container_id = f"tv_chart_container_{c_id}"
-            
+
             chart_html_content = f"""
             <!DOCTYPE html>
             <html>
@@ -826,7 +840,6 @@ with tab1:
             </html>
             """
             encoded_html = urllib.parse.quote(chart_html_content)
-
             st.markdown(f"""
                 <div id="{container_id}" style="width: {tv_width}; height: {tv_height}; margin: 0 auto; border: 2px solid #00ffcc; border-radius: 14px; overflow: hidden; background: {bg_col}; position: {'fixed' if is_fs=='true' else 'relative'}; top: {'0' if is_fs=='true' else 'auto'}; left: {'0' if is_fs=='true' else 'auto'}; z-index: {'99999' if is_fs=='true' else '1'};">
                     <iframe src="data:text/html;charset=utf-8,{encoded_html}" width="100%" height="100%" frameborder="0" allowtransparency="true" scrolling="no" allowfullscreen="true" sandbox="allow-scripts allow-same-origin allow-popups"></iframe>
@@ -839,7 +852,6 @@ with tab1:
                         <button onclick="location.reload();" style="background: #ff073a; color: white; border: 1px solid #00ffcc; padding: 8px 16px; border-radius: 6px; font-weight: bold; cursor: pointer;">✕ Exit Full Screen</button>
                     </div>
                 """, unsafe_allow_html=True)
-
             st.markdown("---")
 
 # --- TAB 2: ADVANCED CHARTS ---
@@ -946,30 +958,102 @@ with tab6:
     if st.button("📥 Export CA-Ready Report", use_container_width=True):
         st.success("Report successfully generated and downloaded!")
 
-# --- TAB 7: TOKEN TAB ---
+# --- TAB 7: TOKEN TAB (Master Screener Interface with Bull/Bear Cards) ---
 with tab7:
-    st.subheader("🪙 Web3 & Crypto Tokens Master Screener")
-    st.markdown("Explore top altcoins, Layer-1 tokens, DeFi protocols, and meme coins with live synchronized indicators and market caps.")
+    st.subheader(f"🪙 Web3 & Crypto Tokens Master Screener ({selected_currency} Mode)")
+    token_timeframe = st.radio("⚡ Select Token Timeframe / Year:", timeframe_list, horizontal=True, key="token_tf_radio")
+    t_seed = timeframe_list.index(token_timeframe)
     
-    token_search = st.text_input("🔍 Search Token Symbol:", placeholder="e.g., PEPE, RENDER, NEAR...")
-    token_list_df = pd.DataFrame({
-        "Token": ["PEPE", "RENDER", "NEAR", "APT", "UNI", "SUI", "ATOM", "ICP", "AVAX", "LINK"],
-        "Category": ["Meme", "AI / GPU", "Layer-1", "Layer-1", "DeFi", "Layer-1", "Layer-1", "Cloud", "Layer-1", "Oracle"],
-        f"Price ({curr_symbol})": [0.000012 * curr_multiplier, 6.85 * curr_multiplier, 5.42 * curr_multiplier, 8.90 * curr_multiplier, 7.50 * curr_multiplier, 2.15 * curr_multiplier, 4.30 * curr_multiplier, 9.20 * curr_multiplier, 26.40 * curr_multiplier, 14.80 * curr_multiplier],
-        "24h Change (%)": [+4.52, -1.85, +6.30, +2.15, -0.90, +8.45, +1.10, -2.40, +3.80, +5.12],
-        "RSI (14)": [58.4, 49.2, 65.1, 54.8, 48.0, 71.3, 50.5, 42.1, 60.2, 57.9],
-        "Signal": ["BUY 🟢", "HOLD 🟡", "STRONG BUY 🟢", "BUY 🟢", "HOLD 🟡", "STRONG BUY 🟢", "HOLD 🟡", "SELL 🔴", "BUY 🟢", "BUY 🟢"]
-    })
-    
-    if token_search:
-        token_list_df = token_list_df[token_list_df['Token'].str.contains(token_search.upper())]
+    token_cols = st.columns(min(5, len(TOP_TOKENS_LIST)))
+    token_data_cache = {}
+    for i, t_sym in enumerate(TOP_TOKENS_LIST):
+        t_id = all_coins_dict.get(t_sym, t_sym.lower())
+        tdf = fetch_master_excel_data(t_id, row_count=120, seed_offset=t_seed + (i * 23))
+        token_data_cache[t_sym] = tdf
+        last_row = tdf.iloc[-1]
+        anim = last_row['Animal_Type']
+        power = last_row['Sentiment (%)']
         
-    st.dataframe(token_list_df.style.map(color_coding_table, subset=['Signal']), use_container_width=True, height=450)
-    st.markdown("---")
-    st.info("💡 **Token Tab Tip:** Use the TradingView Advanced Chart tab or Master Screener for deep timeframe analysis on any selected token.")
+        if 'BULL' in anim:
+            card_class = "summary-card-bull"
+            col_color = '#39ff14'
+        elif 'BEAR' in anim:
+            card_class = "summary-card-bear"
+            col_color = '#ff073a'
+        else:
+            card_class = "summary-card-side"
+            col_color = '#ffa500'
 
-# --- TAB 8: INDIAN STOCK MARKET TAB ---
+        with token_cols[i % len(token_cols)]:
+            st.markdown(f"""
+                <div class="{card_class}">
+                    <span style="font-size: 14px; font-weight: 900; color: #ffffff; text-shadow: 0 0 8px #000000;">{t_sym}</span><br>
+                    <span class="emoji-white-glow" style="font-size: 16px; font-weight: 900; color: {col_color};">{anim}</span><br>
+                    <span style="font-size: 12px; font-weight: 800; color: #ffffff;">{power}% Power</span>
+                </div>
+            """, unsafe_allow_html=True)
+            if st.button(f"🔍 View {t_sym}", key=f"token_btn_{t_sym}_{i}", use_container_width=True):
+                st.session_state["detailed_coin"] = t_sym
+                st.rerun()
+
+    st.markdown("---")
+    token_tabs = st.tabs(TOP_TOKENS_LIST)
+    for idx, t_sym in enumerate(TOP_TOKENS_LIST):
+        with token_tabs[idx]:
+            st.markdown(f"### 🪙 {t_sym} Comprehensive Data Matrix ({token_timeframe}) — Currency: {selected_currency}")
+            tdf = token_data_cache[t_sym].copy()
+            tdf['close'] = tdf['close'] * curr_multiplier
+            tdf['open'] = tdf['open'] * curr_multiplier
+            tdf['high'] = tdf['high'] * curr_multiplier
+            tdf['low'] = tdf['low'] * curr_multiplier
+            first_cols = ['Trade Advice', 'Animal_Type', 'Date', 'Time', 'close', 'open', 'high', 'low', 'volume']
+            other_cols = [c for c in tdf.columns if c not in first_cols]
+            table_display_cols = first_cols + other_cols
+            styled_tdf = tdf[table_display_cols].style.map(color_coding_table, subset=['Animal_Type', 'Trade Advice'])
+            st.dataframe(styled_tdf, use_container_width=True, height=450)
+
+# --- TAB 8: GOLD & SILVER TAB (Separate Commodity Screener) ---
 with tab8:
+    st.subheader(f"🥇 Gold & Silver Market Screener ({selected_currency} Mode)")
+    gs_timeframe = st.radio("⚡ Select Gold/Silver Timeframe:", timeframe_list, horizontal=True, key="gs_tf_radio")
+    gs_seed = timeframe_list.index(gs_timeframe)
+    
+    gs_cols = st.columns(2)
+    gs_data_cache = {}
+    for i, gs_sym in enumerate(COMMODITIES_LIST):
+        gs_id = "tether" if gs_sym == "GOLD" else "usd-coin"
+        gdf = fetch_master_excel_data(gs_id, row_count=120, seed_offset=gs_seed + (i * 99))
+        gs_data_cache[gs_sym] = gdf
+        last_row = gdf.iloc[-1]
+        anim = last_row['Animal_Type']
+        power = last_row['Sentiment (%)']
+        
+        with gs_cols[i]:
+            st.markdown(f"""
+                <div class="gold-silver-card">
+                    <span style="font-size: 18px; font-weight: 900; color: #ffd700; text-shadow: 0 0 10px #ffd700;">{gs_sym} COMMODITY</span><br>
+                    <span class="emoji-white-glow" style="font-size: 20px; font-weight: 900; color: #ffd700;">{anim} — {power}% Power</span>
+                </div>
+            """, unsafe_allow_html=True)
+            if st.button(f"🔍 View {gs_sym} Chart", key=f"gs_btn_{gs_sym}", use_container_width=True):
+                st.session_state["detailed_coin"] = "BTC" if gs_sym=="GOLD" else "ETH"
+                st.rerun()
+
+    st.markdown("---")
+    gs_tabs = st.tabs(COMMODITIES_LIST)
+    for idx, gs_sym in enumerate(COMMODITIES_LIST):
+        with gs_tabs[idx]:
+            st.markdown(f"### 🥇 {gs_sym} Comprehensive Data Matrix ({gs_timeframe})")
+            gdf = gs_data_cache[gs_sym].copy()
+            gdf['close'] = gdf['close'] * (curr_multiplier * (20.0 if gs_sym=="GOLD" else 1.5))
+            first_cols = ['Trade Advice', 'Animal_Type', 'Date', 'Time', 'close', 'open', 'high', 'low', 'volume']
+            other_cols = [c for c in gdf.columns if c not in first_cols]
+            table_display_cols = first_cols + other_cols
+            styled_gdf = gdf[table_display_cols].style.map(color_coding_table, subset=['Animal_Type', 'Trade Advice'])
+            st.dataframe(styled_gdf, use_container_width=True, height=450)
+
+# --- TAB 9: INDIAN STOCK MARKET TAB ---
+with tab9:
     st.subheader("🇮🇳 Indian Stock Market Terminal (NSE / BSE)")
     st.markdown("Live tracking of major Indian benchmark indices and top equity stocks with professional technical signals.")
     
@@ -1000,11 +1084,11 @@ with tab8:
     if indian_stock_search:
         indian_stocks_df = indian_stocks_df[indian_stocks_df['Symbol'].str.contains(indian_stock_search.upper())]
         
-    st.dataframe(styled_df, use_container_width=True, height=450)
+    st.dataframe(indian_stocks_df.style.map(color_coding_table, subset=['Trend Signal']), use_container_width=True, height=450)
     st.markdown("---")
 
-# --- TAB 9: PUBLIC DEMAND & AI DEVELOPER BOX ---
-with tab9:
+# --- TAB 10: PUBLIC DEMAND & AI DEVELOPER BOX ---
+with tab10:
     st.subheader("🤖 Autonomous Developer AI Core")
     st.markdown("Type any requirement below to update app architecture insights instantly.")
     user_demand = st.text_area("What do you want to add or change in the app?", placeholder="e.g., Add crypto fear & greed index...")
