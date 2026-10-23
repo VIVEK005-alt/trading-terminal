@@ -334,6 +334,8 @@ if n_col1.button("⟳ Refresh App", use_container_width=True):
     st.cache_data.clear()
     st.rerun()
 if n_col2.button("🏠 Home", use_container_width=True):
+    if "detailed_coin" in st.session_state:
+        del st.session_state["detailed_coin"]
     st.rerun()
 
 st.sidebar.title("⚡ APEX CONTROL")
@@ -360,7 +362,6 @@ if st.sidebar.button("➕ Create New Playlist", use_container_width=True):
 
 active_playlist = st.sidebar.selectbox("📂 Select Active Playlist:", list(st.session_state.custom_playlists.keys()))
 
-# Manage coins in active playlist
 current_coins_in_playlist = st.session_state.custom_playlists[active_playlist]
 updated_playlist_coins = st.sidebar.multiselect(
     f"Edit Coins in [{active_playlist}]:",
@@ -371,8 +372,6 @@ if updated_playlist_coins:
     st.session_state.custom_playlists[active_playlist] = updated_playlist_coins
 
 st.sidebar.markdown("---")
-
-# --- CURRENCY SELECTOR OPTIONS ---
 selected_currency = st.sidebar.selectbox("💱 Select Trading Currency:", ["USD ($)", "EUR (€)", "GBP (£)", "INR (₹)", "JPY (¥)", "USDT"])
 
 st.sidebar.markdown("---")
@@ -396,29 +395,111 @@ st.markdown("""
     </div>
 """, unsafe_allow_html=True)
 
-# --- INTELLIGENT GLOBAL SEARCH BAR WITH AUTO-SUGGEST & AUTO-CLEANING ---
+# --- DETAILED VIEW PAGE (OPENED WHEN A COIN IS SEARCHED/SELECTED) ---
+if "detailed_coin" in st.session_state and st.session_state["detailed_coin"]:
+    target_coin = st.session_state["detailed_coin"]
+    
+    if st.button("⬅️ Back to Master Terminal", use_container_width=True):
+        del st.session_state["detailed_coin"]
+        st.rerun()
+
+    st.markdown(f"## ⚡ Dedicated Market Detail View: {target_coin}")
+    
+    c_id = all_coins_dict.get(target_coin, target_coin.lower())
+    curr_multiplier = 1.0
+    curr_symbol = "$"
+    if "EUR" in selected_currency:
+        curr_multiplier = 0.92
+        curr_symbol = "€"
+    elif "GBP" in selected_currency:
+        curr_multiplier = 0.79
+        curr_symbol = "£"
+    elif "INR" in selected_currency:
+        curr_multiplier = 83.25
+        curr_symbol = "₹"
+    elif "JPY" in selected_currency:
+        curr_multiplier = 152.50
+        curr_symbol = "¥"
+
+    df_detail = fetch_master_excel_data(c_id, row_count=120)
+    df_detail['close'] = df_detail['close'] * curr_multiplier
+    df_detail['open'] = df_detail['open'] * curr_multiplier
+    df_detail['high'] = df_detail['high'] * curr_multiplier
+    df_detail['low'] = df_detail['low'] * curr_multiplier
+
+    cur_px = df_detail['close'].iloc[-1]
+    anim_type = df_detail['Animal_Type'].iloc[-1]
+    pow_pct = df_detail['Sentiment (%)'].iloc[-1]
+    adv = df_detail['Trade Advice'].iloc[-1]
+    rsi_v = df_detail['RSI_14'].iloc[-1]
+    macd_v = df_detail['MACD'].iloc[-1]
+    atr_v = df_detail['ATR_14'].iloc[-1]
+    ema_v = df_detail['EMA_20'].iloc[-1]
+
+    box_col = '#39ff14' if 'BULL' in anim_type else ('#ff073a' if 'BEAR' in anim_type else '#ffa500')
+    px_cls = "live-running-price-bull" if 'BULL' in anim_type else ("live-running-price-bear" if 'BEAR' in anim_type else "live-running-price-side")
+
+    d_col1, d_col2 = st.columns([1.3, 1])
+    with d_col1:
+        st.markdown(f"""
+            <div style="padding: 20px; background: #0d1117; border-radius: 12px; border: 2px solid {box_col};">
+                <span style="font-size: 12px; color: #8b949e; display: block; font-weight: 600;">LIVE RUNNING PRICE ({selected_currency})</span>
+                <span class="{px_cls}">{curr_symbol}{cur_px:,.2f}</span>
+                <hr style="border-color: #30363d; margin: 10px 0;">
+                <span style="font-size: 12px; color: #8b949e; display: block; font-weight: 600;">AI SENTIMENT & POWER</span>
+                <span class="emoji-white-glow" style="font-size: 22px; font-weight: 900; color: {box_col};">{anim_type} — {pow_pct}% Power</span>
+            </div>
+        """, unsafe_allow_html=True)
+
+    with d_col2:
+        st.markdown(f"""
+            <div class="unique-strategy-box" style="margin-top: 0; padding: 20px;">
+                <h4 style="color: #00ffcc; margin-top: 0; font-size: 16px;">🎯 Dedicated AI Trading Strategy</h4>
+                <p style="color: #ffffff; font-size: 13px; margin-bottom: 6px;"><b>Advice:</b> <span style="color: #39ff14;">{adv}</span></p>
+                <p style="color: #8b949e; font-size: 12px; margin-bottom: 0;"><b>Key Indicators:</b> RSI: {rsi_v} | MACD: {macd_v} | EMA: {ema_v} | ATR: {atr_v}</p>
+            </div>
+        """, unsafe_allow_html=True)
+
+    st.markdown("---")
+    st.dataframe(df_detail, use_container_width=True, height=500)
+    st.stop()
+
+# --- INTELLIGENT SEARCH BAR WITH CLEAR BUTTON & DROPDOWN SUGGESTIONS ---
 st.markdown("### 🔍 Global Market Search")
 
 available_coin_symbols = sorted(list(all_coins_dict.keys()) + MASTER_COIN_LIST)
 
-s_col1, s_col2 = st.columns([5, 1])
+# Initialize session state for input cleaning
+if "search_box_val" not in st.session_state:
+    st.session_state["search_box_val"] = "BTC"
+
+s_col1, s_col2, s_col3 = st.columns([4, 1, 1])
+
 with s_col1:
-    selected_search_coin = st.selectbox(
-        "Search or Select Coin Symbol:",
+    typed_coin = st.selectbox(
+        "Search or Select Coin Symbol (Suggestions below):",
         options=available_coin_symbols,
-        index=available_coin_symbols.index("BTC") if "BTC" in available_coin_symbols else 0,
+        index=available_coin_symbols.index(st.session_state["search_box_val"]) if st.session_state["search_box_val"] in available_coin_symbols else 0,
         label_visibility="collapsed"
     )
+
 with s_col2:
-    search_clicked = st.button("🚀 Fetch Data", use_container_width=True)
+    fetch_btn = st.button("🚀 Fetch Data", use_container_width=True)
 
-# Auto-clean input: remove words like USDT, USD if typed or selected
-clean_coin = selected_search_coin.upper().replace("USDT", "").replace("USD", "").replace("/", "").strip()
+with s_col3:
+    clear_btn = st.button("🧹 Clear", use_container_width=True)
 
-if search_clicked:
-    st.session_state["global_search_target"] = clean_coin
+if clear_btn:
+    st.session_state["search_box_val"] = "BTC"
+    if "detailed_coin" in st.session_state:
+        del st.session_state["detailed_coin"]
+    st.rerun()
 
-active_search_symbol = st.session_state.get("global_search_target", clean_coin)
+clean_symbol = typed_coin.upper().replace("USDT", "").replace("USD", "").replace("/", "").strip()
+
+if fetch_btn and clean_symbol:
+    st.session_state["detailed_coin"] = clean_symbol
+    st.rerun()
 
 # --- UPDATED TABS INCLUDING TOKEN TAB & INDIAN STOCK MARKET TAB ---
 tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9 = st.tabs([
@@ -436,14 +517,12 @@ tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9 = st.tabs([
 df = None
 
 with tab1:
-    st.subheader(f"🌍 Master Excel Sheet Matrix ({selected_currency} Mode) — Active Coin: {active_search_symbol}")
+    st.subheader(f"🌍 Master Excel Sheet Matrix ({selected_currency} Mode)")
     
     selected_lang = st.selectbox("🌐 Choose Language / भाषा चुनें:", ["English", "Hinglish", "Hindi"], key="inline_lang_selector")
     lang = LANG_DICT[selected_lang]
     
     coin_mapping = {k: all_coins_dict[k] for k in st.session_state.custom_playlists[active_playlist] if k in all_coins_dict}
-    if active_search_symbol not in coin_mapping and active_search_symbol in all_coins_dict:
-        coin_mapping = {active_search_symbol: all_coins_dict[active_search_symbol], **coin_mapping}
     if not coin_mapping:
         coin_mapping = {"BTC": "bitcoin", "ETH": "ethereum", "SOL": "solana"}
     
@@ -861,7 +940,7 @@ with tab8:
 with tab9:
     st.subheader("🤖 Autonomous Developer AI Core")
     st.markdown("Type any requirement below to update app architecture insights instantly.")
-    user_demand = st.text_input("What do you want to add or change in the app?", placeholder="e.g., Add crypto fear & greed index...")
+    user_demand = st.text_area("What do you want to add or change in the app?", placeholder="e.g., Add crypto fear & greed index...")
     if st.button("✨ Submit Demand to Developer AI", use_container_width=True):
         if user_demand:
             st.info(f"🔄 **Developer AI is processing your request:** '{user_demand}'...")
