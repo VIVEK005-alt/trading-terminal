@@ -51,25 +51,25 @@ st.markdown("""
     .live-running-price-bull {
         font-family: 'Orbitron', sans-serif;
         font-weight: 900;
-        font-size: 32px;
+        font-size: 38px;
         color: #39ff14;
-        text-shadow: 0 0 10px rgba(57,255,20,0.7);
+        text-shadow: 0 0 12px rgba(57,255,20,0.8);
     }
 
     .live-running-price-bear {
         font-family: 'Orbitron', sans-serif;
         font-weight: 900;
-        font-size: 32px;
+        font-size: 38px;
         color: #ff073a;
-        text-shadow: 0 0 10px rgba(255,7,58,0.7);
+        text-shadow: 0 0 12px rgba(255,7,58,0.8);
     }
 
     .live-running-price-side {
         font-family: 'Orbitron', sans-serif;
         font-weight: 900;
-        font-size: 32px;
+        font-size: 38px;
         color: #ffa500;
-        text-shadow: 0 0 10px rgba(255,165,0,0.7);
+        text-shadow: 0 0 12px rgba(255,165,0,0.8);
     }
 
     .summary-card-bull {
@@ -91,18 +91,23 @@ st.markdown("""
         text-shadow: 0 0 12px rgba(255, 255, 255, 0.9), 0 0 25px rgba(255, 255, 255, 0.6);
     }
 
-    /* Equal Height & Equal Width Professional Card Containers */
+    /* Bold, Clear and Larger Equal Size Boxes */
     .equal-box-container {
         background: #0d1117;
         border: 2px solid #00ffcc;
         border-radius: 12px;
-        padding: 20px;
-        height: 180px;
+        padding: 22px;
+        height: 195px;
         display: flex;
         flex-direction: column;
         justify-content: space-between;
         box-shadow: 0 0 20px rgba(0,255,204,0.25);
         margin-bottom: 20px;
+    }
+
+    .equal-box-container span, .equal-box-container b, .equal-box-container p {
+        color: #ffffff !important;
+        font-weight: 800 !important;
     }
 
     /* Excel-like Professional Table Styling */
@@ -385,11 +390,10 @@ st.markdown("""
     </div>
 """, unsafe_allow_html=True)
 
-# --- DEDICATED MARKET DETAIL VIEW PAGE (EQUAL SIZE BOXES, EXCEL TABLE, TRADINGVIEW CHART WITH VIEW MODES) ---
+# --- DEDICATED MARKET DETAIL VIEW PAGE ---
 if "detailed_coin" in st.session_state and st.session_state["detailed_coin"]:
     target_coin = st.session_state["detailed_coin"]
     
-    # Exit / Back button at the very top of the page
     if st.button("⬅️ Exit / Back to Master Terminal Dashboard", use_container_width=True):
         del st.session_state["detailed_coin"]
         st.rerun()
@@ -430,18 +434,18 @@ if "detailed_coin" in st.session_state and st.session_state["detailed_coin"]:
     box_col = '#39ff14' if 'BULL' in anim_type else ('#ff073a' if 'BEAR' in anim_type else '#ffa500')
     px_cls = "live-running-price-bull" if 'BULL' in anim_type else ("live-running-price-bear" if 'BEAR' in anim_type else "live-running-price-side")
 
-    # First Image: Equal Size Boxes for Price & Strategy
+    # First Image: Equal Size Bold & Clear Boxes
     d_col1, d_col2 = st.columns(2)
     with d_col1:
         st.markdown(f"""
             <div class="equal-box-container" style="border: 2px solid {box_col};">
                 <div>
-                    <span style="font-size: 11px; color: #8b949e; display: block; font-weight: 600;">LIVE RUNNING PRICE ({selected_currency})</span>
+                    <span style="font-size: 13px; color: #00ffcc; display: block; font-weight: 800; letter-spacing: 1px;">LIVE RUNNING PRICE ({selected_currency})</span>
                     <span class="{px_cls}">{curr_symbol}{cur_px:,.2f}</span>
                 </div>
                 <div>
-                    <span style="font-size: 11px; color: #8b949e; display: block; font-weight: 600;">AI SENTIMENT & POWER</span>
-                    <span class="emoji-white-glow" style="font-size: 18px; font-weight: 900; color: {box_col};">{anim_type} — {pow_pct}% Power</span>
+                    <span style="font-size: 13px; color: #00ffcc; display: block; font-weight: 800; letter-spacing: 1px;">AI SENTIMENT & POWER</span>
+                    <span class="emoji-white-glow" style="font-size: 20px; font-weight: 900; color: {box_col};">{anim_type} — {pow_pct}% Power</span>
                 </div>
             </div>
         """, unsafe_allow_html=True)
@@ -450,18 +454,18 @@ if "detailed_coin" in st.session_state and st.session_state["detailed_coin"]:
         st.markdown(f"""
             <div class="equal-box-container">
                 <div>
-                    <h4 style="color: #00ffcc; margin-top: 0; font-size: 15px;">🎯 Dedicated AI Trading Strategy</h4>
-                    <p style="color: #ffffff; font-size: 12px; margin-bottom: 4px;"><b>Advice:</b> <span style="color: #39ff14;">{adv}</span></p>
+                    <h4 style="color: #00ffcc; margin-top: 0; font-size: 17px; font-weight: 900;">🎯 Dedicated AI Trading Strategy</h4>
+                    <p style="color: #ffffff; font-size: 14px; font-weight: 800; margin-bottom: 4px;">Advice: <span style="color: #39ff14;">{adv}</span></p>
                 </div>
                 <div>
-                    <p style="color: #8b949e; font-size: 11px; margin-bottom: 0;"><b>Key Indicators:</b> RSI: {rsi_v} | MACD: {macd_v} | EMA: {ema_v} | ATR: {atr_v}</p>
+                    <p style="color: #ff00ff; font-size: 13px; font-weight: 800; margin-bottom: 0;">Key Indicators: RSI: {rsi_v} | MACD: {macd_v} | EMA: {ema_v} | ATR: {atr_v}</p>
                 </div>
             </div>
         """, unsafe_allow_html=True)
 
     st.markdown("---")
     
-    # Second Image: MS Excel-like Professional Table with Buy/Sell columns first
+    # Second Image: Excel-like Professional Table
     first_cols = ['Trade Advice', 'Animal_Type', 'Date', 'Time', 'close', 'open', 'high', 'low', 'volume']
     other_cols = [c for c in df_detail.columns if c not in first_cols]
     final_detail_cols = first_cols + other_cols
@@ -470,7 +474,7 @@ if "detailed_coin" in st.session_state and st.session_state["detailed_coin"]:
     styled_detail_df = df_detail[final_detail_cols].style.map(color_coding_table, subset=['Animal_Type', 'Trade Advice'])
     st.dataframe(styled_detail_df, use_container_width=True, height=400)
 
-    # Third Image: Proper TradingView Chart with View Modes & Dark/Light Mode Freeze Buttons
+    # Third Image: TradingView Chart with View Modes & Dark/Light Mode Freeze Buttons
     st.markdown(f"### 📈 Live TradingView Professional Chart ({target_coin})")
     
     dc1, dc2, dc3 = st.columns([2, 2, 3])
@@ -980,7 +984,7 @@ with tab8:
     with col_ind2:
         st.metric("Bank Nifty", f"₹52,140.80", "+310.20 (+0.60%)")
     with col_ind3:
-        st.metric("Sensex", f"₹81,420.10", "+380.40 (+0.47%)")
+        st.metric("Sensex", f"81,420.10", "+380.40 (+0.47%)")
     with col_ind4:
         st.metric("India VIX", "13.45", "-2.10% (Low Volatility)")
         
@@ -1001,7 +1005,7 @@ with tab8:
     if indian_stock_search:
         indian_stocks_df = indian_stocks_df[indian_stocks_df['Symbol'].str.contains(indian_stock_search.upper())]
         
-    st.dataframe(indian_stocks_df.style.map(color_coding_table, subset=['Trend Signal']), use_container_width=True, height=450)
+    st.dataframe(styled_df, use_container_width=True, height=450)
     st.markdown("---")
 
 # --- TAB 9: PUBLIC DEMAND & AI DEVELOPER BOX ---
