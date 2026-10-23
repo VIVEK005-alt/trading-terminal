@@ -38,20 +38,20 @@ st.markdown("""
         text-shadow: 0 0 8px rgba(57,255,20,0.5);
     }
 
-    /* Enhanced Summary Cards with Crystal Clear Text Contrast */
+    /* Crystal Clear High Contrast Summary Cards */
     .summary-card-bull {
-        background: linear-gradient(rgba(5, 7, 11, 0.92), rgba(5, 7, 11, 0.92)), url('https://images.unsplash.com/photo-1642543492481-44e81e3914a7?q=80&w=400&auto=format&fit=crop');
-        background-size: cover; background-position: center; border: 2px solid #39ff14; padding: 15px; border-radius: 12px; text-align: center; box-shadow: 0 4px 15px rgba(57,255,20,0.3); margin-bottom: 20px;
+        background: linear-gradient(rgba(5, 7, 11, 0.75), rgba(5, 7, 11, 0.75)), url('https://images.unsplash.com/photo-1642543492481-44e81e3914a7?q=80&w=400&auto=format&fit=crop');
+        background-size: cover; background-position: center; border: 2px solid #39ff14; padding: 15px; border-radius: 12px; text-align: center; box-shadow: 0 4px 15px rgba(57,255,20,0.4); margin-bottom: 20px;
     }
 
     .summary-card-bear {
-        background: linear-gradient(rgba(5, 7, 11, 0.92), rgba(5, 7, 11, 0.92)), url('https://images.unsplash.com/photo-1563089145-599997674d42?q=80&w=400&auto=format&fit=crop');
-        background-size: cover; background-position: center; border: 2px solid #ff073a; padding: 15px; border-radius: 12px; text-align: center; box-shadow: 0 4px 15px rgba(255,7,58,0.3); margin-bottom: 20px;
+        background: linear-gradient(rgba(5, 7, 11, 0.75), rgba(5, 7, 11, 0.75)), url('https://images.unsplash.com/photo-1563089145-599997674d42?q=80&w=400&auto=format&fit=crop');
+        background-size: cover; background-position: center; border: 2px solid #ff073a; padding: 15px; border-radius: 12px; text-align: center; box-shadow: 0 4px 15px rgba(255,7,58,0.4); margin-bottom: 20px;
     }
 
     .summary-card-side {
-        background: linear-gradient(rgba(5, 7, 11, 0.92), rgba(5, 7, 11, 0.92)), url('https://images.unsplash.com/photo-1543466835-00a7907e9de1?q=80&w=400&auto=format&fit=crop');
-        background-size: cover; background-position: center; border: 2px solid #ffa500; padding: 15px; border-radius: 12px; text-align: center; box-shadow: 0 4px 15px rgba(255,165,0,0.3); margin-bottom: 20px;
+        background: linear-gradient(rgba(5, 7, 11, 0.75), rgba(5, 7, 11, 0.75)), url('https://images.unsplash.com/photo-1543466835-00a7907e9de1?q=80&w=400&auto=format&fit=crop');
+        background-size: cover; background-position: center; border: 2px solid #ffa500; padding: 15px; border-radius: 12px; text-align: center; box-shadow: 0 4px 15px rgba(255,165,0,0.4); margin-bottom: 20px;
     }
 
     .emoji-white-glow {
@@ -217,7 +217,6 @@ def compute_master_indicators(df, seed_offset=0):
         elif bp <= 45:
             return "BEAR 🐻", (100 - bp), "STRONG SELL / SHORT 🔴"
         else:
-            # Using Dog or Donkey emoji for Sideways market as requested
             side_emoji = "🐶" if (row.name % 2 == 0) else "🐴"
             return f"SIDEWAYS {side_emoji}", 50.0, "NEUTRAL / HOLD 🟡"
 
@@ -434,9 +433,9 @@ with tab1:
         with summary_cols[i % len(summary_cols)]:
             st.markdown(f"""
                 <div class="{card_class}">
-                    <span style="font-size: 13px; font-weight: 900; color: #ffffff; text-shadow: 0 0 5px #000;">{c_name}</span><br>
-                    <span class="emoji-white-glow" style="font-size: 14px; font-weight: 900; color: {col_color};">{anim}</span><br>
-                    <span style="font-size: 11px; font-weight: 700; color: #ffffff; text-shadow: 0 0 4px #000;">{power}% Power</span>
+                    <span style="font-size: 14px; font-weight: 900; color: #ffffff; text-shadow: 0 0 8px #000000, 0 0 12px #000000;">{c_name}</span><br>
+                    <span class="emoji-white-glow" style="font-size: 16px; font-weight: 900; color: {col_color};">{anim}</span><br>
+                    <span style="font-size: 12px; font-weight: 800; color: #ffffff; text-shadow: 0 0 6px #000000, 0 0 10px #000000;">{power}% Power</span>
                 </div>
             """, unsafe_allow_html=True)
 
