@@ -379,7 +379,6 @@ if "detailed_coin" in st.session_state and st.session_state["detailed_coin"]:
         curr_multiplier = 152.50
         curr_symbol = "¥"
 
-    # --- ALL TIME-FRAMES SELECTION FOR THE DETAIL PAGE ---
     timeframe_list = [
         "1 Min", "3 Min", "5 Min", "15 Min", "30 Min", "75 Min", 
         "1 Hour", "2 Hour", "3 Hour", "4 Hour", "6 Hour", "12 Hour", 
@@ -410,7 +409,6 @@ if "detailed_coin" in st.session_state and st.session_state["detailed_coin"]:
     box_col = '#39ff14' if 'BULL' in anim_type else ('#ff073a' if 'BEAR' in anim_type else '#ffa500')
     px_cls = "live-running-price-bull" if 'BULL' in anim_type else ("live-running-price-bear" if 'BEAR' in anim_type else "live-running-price-side")
 
-    # Equal Size Bold & Clear Auto-Fitting Boxes with Dynamic Trend Colors
     d_col1, d_col2 = st.columns(2)
     with d_col1:
         st.markdown(f"""
@@ -447,7 +445,6 @@ if "detailed_coin" in st.session_state and st.session_state["detailed_coin"]:
 
     st.markdown("---")
     
-    # Professional Market Matrix Table with Buy/Sell columns first
     first_cols = ['Trade Advice', 'Animal_Type', 'Date', 'Time', 'close', 'open', 'high', 'low', 'volume']
     other_cols = [c for c in df_detail.columns if c not in first_cols]
     final_detail_cols = first_cols + other_cols
@@ -456,7 +453,6 @@ if "detailed_coin" in st.session_state and st.session_state["detailed_coin"]:
     styled_detail_df = df_detail[final_detail_cols].style.map(color_coding_table, subset=['Animal_Type', 'Trade Advice'])
     st.dataframe(styled_detail_df, use_container_width=True, height=400)
 
-    # --- TRADINGVIEW PRO ADVANCED EMBED CHART WITH CORRECTED THEME MODE ---
     st.markdown(f"### 📈 Live TradingView Professional Chart ({target_coin})")
     
     dc1, dc2, dc3 = st.columns([2, 2, 3])
@@ -579,7 +575,7 @@ if fetch_pressed and clean_queried_coin:
     st.session_state["detailed_coin"] = clean_queried_coin
     st.rerun()
 
-# --- UPDATED TABS INCLUDING TOKEN TAB & INDIAN STOCK MARKET TAB ---
+# --- ORIGINAL 9 TABS STRUCTURE RESTORED ---
 tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9 = st.tabs([
     "📊 Master Excel Screener", 
     "📈 Advanced Charts", 
@@ -654,17 +650,16 @@ with tab1:
             col_color = '#ffa500'
 
         with summary_cols[i % len(summary_cols)]:
-            with st.container():
-                st.markdown(f"""
-                    <div class="{card_class}" style="cursor: pointer;">
-                        <span style="font-size: 14px; font-weight: 900; color: #ffffff; text-shadow: 0 0 8px #000000, 0 0 12px #000000;">{c_name}</span><br>
-                        <span class="emoji-white-glow" style="font-size: 16px; font-weight: 900; color: {col_color};">{anim}</span><br>
-                        <span style="font-size: 12px; font-weight: 800; color: #ffffff; text-shadow: 0 0 6px #000000, 0 0 10px #000000;">{power}% Power</span>
-                    </div>
-                """, unsafe_allow_html=True)
-                if st.button(f"🔍 View {c_name} Chart", key=f"card_btn_{c_name}_{i}", use_container_width=True):
-                    st.session_state["detailed_coin"] = c_name
-                    st.rerun()
+            st.markdown(f"""
+                <div class="{card_class}">
+                    <span style="font-size: 14px; font-weight: 900; color: #ffffff; text-shadow: 0 0 8px #000000, 0 0 12px #000000;">{c_name}</span><br>
+                    <span class="emoji-white-glow" style="font-size: 16px; font-weight: 900; color: {col_color};">{anim}</span><br>
+                    <span style="font-size: 12px; font-weight: 800; color: #ffffff; text-shadow: 0 0 6px #000000, 0 0 10px #000000;">{power}% Power</span>
+                </div>
+            """, unsafe_allow_html=True)
+            if st.button(f"🔍 View {c_name} Chart", key=f"card_btn_{c_name}_{i}", use_container_width=True):
+                st.session_state["detailed_coin"] = c_name
+                st.rerun()
 
     st.markdown("---")
 
@@ -692,7 +687,6 @@ with tab1:
             box_color = '#39ff14' if 'BULL' in animal_type else ('#ff073a' if 'BEAR' in animal_type else '#ffa500')
             price_class = "live-running-price-bull" if 'BULL' in animal_type else ("live-running-price-bear" if 'BEAR' in animal_type else "live-running-price-side")
 
-            # --- Layout Split: Left for Price/Sentiment, Right for Trading Strategy Box ---
             col_left, col_right = st.columns([1.3, 1])
 
             with col_left:
@@ -727,9 +721,9 @@ with tab1:
 
                 st.markdown(f"""
                     <div class="unique-strategy-box" style="margin-top: 0; padding: 15px;">
-                        <h4 style="color: #00ffcc; margin-top: 0; font-size: 15px;">🎯 AI Live Trading Strategy ({selected_tf})</h4>
+                        <h4 style="color: {box_color}; margin-top: 0; font-size: 15px;">🎯 AI Live Trading Strategy ({selected_tf})</h4>
                         <p style="color: #ffffff; font-size: 12px; margin-bottom: 5px;"><b>Strategy Type:</b> <span style="color: #58a6ff;">{trade_style}</span></p>
-                        <p style="color: #ffffff; font-size: 12px; margin-bottom: 5px;"><b>Recommended Action:</b> <span style="color: #39ff14;">{strat_action}</span></p>
+                        <p style="color: #ffffff; font-size: 12px; margin-bottom: 5px;"><b>Recommended Action:</b> <span style="color: {box_color};">{strat_action}</span></p>
                         <p style="color: #ffffff; font-size: 12px; margin-bottom: 5px;"><b>Hold Duration:</b> <span style="color: #ffa500;">Hold trade for {hold_time}</span></p>
                         <p style="color: #8b949e; font-size: 11px; margin-bottom: 0;"><b>Indicators:</b> 
                             <span style="color: #f5c542;">RSI: {rsi_val}</span> | 
@@ -760,7 +754,6 @@ with tab1:
             styled_df = filtered_df[table_display_cols].style.map(color_coding_table, subset=['Animal_Type', 'Trade Advice'])
             st.dataframe(styled_df, use_container_width=True, height=450)
             
-            # --- TRADINGVIEW PRO ADVANCED EMBED CHART WITH BUILT-IN WATCHLIST & FULL INTERACTIVITY ---
             st.markdown(f"### 📈 Live TradingView Professional Chart ({c_tab_name})")
             
             col_c1, col_c2, col_c3 = st.columns([2, 2, 3])
@@ -784,7 +777,7 @@ with tab1:
                 tv_width = "100vw"
                 tv_height = "100vh"
                 is_fs = "true"
-            else: # Landscape View
+            else:
                 tv_width = "100%"
                 tv_height = "650px"
                 is_fs = "false"
@@ -802,12 +795,8 @@ with tab1:
               <meta charset="utf-8">
               <style>
                 html, body {{
-                  margin: 0;
-                  padding: 0;
-                  width: 100%;
-                  height: 100%;
-                  background-color: {bg_col};
-                  overflow: hidden;
+                  margin: 0; padding: 0; width: 100%; height: 100%;
+                  background-color: {bg_col}; overflow: hidden;
                 }}
               </style>
             </head>
@@ -825,7 +814,7 @@ with tab1:
                   "locale": "en",
                   "enable_publishing": false,
                   "allow_symbol_change": true,
-                  "watchlist": ["BINANCE:BTCUSDT", "BINANCE:ETHUSDT", "BINANCE:SOLUSDT", "BINANCE:BNBUSDT", "BINANCE:XRPUSDT", "BINANCE:ADAUSDT", "BINANCE:AVAXUSDT", "BINANCE:LINKUSDT", "BINANCE:SUIUSDT", "BINANCE:DOTUSDT"],
+                  "watchlist": ["BINANCE:BTCUSDT", "BINANCE:ETHUSDT", "BINANCE:SOLUSDT", "BINANCE:BNBUSDT", "BINANCE:XRPUSDT"],
                   "details": true,
                   "hotlist": true,
                   "calendar": false,
@@ -885,7 +874,7 @@ with tab4:
     t_type = st.radio("Order Type:", ["BUY / LONG", "SELL / SHORT"])
     t_qty = st.number_input("Position Size / Quantity:", value=1.0)
     if st.button("🚀 Execute Simulated Order", use_container_width=True):
-        st.success(f"Successfully placed {t_type} for {search_query} with Auto-Trailing Stop-Loss!")
+        st.success(f"Successfully placed {t_type} with Auto-Trailing Stop-Loss!")
 
 # --- TAB 5: CYBER YOUTUBE & DOWNLOAD SUITE ---
 with tab5:
