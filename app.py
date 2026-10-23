@@ -395,7 +395,7 @@ st.markdown("""
     </div>
 """, unsafe_allow_html=True)
 
-# --- DEDICATED MARKET DETAIL VIEW PAGE (ACTIVATED ON SEARCH) ---
+# --- DEDICATED MARKET DETAIL VIEW PAGE (WITH TRADINGVIEW CHART & REORDERED COLUMNS) ---
 if "detailed_coin" in st.session_state and st.session_state["detailed_coin"]:
     target_coin = st.session_state["detailed_coin"]
     
@@ -461,8 +461,54 @@ if "detailed_coin" in st.session_state and st.session_state["detailed_coin"]:
         """, unsafe_allow_html=True)
 
     st.markdown("---")
-    st.subheader(f"📊 Full Historical & Indicator Matrix for {target_coin}")
-    st.dataframe(df_detail, use_container_width=True, height=500)
+    
+    # Reordering columns to put essential buy/sell columns first
+    first_cols = ['Trade Advice', 'Animal_Type', 'Date', 'Time', 'close', 'open', 'high', 'low', 'volume']
+    other_cols = [c for c in df_detail.columns if c not in first_cols]
+    final_detail_cols = first_cols + other_cols
+    
+    st.subheader(f"📊 Professional Market Matrix for {target_coin}")
+    styled_detail_df = df_detail[final_detail_cols].style.map(color_coding_table, subset=['Animal_Type', 'Trade Advice'])
+    st.dataframe(styled_detail_df, use_container_width=True, height=400)
+
+    # --- TRADINGVIEW PRO EMBED CHART ON DETAIL PAGE ---
+    st.markdown(f"### 📈 Live TradingView Professional Chart ({target_coin})")
+    tv_symbol = f"BINANCE:{target_coin}USDT"
+    chart_html_content = f"""
+    <!DOCTYPE html>
+    <html>
+    <head><meta charset="utf-8"></head>
+    <body style="margin:0;background-color:#07090e;">
+      <div class="tradingview-widget-container" style="height:600px;width:100%">
+        <div class="tradingview-widget-container__widget" style="height:100%;width:100%"></div>
+        <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js" async>
+        {{
+          "autosize": true,
+          "symbol": "{tv_symbol}",
+          "interval": "D",
+          "timezone": "Etc/UTC",
+          "theme": "dark",
+          "style": "1",
+          "locale": "en",
+          "enable_publishing": false,
+          "allow_symbol_change": true,
+          "details": true,
+          "hotlist": true,
+          "calendar": false,
+          "support_host": "https://www.tradingview.com"
+        }}
+        </script>
+      </div>
+    </body>
+    </html>
+    """
+    encoded_detail_html = urllib.parse.quote(chart_html_content)
+    st.markdown(f"""
+        <div style="width: 100%; height: 620px; border: 2px solid #00ffcc; border-radius: 14px; overflow: hidden; background: #07090e;">
+            <iframe src="data:text/html;charset=utf-8,{encoded_detail_html}" width="100%" height="100%" frameborder="0" allowtransparency="true" scrolling="no" allowfullscreen="true" sandbox="allow-scripts allow-same-origin allow-popups"></iframe>
+        </div>
+    """, unsafe_allow_html=True)
+    
     st.stop()
 
 # --- INTELLIGENT SEARCH BAR WITH AUTO-SUGGESTIONS & CLEAR BUTTON ---
@@ -668,15 +714,12 @@ with tab1:
                 filtered_df = filtered_df[filtered_df['Trade Advice'] == filter_signal]
             filtered_df = filtered_df[filtered_df['RSI_14'] >= min_rsi]
             
-            excel_display_cols = [
-                'Date', 'Time', 'open', 'high', 'low', 'close', 'volume', 
-                'EMA_10', 'EMA_20', 'EMA_50', 'EMA_100', 'EMA_200', 
-                'RSI_14', 'MACD', 'MACD_Signal', 'BB_Upper', 'BB_Lower', 'ATR_14', 
-                'Buyer Vol', 'Seller Vol', 'Buy Pressure (%)', 'Sell Pressure (%)', 
-                'Animal_Type', 'Trade Advice'
-            ]
+            # Reordered columns to place Buy/Sell columns first for professional layout
+            first_cols = ['Trade Advice', 'Animal_Type', 'Date', 'Time', 'close', 'open', 'high', 'low', 'volume']
+            other_cols = [c for c in filtered_df.columns if c not in first_cols]
+            table_display_cols = first_cols + other_cols
             
-            styled_df = filtered_df[excel_display_cols].style.map(color_coding_table, subset=['Animal_Type', 'Trade Advice'])
+            styled_df = filtered_df[table_display_cols].style.map(color_coding_table, subset=['Animal_Type', 'Trade Advice'])
             st.dataframe(styled_df, use_container_width=True, height=450)
             
             # --- TRADINGVIEW PRO ADVANCED EMBED CHART WITH BUILT-IN WATCHLIST & FULL INTERACTIVITY ---
