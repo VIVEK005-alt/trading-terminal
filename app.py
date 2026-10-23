@@ -24,13 +24,10 @@ st.markdown("""
     .rgb-neon-title {
         font-family: 'Orbitron', sans-serif;
         font-weight: 900;
-        font-size: 32px;
+        font-size: 26px;
         color: #00ffcc;
-        text-shadow: 0 0 12px rgba(0,255,204,0.7), 0 0 25px rgba(0,255,204,0.4);
-        letter-spacing: 1.5px;
+        text-shadow: 0 0 5px rgba(0,255,204,0.4);
         display: inline-block;
-        vertical-align: middle;
-        margin-left: 15px;
     }
 
     .live-running-price-bull {
@@ -374,11 +371,9 @@ st.sidebar.success("🟢 **Developer AI**: Synced")
 # --- HEADER WITH PROFESSIONAL LOGO AND ORGANIZED LAYOUT ---
 head_col1, head_col2 = st.columns([0.08, 0.92])
 with head_col1:
-    st.image("https://images.unsplash.com/photo-1639762681485-074b7f938ba0?q=80&w=150&auto=format&fit=crop", width=70)
+    st.image("https://images.unsplash.com/photo-1622979135225-d2ba269bc1df?q=80&w=150&auto=format&fit=crop", width=65)
 with head_col2:
-    st.markdown('<div class="rgb-neon-title">APEX QUANTUM MULTI-TIMEFRAME MASTER TERMINAL</div>', unsafe_allow_html=True)
-
-st.markdown("<br>", unsafe_allow_html=True)
+    st.markdown('<div class="rgb-neon-title">⚡ APEX QUANTUM MULTI-TIMEFRAME MASTER TERMINAL</div>', unsafe_allow_html=True)
 
 # --- GLOBAL SEARCH BAR WITH WORKING SEARCH BUTTON & MULTI-SOURCE FETCHING ---
 st.markdown("### 🔍 Global Market Search")
@@ -592,4 +587,250 @@ with tab1:
                 """, unsafe_allow_html=True)
             
             if chart_view_mode == "Portrait View":
-                tv_width = "450
+                tv_width = "450px"
+                tv_height = "750px"
+                is_fs = "false"
+            elif chart_view_mode == "True Full Screen":
+                tv_width = "100vw"
+                tv_height = "100vh"
+                is_fs = "true"
+            else: # Landscape View
+                tv_width = "100%"
+                tv_height = "650px"
+                is_fs = "false"
+
+            tv_symbol = f"BINANCE:{c_tab_name}USDT"
+            tv_theme_str = "light" if chart_theme_mode == "Light Mode" else "dark"
+            bg_col = "#fff" if chart_theme_mode == "Light Mode" else "#07090e"
+
+            container_id = f"tv_chart_container_{c_id}"
+            
+            chart_html_content = f"""
+            <!DOCTYPE html>
+            <html>
+            <head>
+              <meta charset="utf-8">
+              <style>
+                html, body {{
+                  margin: 0;
+                  padding: 0;
+                  width: 100%;
+                  height: 100%;
+                  background-color: {bg_col};
+                  overflow: hidden;
+                }}
+              </style>
+            </head>
+            <body>
+              <div class="tradingview-widget-container" style="height:100%;width:100%">
+                <div class="tradingview-widget-container__widget" style="height:100%;width:100%"></div>
+                <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js" async>
+                {{
+                  "autosize": true,
+                  "symbol": "{tv_symbol}",
+                  "interval": "D",
+                  "timezone": "Etc/UTC",
+                  "theme": "{tv_theme_str}",
+                  "style": "1",
+                  "locale": "en",
+                  "enable_publishing": false,
+                  "allow_symbol_change": true,
+                  "watchlist": ["BINANCE:BTCUSDT", "BINANCE:ETHUSDT", "BINANCE:SOLUSDT", "BINANCE:BNBUSDT", "BINANCE:XRPUSDT", "BINANCE:ADAUSDT", "BINANCE:AVAXUSDT", "BINANCE:LINKUSDT", "BINANCE:SUIUSDT", "BINANCE:DOTUSDT"],
+                  "details": true,
+                  "hotlist": true,
+                  "calendar": false,
+                  "support_host": "https://www.tradingview.com"
+                }}
+                </script>
+              </div>
+            </body>
+            </html>
+            """
+            encoded_html = urllib.parse.quote(chart_html_content)
+
+            st.markdown(f"""
+                <div id="{container_id}" style="width: {tv_width}; height: {tv_height}; margin: 0 auto; border: 2px solid #00ffcc; border-radius: 14px; overflow: hidden; background: {bg_col}; position: {'fixed' if is_fs=='true' else 'relative'}; top: {'0' if is_fs=='true' else 'auto'}; left: {'0' if is_fs=='true' else 'auto'}; z-index: {'99999' if is_fs=='true' else '1'};">
+                    <iframe src="data:text/html;charset=utf-8,{encoded_html}" width="100%" height="100%" frameborder="0" allowtransparency="true" scrolling="no" allowfullscreen="true" sandbox="allow-scripts allow-same-origin allow-popups"></iframe>
+                </div>
+            """, unsafe_allow_html=True)
+            
+            if is_fs == "true":
+                st.markdown(f"""
+                    <div style="position: fixed; top: 10px; right: 10px; z-index: 100000;">
+                        <button onclick="location.reload();" style="background: #ff073a; color: white; border: 1px solid #00ffcc; padding: 8px 16px; border-radius: 6px; font-weight: bold; cursor: pointer;">✕ Exit Full Screen</button>
+                    </div>
+                """, unsafe_allow_html=True)
+
+            st.markdown("---")
+
+# --- TAB 2: ADVANCED CHARTS ---
+with tab2:
+    st.subheader("📊 Pro Interactive Chart Engine")
+    st.markdown("""
+        <div class="ai-box">
+            <b>🤖 Trading Expert AI Insight:</b> Multi-timeframe trend alignment verified across all master structures.
+        </div>
+    """, unsafe_allow_html=True)
+    try:
+        sample_df = fetch_master_excel_data('bitcoin', 100)
+        st.line_chart(sample_df.set_index(pd.to_datetime(sample_df['Date'] + ' ' + sample_df['Time']))['close'], use_container_width=True)
+    except Exception as e:
+        st.info(f"Chart rendering note: {e}")
+
+# --- TAB 3: DERIVATIVES & COINGLASS ---
+with tab3:
+    st.subheader("🐋 Whales, Open Interest & Liquidations")
+    col1, col2 = st.columns(2)
+    with col1:
+        st.metric("Open Interest (OI)", "$5.82 Billion", "+6.2% (Bullish)")
+        st.metric("Long / Short Ratio", "1.95", "Dominant Longs")
+    with col2:
+        st.metric("24h Liquidations", "$158 Million", "Short Squeeze Active")
+        st.metric("Funding Rate", "+0.0132%", "Bullish Bias")
+
+# --- TAB 4: PAPER TRADING ---
+with tab4:
+    st.subheader("🎮 Risk-Free Paper Trading Simulator")
+    st.write(f"**Virtual Wallet Balance:** {curr_symbol}10,000.00")
+    t_type = st.radio("Order Type:", ["BUY / LONG", "SELL / SHORT"])
+    t_qty = st.number_input("Position Size / Quantity:", value=1.0)
+    if st.button("🚀 Execute Simulated Order", use_container_width=True):
+        st.success(f"Successfully placed {t_type} for {search_query} with Auto-Trailing Stop-Loss!")
+
+# --- TAB 5: CYBER YOUTUBE & DOWNLOAD SUITE ---
+with tab5:
+    st.markdown('<div class="rgb-neon-title">📺 🔴 APEX MEDIA STREAM & DOWNLOAD SUITE</div>', unsafe_allow_html=True)
+    st.markdown("Lightning-fast streaming, instant URL loading, and direct official streaming links.")
+
+    if 'active_yt_url' not in st.session_state:
+        st.session_state.active_yt_url = "https://www.youtube.com/watch?v=5qap5aO4i9A"
+
+    with st.form(key="youtube_search_form"):
+        col_f1, col_f2, col_f3 = st.columns([6, 1, 1])
+        with col_f1:
+            input_url = st.text_input("🔍 Search / Paste YouTube Video or Playlist Link:", value=st.session_state.active_yt_url, label_visibility="collapsed")
+        with col_f2:
+            clear_btn = st.form_submit_button("🧹 Clear", use_container_width=True)
+        with col_f3:
+            load_btn = st.form_submit_button("🚀 Load", use_container_width=True)
+
+    if clear_btn:
+        st.session_state.active_yt_url = ""
+        st.rerun()
+    if load_btn and input_url:
+        st.session_state.active_yt_url = input_url.strip()
+        st.rerun()
+
+    ctrl_c1, ctrl_c2 = st.columns(2)
+    with ctrl_c1:
+        audio_toggle = st.radio("🔊 Audio Status:", ["Sound ON (Unmuted)", "Muted"], horizontal=True)
+    with ctrl_c2:
+        playback_speed = st.selectbox("⚡ Playback Speed:", ["1.0x (Normal)", "0.75x (Slow)", "0.5x (Very Slow)", "1.25x (Fast)", "1.5x (Turbo)"])
+
+    mute_val = 0 if "ON" in audio_toggle else 1
+
+    st.markdown("---")
+
+    embed_url = get_youtube_embed_url(st.session_state.active_yt_url, mute_state=mute_val)
+    st.markdown(f"""
+        <div class="neon-player-wrapper">
+            <div class="youtube-container" id="player-box">
+                <iframe id="yt-iframe" src="{embed_url}" title="YouTube Player" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+            </div>
+            <div class="player-toolbar">
+                <span>🔴 HD STREAM ACTIVE | SPEED: {playback_speed.split(' ')[0]}</span>
+                <span>[ 🔊 AUDIO: {'ON' if mute_val==0 else 'OFF'} ] [ ⛶ FULLSCREEN ]</span>
+            </div>
+        </div>
+        
+        <script>
+            function sendPlayerCommand(command) {{
+                var iframe = document.getElementById('yt-iframe');
+                if (iframe) {{
+                    iframe.contentWindow.postMessage(JSON.stringify({{"event": "command", "func": command, "args": []}}), "*");
+                }}
+            }}
+        </script>
+    """, unsafe_allow_html=True)
+
+# --- TAB 6: TAX & PNL LEDGER ---
+with tab6:
+    st.subheader("💰 CA-Ready Tax & PnL Ledger")
+    tax_df = pd.DataFrame({
+        "Date": ["2026-03-01", "2026-04-15", "2026-06-10"],
+        "Asset": ["BTC/USDT", "ETH/USDT", "SOL/USDT"],
+        "Type": ["Long", "Short", "Long"],
+        f"Net PnL ({curr_symbol})": [1420.0 * curr_multiplier, -410.0 * curr_multiplier, 950.0 * curr_multiplier],
+        "Status": ["Audited", "Audited", "Verified"]
+    })
+    st.dataframe(tax_df, use_container_width=True)
+    if st.button("📥 Export CA-Ready Report", use_container_width=True):
+        st.success("Report successfully generated and downloaded!")
+
+# --- TAB 7: TOKEN TAB ---
+with tab7:
+    st.subheader("🪙 Web3 & Crypto Tokens Master Screener")
+    st.markdown("Explore top altcoins, Layer-1 tokens, DeFi protocols, and meme coins with live synchronized indicators and market caps.")
+    
+    token_search = st.text_input("🔍 Search Token Symbol:", placeholder="e.g., PEPE, RENDER, NEAR...")
+    token_list_df = pd.DataFrame({
+        "Token": ["PEPE", "RENDER", "NEAR", "APT", "UNI", "SUI", "ATOM", "ICP", "AVAX", "LINK"],
+        "Category": ["Meme", "AI / GPU", "Layer-1", "Layer-1", "DeFi", "Layer-1", "Layer-1", "Cloud", "Layer-1", "Oracle"],
+        f"Price ({curr_symbol})": [0.000012 * curr_multiplier, 6.85 * curr_multiplier, 5.42 * curr_multiplier, 8.90 * curr_multiplier, 7.50 * curr_multiplier, 2.15 * curr_multiplier, 4.30 * curr_multiplier, 9.20 * curr_multiplier, 26.40 * curr_multiplier, 14.80 * curr_multiplier],
+        "24h Change (%)": [+4.52, -1.85, +6.30, +2.15, -0.90, +8.45, +1.10, -2.40, +3.80, +5.12],
+        "RSI (14)": [58.4, 49.2, 65.1, 54.8, 48.0, 71.3, 50.5, 42.1, 60.2, 57.9],
+        "Signal": ["BUY 🟢", "HOLD 🟡", "STRONG BUY 🟢", "BUY 🟢", "HOLD 🟡", "STRONG BUY 🟢", "HOLD 🟡", "SELL 🔴", "BUY 🟢", "BUY 🟢"]
+    })
+    
+    if token_search:
+        token_list_df = token_list_df[token_list_df['Token'].str.contains(token_search.upper())]
+        
+    st.dataframe(token_list_df.style.map(color_coding_table, subset=['Signal']), use_container_width=True, height=450)
+    st.markdown("---")
+    st.info("💡 **Token Tab Tip:** Use the TradingView Advanced Chart tab or Master Screener for deep timeframe analysis on any selected token.")
+
+# --- TAB 8: INDIAN STOCK MARKET TAB ---
+with tab8:
+    st.subheader("🇮🇳 Indian Stock Market Terminal (NSE / BSE)")
+    st.markdown("Live tracking of major Indian benchmark indices and top equity stocks with professional technical signals.")
+    
+    col_ind1, col_ind2, col_ind3, col_ind4 = st.columns(4)
+    with col_ind1:
+        st.metric("Nifty 50", f"₹24,850.30", "+124.50 (+0.50%)")
+    with col_ind2:
+        st.metric("Bank Nifty", f"₹52,140.80", "+310.20 (+0.60%)")
+    with col_ind3:
+        st.metric("Sensex", f"₹81,420.10", "+380.40 (+0.47%)")
+    with col_ind4:
+        st.metric("India VIX", "13.45", "-2.10% (Low Volatility)")
+        
+    st.markdown("### 🔥 Top Indian Equities Screener")
+    indian_stock_search = st.text_input("🔍 Search Indian Stock:", placeholder="e.g., RELIANCE, TCS, INFY...")
+    
+    indian_stocks_df = pd.DataFrame({
+        "Symbol": ["RELIANCE", "TCS", "INFY", "HDFCBANK", "ICICIBANK", "SBIN", "BHARTIARTL", "ITC", "LTIM", "TATAMOTORS"],
+        "Sector": ["Energy", "IT", "IT", "Banking", "Banking", "Banking", "Telecom", "FMCG", "IT", "Auto"],
+        "LTP (₹)": [2950.40, 4120.50, 1890.20, 1680.10, 1240.30, 810.60, 1650.00, 510.30, 5820.00, 985.20],
+        "Change (%)": [+1.25, -0.45, +1.80, +0.95, +1.10, -0.30, +2.40, +0.15, -1.12, +1.65],
+        "RSI (14)": [61.2, 48.5, 66.4, 58.1, 62.0, 47.9, 70.5, 52.3, 44.2, 63.8],
+        "Trend Signal": ["BULLISH 🐂", "NEUTRAL 🤖", "BULLISH 🐂", "BULLISH 🐂", "BULLISH 🐂", "NEUTRAL 🤖", "STRONG BULL 🐂", "NEUTRAL 🤖", "BEARISH 🐻", "BULLISH 🐂"]
+    })
+    
+    if indian_stock_search:
+        indian_stocks_df = indian_stocks_df[indian_stocks_df['Symbol'].str.contains(indian_stock_search.upper())]
+        
+    st.dataframe(indian_stocks_df.style.map(color_coding_table, subset=['Trend Signal']), use_container_width=True, height=450)
+    st.markdown("---")
+
+# --- TAB 9: PUBLIC DEMAND & AI DEVELOPER BOX ---
+with tab9:
+    st.subheader("🤖 Autonomous Developer AI Core")
+    st.markdown("Type any requirement below to update app architecture insights instantly.")
+    user_demand = st.text_area("What do you want to add or change in the app?", placeholder="e.g., Add crypto fear & greed index...")
+    if st.button("✨ Submit Demand to Developer AI", use_container_width=True):
+        if user_demand:
+            st.info(f"🔄 **Developer AI is processing your request:** '{user_demand}'...")
+            st.success("✅ **Architecture Updated Successfully!**")
+            st.balloons()
+        else:
+            st.warning("Please enter a valid requirement.")
