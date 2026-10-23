@@ -150,8 +150,11 @@ def fetch_top_1000_coins():
  
 all_coins_dict = fetch_top_1000_coins()
 
-# Master coin list without duplicates as requested
 MASTER_COIN_LIST = [
+    "BTC", "ETH", "BNB", "SOL", "XRP", "TRX", "DOGE", "ADA", "LTC", "BCH",
+    "AVAX", "DOT", "NEAR", "ATOM", "TON", "SUI", "APT", "SEI", "INJ", "KAS",
+    HBAR, "ICP", "FIL", "ETC", "XLM", "ALGO", "VET", "XTZ"
+] if 'HBAR' in locals() else [
     "BTC", "ETH", "BNB", "SOL", "XRP", "TRX", "DOGE", "ADA", "LTC", "BCH",
     "AVAX", "DOT", "NEAR", "ATOM", "TON", "SUI", "APT", "SEI", "INJ", "KAS",
     "HBAR", "ICP", "FIL", "ETC", "XLM", "ALGO", "VET", "XTZ"
@@ -409,7 +412,7 @@ with tab1:
         curr_symbol = "¥"
  
     for i, (c_name, c_id) in enumerate(coin_mapping.items()):
-        cdf = fetch_master_excel_data(c_id, row_count=r_count, seed_offset=seed_offset)
+        cdf = fetch_master_excel_data(c_id, row_count=r_count, seed_offset=seed_offset + i)
         coin_data_cache[c_name] = cdf
         last_row = cdf.iloc[-1]
         anim = last_row['Animal_Type']
