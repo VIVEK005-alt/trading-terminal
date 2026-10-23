@@ -91,7 +91,7 @@ st.markdown("""
         text-shadow: 0 0 12px rgba(255, 255, 255, 0.9), 0 0 25px rgba(255, 255, 255, 0.6);
     }
 
-    /* Bold, Clear and Larger Equal Size Boxes */
+    /* Equal Height & Equal Width Professional Card Containers with Auto-Fitting Bold Text */
     .equal-box-container {
         background: #0d1117;
         border: 2px solid #00ffcc;
@@ -434,7 +434,7 @@ if "detailed_coin" in st.session_state and st.session_state["detailed_coin"]:
     box_col = '#39ff14' if 'BULL' in anim_type else ('#ff073a' if 'BEAR' in anim_type else '#ffa500')
     px_cls = "live-running-price-bull" if 'BULL' in anim_type else ("live-running-price-bear" if 'BEAR' in anim_type else "live-running-price-side")
 
-    # First Image: Equal Size Bold & Clear Boxes
+    # First Image: Equal Size Bold & Clear Auto-Fitting Boxes with Dynamic Colors
     d_col1, d_col2 = st.columns(2)
     with d_col1:
         st.markdown(f"""
@@ -452,13 +452,19 @@ if "detailed_coin" in st.session_state and st.session_state["detailed_coin"]:
 
     with d_col2:
         st.markdown(f"""
-            <div class="equal-box-container">
+            <div class="equal-box-container" style="border: 2px solid {box_col};">
                 <div>
                     <h4 style="color: #00ffcc; margin-top: 0; font-size: 17px; font-weight: 900;">🎯 Dedicated AI Trading Strategy</h4>
                     <p style="color: #ffffff; font-size: 14px; font-weight: 800; margin-bottom: 4px;">Advice: <span style="color: #39ff14;">{adv}</span></p>
                 </div>
                 <div>
-                    <p style="color: #ff00ff; font-size: 13px; font-weight: 800; margin-bottom: 0;">Key Indicators: RSI: {rsi_v} | MACD: {macd_v} | EMA: {ema_v} | ATR: {atr_v}</p>
+                    <p style="font-size: 13px; font-weight: 800; margin-bottom: 0;">
+                        Indicators: 
+                        <span style="color: #f5c542; text-shadow: 0 0 8px #f5c542;">RSI: {rsi_v}</span> | 
+                        <span style="color: #00b0ff; text-shadow: 0 0 8px #00b0ff;">MACD: {macd_v}</span> | 
+                        <span style="color: #ff8a65; text-shadow: 0 0 8px #ff8a65;">EMA: {ema_v}</span> | 
+                        <span style="color: #ce93d8; text-shadow: 0 0 8px #ce93d8;">ATR: {atr_v}</span>
+                    </p>
                 </div>
             </div>
         """, unsafe_allow_html=True)
