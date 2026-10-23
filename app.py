@@ -442,17 +442,59 @@ if "detailed_coin" in st.session_state and st.session_state["detailed_coin"]:
     styled_detail_df = df_detail[final_detail_cols].style.map(color_coding_table, subset=['Animal_Type', 'Trade Advice'])
     st.dataframe(styled_detail_df, use_container_width=True, height=400)
 
-    # --- FULL TRADINGVIEW ADVANCED WIDGET WITH ALL TOOLS & RESET OPTIONS ---
+    # --- TRADINGVIEW PRO ADVANCED EMBED CHART WITH EXTERNAL CONTROLS ---
     st.markdown(f"### 📈 Live TradingView Professional Chart ({target_coin})")
     
+    dc1, dc2, dc3 = st.columns([2, 2, 3])
+    with dc1:
+        d_view_mode = st.selectbox("🔒 Chart View Mode:", ["Landscape View", "Portrait View", "True Full Screen"], key="detail_vmode")
+    with dc2:
+        d_theme_mode = st.selectbox("🌓 Theme Mode:", ["Dark Mode", "Light Mode"], key="detail_theme")
+    with dc3:
+        tv_link_url = f"https://www.tradingview.com/chart/?symbol=BINANCE:{target_coin}USDT"
+        st.markdown(f"""
+            <div style="padding-top: 5px;">
+                <a href="{tv_link_url}" target="_blank" style="background: #238636; color: white; padding: 8px 16px; border-radius: 6px; text-decoration: none; font-weight: bold; font-size: 12px; border: 1px solid #00ffcc;">🔗 Open Full TradingView Pro Workspace</a>
+            </div>
+        """, unsafe_allow_html=True)
+
+    if d_view_mode == "Portrait View":
+        tv_width = "450px"
+        tv_height = "750px"
+        is_fs = "false"
+    elif d_view_mode == "True Full Screen":
+        tv_width = "100vw"
+        tv_height = "100vh"
+        is_fs = "true"
+    else:
+        tv_width = "100%"
+        tv_height = "650px"
+        is_fs = "false"
+
     tv_symbol = f"BINANCE:{target_coin}USDT"
-    
-    chart_widget_html = f"""
+    tv_theme_str = "light" if d_theme_mode == "Light Mode" else "dark"
+    bg_col = "#fff" if d_theme_mode == "Light Mode" else "#07090e"
+
+    container_id = f"tv_chart_container_{target_coin}"
+
+    chart_html_content = f"""
     <!DOCTYPE html>
     <html>
-    <head><meta charset="utf-8"></head>
-    <body style="margin:0;background-color:#07090e;">
-      <div class="tradingview-widget-container" style="height:650px;width:100%">
+    <head>
+      <meta charset="utf-8">
+      <style>
+        html, body {{
+          margin: 0;
+          padding: 0;
+          width: 100%;
+          height: 100%;
+          background-color: {bg_col};
+          overflow: hidden;
+        }}
+      </style>
+    </head>
+    <body>
+      <div class="tradingview-widget-container" style="height:100%;width:100%">
         <div class="tradingview-widget-container__widget" style="height:100%;width:100%"></div>
         <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js" async>
         {{
@@ -460,14 +502,15 @@ if "detailed_coin" in st.session_state and st.session_state["detailed_coin"]:
           "symbol": "{tv_symbol}",
           "interval": "D",
           "timezone": "Etc/UTC",
-          "theme": "dark",
+          "theme": "{tv_theme_str}",
           "style": "1",
           "locale": "en",
           "enable_publishing": false,
           "allow_symbol_change": true,
-          "calendar": true,
+          "watchlist": ["BINANCE:BTCUSDT", "BINANCE:ETHUSDT", "BINANCE:SOLUSDT", "BINANCE:BNBUSDT", "BINANCE:XRPUSDT", "BINANCE:ADAUSDT", "BINANCE:AVAXUSDT", "BINANCE:LINKUSDT", "BINANCE:SUIUSDT", "BINANCE:DOTUSDT"],
           "details": true,
           "hotlist": true,
+          "calendar": true,
           "support_host": "https://www.tradingview.com"
         }}
         </script>
@@ -475,12 +518,20 @@ if "detailed_coin" in st.session_state and st.session_state["detailed_coin"]:
     </body>
     </html>
     """
-    encoded_widget_html = urllib.parse.quote(chart_widget_html)
+    encoded_html = urllib.parse.quote(chart_html_content)
+
     st.markdown(f"""
-        <div style="width: 100%; height: 670px; border: 2px solid #00ffcc; border-radius: 14px; overflow: hidden; background: #07090e;">
-            <iframe src="data:text/html;charset=utf-8,{encoded_widget_html}" width="100%" height="100%" frameborder="0" allowtransparency="true" scrolling="no" allowfullscreen="true" sandbox="allow-scripts allow-same-origin allow-popups"></iframe>
+        <div id="{container_id}" style="width: {tv_width}; height: {tv_height}; margin: 0 auto; border: 2px solid #00ffcc; border-radius: 14px; overflow: hidden; background: {bg_col}; position: {'fixed' if is_fs=='true' else 'relative'}; top: {'0' if is_fs=='true' else 'auto'}; left: {'0' if is_fs=='true' else 'auto'}; z-index: {'99999' if is_fs=='true' else '1'};">
+            <iframe src="data:text/html;charset=utf-8,{encoded_html}" width="100%" height="100%" frameborder="0" allowtransparency="true" scrolling="no" allowfullscreen="true" sandbox="allow-scripts allow-same-origin allow-popups"></iframe>
         </div>
     """, unsafe_allow_html=True)
+    
+    if is_fs == "true":
+        st.markdown(f"""
+            <div style="position: fixed; top: 10px; right: 10px; z-index: 100000;">
+                <button onclick="location.reload();" style="background: #ff073a; color: white; border: 1px solid #00ffcc; padding: 8px 16px; border-radius: 6px; font-weight: bold; cursor: pointer;">✕ Exit Full Screen</button>
+            </div>
+        """, unsafe_allow_html=True)
     
     st.stop()
 
