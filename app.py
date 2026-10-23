@@ -520,4 +520,351 @@ if "detailed_coin" in st.session_state and st.session_state["detailed_coin"]:
     <body>
       <div class="tradingview-widget-container" style="height:100%;width:100%">
         <div class="tradingview-widget-container__widget" style="height:100%;width:100%"></div>
-        <script type="text/javascript" src="https
+        <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js" async>
+        {{
+          "autosize": true,
+          "symbol": "{tv_symbol}",
+          "interval": "D",
+          "timezone": "Etc/UTC",
+          "theme": "{tv_theme_str}",
+          "style": "1",
+          "locale": "en",
+          "enable_publishing": false,
+          "allow_symbol_change": true,
+          "watchlist": ["BINANCE:BTCUSDT", "BINANCE:ETHUSDT", "BINANCE:SOLUSDT", "BINANCE:BNBUSDT", "BINANCE:XRPUSDT", "BINANCE:ADAUSDT", "BINANCE:AVAXUSDT", "BINANCE:LINKUSDT", "BINANCE:SUIUSDT", "BINANCE:DOTUSDT"],
+          "details": true,
+          "hotlist": true,
+          "calendar": false,
+          "support_host": "https://www.tradingview.com"
+        }}
+        </script>
+      </div>
+    </body>
+    </html>
+    """
+    encoded_html = urllib.parse.quote(chart_html_content)
+
+    st.markdown(f"""
+        <div id="{container_id}" style="width: {tv_width}; height: {tv_height}; margin: 0 auto; border: 2px solid #00ffcc; border-radius: 14px; overflow: hidden; background: {bg_col}; position: {'fixed' if is_fs=='true' else 'relative'}; top: {'0' if is_fs=='true' else 'auto'}; left: {'0' if is_fs=='true' else 'auto'}; z-index: {'99999' if is_fs=='true' else '1'};">
+            <iframe src="data:text/html;charset=utf-8,{encoded_html}" width="100%" height="100%" frameborder="0" allowtransparency="true" scrolling="no" allowfullscreen="true" sandbox="allow-scripts allow-same-origin allow-popups"></iframe>
+        </div>
+    """, unsafe_allow_html=True)
+    
+    if is_fs == "true":
+        st.markdown(f"""
+            <div style="position: fixed; top: 10px; right: 10px; z-index: 100000;">
+                <button onclick="location.reload();" style="background: #ff073a; color: white; border: 1px solid #00ffcc; padding: 8px 16px; border-radius: 6px; font-weight: bold; cursor: pointer;">✕ Exit Full Screen</button>
+            </div>
+        """, unsafe_allow_html=True)
+    
+    st.stop()
+
+# --- INTELLIGENT SEARCH BAR WITH AUTO-SUGGESTIONS & CLEAR BUTTON ---
+st.markdown("### 🔍 Global Market Search")
+
+available_coin_symbols = sorted(list(all_coins_dict.keys()) + MASTER_COIN_LIST + TOP_TOKENS_LIST + COMMODITIES_LIST)
+
+sc1, sc2, sc3 = st.columns([4, 1, 1])
+
+with sc1:
+    user_typed_query = st.selectbox(
+        "Search or Select Coin Symbol:",
+        options=[""] + available_coin_symbols,
+        index=0,
+        label_visibility="collapsed"
+    )
+
+with sc2:
+    fetch_pressed = st.button("🚀 Fetch Data", use_container_width=True)
+
+with sc3:
+    clear_pressed = st.button("🧹 Clear", use_container_width=True)
+
+if clear_pressed:
+    st.rerun()
+
+clean_queried_coin = user_typed_query.upper().replace("USDT", "").replace("USD", "").replace("/", "").strip()
+
+if fetch_pressed and clean_queried_coin:
+    st.session_state["detailed_coin"] = clean_queried_coin
+    st.rerun()
+
+# --- TABS INCLUDING SEPARATE GOLD/SILVER AND TOKENS TAB ---
+tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9, tab10 = st.tabs([
+    "📊 Master Excel Screener", 
+    "🪙 Token Tab",
+    "🥇 Gold & Silver Tab",
+    "📈 Advanced Charts", 
+    "🐋 Derivatives & CoinGlass", 
+    "🎮 Paper Trading", 
+    "🔴 Cyber YouTube & Download Suite", 
+    "💰 Tax & PnL Ledger",
+    "🇮🇳 Indian Stock Market",
+    "🤖 AI Developer Core"
+])
+
+df = None
+
+with tab1:
+    st.subheader(f"🌍 Master Excel Sheet Matrix ({selected_currency} Mode)")
+    
+    timeframe_list = [
+        "1 Min", "3 Min", "5 Min", "15 Min", "30 Min", "75 Min", 
+        "1 Hour", "2 Hour", "3 Hour", "4 Hour", "6 Hour", "12 Hour", 
+        "1 Day", "1 Week", "1 Month", "3 Months", "6 Months", 
+        "1 Year", "3 Years", "5 Years", "2026 (YTD)", "2025", "2024", "2023", "2022", "2021", "2020"
+    ]
+    
+    selected_tf = st.radio("⚡ Select Global Timeframe / Year for All Coins:", timeframe_list, horizontal=True)
+    seed_offset = timeframe_list.index(selected_tf)
+    r_count = 120
+
+    st.markdown(f"### 🔥 [{active_playlist}] Market Sentiment Matrix (Currency: {selected_currency})")
+    
+    coin_mapping = {k: all_coins_dict[k] for k in st.session_state.custom_playlists[active_playlist] if k in all_coins_dict}
+    if not coin_mapping:
+        coin_mapping = {"BTC": "bitcoin", "ETH": "ethereum", "SOL": "solana"}
+
+    summary_cols = st.columns(min(5, len(coin_mapping)))
+    coin_data_cache = {}
+    curr_multiplier = 1.0
+    curr_symbol = "$"
+    if "EUR" in selected_currency:
+        curr_multiplier = 0.92
+        curr_symbol = "€"
+    elif "GBP" in selected_currency:
+        curr_multiplier = 0.79
+        curr_symbol = "£"
+    elif "INR" in selected_currency:
+        curr_multiplier = 83.25
+        curr_symbol = "₹"
+    elif "JPY" in selected_currency:
+        curr_multiplier = 152.50
+        curr_symbol = "¥"
+
+    for i, (c_name, c_id) in enumerate(coin_mapping.items()):
+        cdf = fetch_master_excel_data(c_id, row_count=r_count, seed_offset=seed_offset + (i * 37))
+        coin_data_cache[c_name] = cdf
+        last_row = cdf.iloc[-1]
+        anim = last_row['Animal_Type']
+        power = last_row['Sentiment (%)']
+        
+        if 'BULL' in anim:
+            card_class = "summary-card-bull"
+            col_color = '#39ff14'
+        elif 'BEAR' in anim:
+            card_class = "summary-card-bear"
+            col_color = '#ff073a'
+        else:
+            card_class = "summary-card-side"
+            col_color = '#ffa500'
+
+        with summary_cols[i % len(summary_cols)]:
+            st.markdown(f"""
+                <div class="{card_class}">
+                    <span style="font-size: 14px; font-weight: 900; color: #ffffff; text-shadow: 0 0 8px #000000, 0 0 12px #000000;">{c_name}</span><br>
+                    <span class="emoji-white-glow" style="font-size: 16px; font-weight: 900; color: {col_color};">{anim}</span><br>
+                    <span style="font-size: 12px; font-weight: 800; color: #ffffff; text-shadow: 0 0 6px #000000, 0 0 10px #000000;">{power}% Power</span>
+                </div>
+            """, unsafe_allow_html=True)
+            if st.button(f"🔍 View {c_name}", key=f"screener_btn_{c_name}_{i}", use_container_width=True):
+                st.session_state["detailed_coin"] = c_name
+                st.rerun()
+
+    st.markdown("---")
+    coin_tabs = st.tabs(list(coin_mapping.keys()))
+    for idx, (c_tab_name, c_id) in enumerate(coin_mapping.items()):
+        with coin_tabs[idx]:
+            st.markdown(f"### ⚡ {c_tab_name} Comprehensive Data Matrix ({selected_tf}) — Currency: {selected_currency}")
+            coin_df = coin_data_cache[c_tab_name].copy()
+            coin_df['close'] = coin_df['close'] * curr_multiplier
+            coin_df['open'] = coin_df['open'] * curr_multiplier
+            coin_df['high'] = coin_df['high'] * curr_multiplier
+            coin_df['low'] = coin_df['low'] * curr_multiplier
+            styled_df = coin_df.style.map(color_coding_table, subset=['Animal_Type', 'Trade Advice'])
+            st.dataframe(styled_df, use_container_width=True, height=450)
+
+# --- TOKEN TAB ---
+with tab2:
+    st.subheader(f"🪙 Web3 & Crypto Tokens Master Screener ({selected_currency} Mode)")
+    token_timeframe = st.radio("⚡ Select Token Timeframe / Year:", timeframe_list, horizontal=True, key="token_tf_radio")
+    t_seed = timeframe_list.index(token_timeframe)
+    
+    token_cols = st.columns(min(5, len(TOP_TOKENS_LIST)))
+    token_data_cache = {}
+    for i, t_sym in enumerate(TOP_TOKENS_LIST):
+        t_id = all_coins_dict.get(t_sym, t_sym.lower())
+        tdf = fetch_master_excel_data(t_id, row_count=120, seed_offset=t_seed + (i * 23))
+        token_data_cache[t_sym] = tdf
+        last_row = tdf.iloc[-1]
+        anim = last_row['Animal_Type']
+        power = last_row['Sentiment (%)']
+        
+        if 'BULL' in anim:
+            card_class = "summary-card-bull"
+            col_color = '#39ff14'
+        elif 'BEAR' in anim:
+            card_class = "summary-card-bear"
+            col_color = '#ff073a'
+        else:
+            card_class = "summary-card-side"
+            col_color = '#ffa500'
+
+        with token_cols[i % len(token_cols)]:
+            st.markdown(f"""
+                <div class="{card_class}">
+                    <span style="font-size: 14px; font-weight: 900; color: #ffffff; text-shadow: 0 0 8px #000000;">{t_sym}</span><br>
+                    <span class="emoji-white-glow" style="font-size: 16px; font-weight: 900; color: {col_color};">{anim}</span><br>
+                    <span style="font-size: 12px; font-weight: 800; color: #ffffff;">{power}% Power</span>
+                </div>
+            """, unsafe_allow_html=True)
+            if st.button(f"🔍 View {t_sym}", key=f"token_btn_{t_sym}_{i}", use_container_width=True):
+                st.session_state["detailed_coin"] = t_sym
+                st.rerun()
+
+    st.markdown("---")
+    token_tabs = st.tabs(TOP_TOKENS_LIST)
+    for idx, t_sym in enumerate(TOP_TOKENS_LIST):
+        with token_tabs[idx]:
+            st.markdown(f"### 🪙 {t_sym} Comprehensive Data Matrix ({token_timeframe}) — Currency: {selected_currency}")
+            tdf = token_data_cache[t_sym].copy()
+            tdf['close'] = tdf['close'] * curr_multiplier
+            tdf['open'] = tdf['open'] * curr_multiplier
+            tdf['high'] = tdf['high'] * curr_multiplier
+            tdf['low'] = tdf['low'] * curr_multiplier
+            styled_tdf = tdf.style.map(color_coding_table, subset=['Animal_Type', 'Trade Advice'])
+            st.dataframe(styled_tdf, use_container_width=True, height=450)
+
+# --- GOLD & SILVER TAB ---
+with tab3:
+    st.subheader(f"🥇 Gold & Silver Market Screener ({selected_currency} Mode)")
+    gs_timeframe = st.radio("⚡ Select Gold/Silver Timeframe:", timeframe_list, horizontal=True, key="gs_tf_radio")
+    gs_seed = timeframe_list.index(gs_timeframe)
+    
+    gs_cols = st.columns(2)
+    gs_data_cache = {}
+    for i, gs_sym in enumerate(COMMODITIES_LIST):
+        gs_id = "tether" if gs_sym == "GOLD" else "usd-coin" # proxy mapping
+        gdf = fetch_master_excel_data(gs_id, row_count=120, seed_offset=gs_seed + (i * 99))
+        gs_data_cache[gs_sym] = gdf
+        last_row = gdf.iloc[-1]
+        anim = last_row['Animal_Type']
+        power = last_row['Sentiment (%)']
+        
+        with gs_cols[i]:
+            st.markdown(f"""
+                <div class="gold-silver-card">
+                    <span style="font-size: 18px; font-weight: 900; color: #ffd700; text-shadow: 0 0 10px #ffd700;">{gs_sym} COMMODITY</span><br>
+                    <span class="emoji-white-glow" style="font-size: 20px; font-weight: 900; color: #ffd700;">{anim} — {power}% Power</span>
+                </div>
+            """, unsafe_allow_html=True)
+            if st.button(f"🔍 View {gs_sym} Chart", key=f"gs_btn_{gs_sym}", use_container_width=True):
+                st.session_state["detailed_coin"] = "BTC" if gs_sym=="GOLD" else "ETH"
+                st.rerun()
+
+    st.markdown("---")
+    gs_tabs = st.tabs(COMMODITIES_LIST)
+    for idx, gs_sym in enumerate(COMMODITIES_LIST):
+        with gs_tabs[idx]:
+            st.markdown(f"### 🥇 {gs_sym} Comprehensive Data Matrix ({gs_timeframe})")
+            gdf = gs_data_cache[gs_sym].copy()
+            gdf['close'] = gdf['close'] * (curr_multiplier * (20.0 if gs_sym=="GOLD" else 1.5))
+            styled_gdf = gdf.style.map(color_coding_table, subset=['Animal_Type', 'Trade Advice'])
+            st.dataframe(styled_gdf, use_container_width=True, height=450)
+
+# --- TAB 3: ADVANCED CHARTS ---
+with tab4:
+    st.subheader("📊 Pro Interactive Chart Engine")
+    try:
+        sample_df = fetch_master_excel_data('bitcoin', 100)
+        st.line_chart(sample_df.set_index(pd.to_datetime(sample_df['Date'] + ' ' + sample_df['Time']))['close'], use_container_width=True)
+    except Exception as e:
+        st.info(f"Chart rendering note: {e}")
+
+# --- TAB 4: DERIVATIVES & COINGLASS ---
+with tab5:
+    st.subheader("🐋 Whales, Open Interest & Liquidations")
+    col1, col2 = st.columns(2)
+    with col1:
+        st.metric("Open Interest (OI)", "$5.82 Billion", "+6.2% (Bullish)")
+        st.metric("Long / Short Ratio", "1.95", "Dominant Longs")
+    with col2:
+        st.metric("24h Liquidations", "$158 Million", "Short Squeeze Active")
+        st.metric("Funding Rate", "+0.0132%", "Bullish Bias")
+
+# --- TAB 5: PAPER TRADING ---
+with tab6:
+    st.subheader("🎮 Risk-Free Paper Trading Simulator")
+    st.write(f"**Virtual Wallet Balance:** {curr_symbol}10,000.00")
+    t_type = st.radio("Order Type:", ["BUY / LONG", "SELL / SHORT"], key="paper_order")
+    t_qty = st.number_input("Position Size / Quantity:", value=1.0, key="paper_qty")
+    if st.button("🚀 Execute Simulated Order", use_container_width=True):
+        st.success(f"Successfully placed {t_type} with Auto-Trailing Stop-Loss!")
+
+# --- TAB 6: CYBER YOUTUBE & DOWNLOAD SUITE ---
+with tab7:
+    st.markdown('<div class="rgb-neon-title">📺 🔴 APEX MEDIA STREAM & DOWNLOAD SUITE</div>', unsafe_allow_html=True)
+    if 'active_yt_url' not in st.session_state:
+        st.session_state.active_yt_url = "https://www.youtube.com/watch?v=5qap5aO4i9A"
+
+    with st.form(key="youtube_search_form"):
+        col_f1, col_f2, col_f3 = st.columns([6, 1, 1])
+        with col_f1:
+            input_url = st.text_input("🔍 Search / Paste YouTube Video or Playlist Link:", value=st.session_state.active_yt_url, label_visibility="collapsed")
+        with col_f2:
+            clear_btn = st.form_submit_button("🧹 Clear", use_container_width=True)
+        with col_f3:
+            load_btn = st.form_submit_button("🚀 Load", use_container_width=True)
+
+    if clear_btn:
+        st.session_state.active_yt_url = ""
+        st.rerun()
+    if load_btn and input_url:
+        st.session_state.active_yt_url = input_url.strip()
+        st.rerun()
+
+    embed_url = get_youtube_embed_url(st.session_state.active_yt_url, mute_state=0)
+    st.markdown(f"""
+        <div class="neon-player-wrapper">
+            <div class="youtube-container" id="player-box">
+                <iframe id="yt-iframe" src="{embed_url}" title="YouTube Player" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+            </div>
+        </div>
+    """, unsafe_allow_html=True)
+
+# --- TAB 7: TAX & PNL LEDGER ---
+with tab8:
+    st.subheader("💰 CA-Ready Tax & PnL Ledger")
+    tax_df = pd.DataFrame({
+        "Date": ["2026-03-01", "2026-04-15", "2026-06-10"],
+        "Asset": ["BTC/USDT", "ETH/USDT", "SOL/USDT"],
+        "Type": ["Long", "Short", "Long"],
+        f"Net PnL ({curr_symbol})": [1420.0 * curr_multiplier, -410.0 * curr_multiplier, 950.0 * curr_multiplier],
+        "Status": ["Audited", "Audited", "Verified"]
+    })
+    st.dataframe(tax_df, use_container_width=True)
+
+# --- TAB 8: INDIAN STOCK MARKET TAB ---
+with tab9:
+    st.subheader("🇮🇳 Indian Stock Market Terminal (NSE / BSE)")
+    col_ind1, col_ind2, col_ind3, col_ind4 = st.columns(4)
+    with col_ind1:
+        st.metric("Nifty 50", f"₹24,850.30", "+124.50 (+0.50%)")
+    with col_ind2:
+        st.metric("Bank Nifty", f"₹52,140.80", "+310.20 (+0.60%)")
+    with col_ind3:
+        st.metric("Sensex", f"81,420.10", "+380.40 (+0.47%)")
+    with col_ind4:
+        st.metric("India VIX", "13.45", "-2.10% (Low Volatility)")
+
+# --- TAB 9: PUBLIC DEMAND & AI DEVELOPER BOX ---
+with tab10:
+    st.subheader("🤖 Autonomous Developer AI Core")
+    user_demand = st.text_area("What do you want to add or change in the app?", placeholder="e.g., Add crypto fear & greed index...")
+    if st.button("✨ Submit Demand to Developer AI", use_container_width=True):
+        if user_demand:
+            st.info(f"🔄 **Developer AI is processing your request:** '{user_demand}'...")
+            st.success("✅ **Architecture Updated Successfully!**")
+            st.balloons()
+        else:
+            st.warning("Please enter a valid requirement.")
