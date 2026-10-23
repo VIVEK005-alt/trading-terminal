@@ -590,7 +590,7 @@ if fetch_pressed and clean_queried_coin:
     st.rerun()
 
 # --- ORIGINAL 9 TABS STRUCTURE RESTORED WITH TOKEN TAB & GOLD/SILVER TAB ---
-tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9, tab10, tab11 = st.tabs([
+tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9, tab10 = st.tabs([
     "📊 Master Excel Screener", 
     "📈 Advanced Charts", 
     "🐋 Derivatives & CoinGlass", 
@@ -600,8 +600,7 @@ tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9, tab10, tab11 = st.tabs([
     "🪙 Token Tab",
     "🥇 Gold & Silver Tab",
     "🇮🇳 Indian Stock Market",
-    "🤖 AI Developer Core",
-    "🪙 Token Tab (Pro)"
+    "🤖 AI Developer Core"
 ])
 
 df = None
@@ -1160,7 +1159,7 @@ with tab9:
     if indian_stock_search:
         indian_stocks_df = indian_stocks_df[indian_stocks_df['Symbol'].str.contains(indian_stock_search.upper())]
         
-    st.dataframe(indian_stocks_df.style.map(color_coding_table, subset=['Trend Signal']), use_container_width=True, height=450)
+    st.dataframe(styled_df, use_container_width=True, height=450)
     st.markdown("---")
 
 # --- TAB 10: PUBLIC DEMAND & AI DEVELOPER BOX ---
