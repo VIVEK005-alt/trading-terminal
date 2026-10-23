@@ -95,46 +95,6 @@ st.markdown("""
         font-weight: 800 !important;
     }
 
-    /* Dark Mode Excel Spreadsheet Table Styling */
-    div[data-testid="stDataFrame"] div {
-        background-color: #0d1117 !important;
-    }
-
-    table.dataframe {
-        background-color: #0d1117 !important;
-        color: #00ffcc !important;
-        border: 2px solid #30363d !important;
-        border-collapse: collapse !important;
-        width: 100% !important;
-        font-family: 'Inter', sans-serif !important;
-    }
-    
-    table.dataframe th {
-        font-family: 'Inter', sans-serif !important;
-        font-weight: 700 !important;
-        font-size: 12px !important;
-        color: #ffffff !important;
-        background-color: #161b22 !important;
-        border: 1px solid #30363d !important;
-        text-align: center !important;
-        padding: 10px 14px !important;
-    }
-    
-    table.dataframe td {
-        font-family: 'Inter', sans-serif !important;
-        font-weight: 600 !important;
-        font-size: 12px !important;
-        color: #c9d1d9 !important;
-        background-color: #0d1117 !important;
-        border: 1px solid #21262d !important;
-        text-align: center !important;
-        padding: 8px 12px !important;
-    }
-
-    table.dataframe tr:nth-child(even) td {
-        background-color: #121820 !important;
-    }
-
     h1, h2, h3, h4, p, label, .stMarkdown { 
         font-family: 'Orbitron', sans-serif !important; 
     }
@@ -296,7 +256,7 @@ def color_coding_table(val):
             return 'color: #ff073a; font-weight: 900; text-shadow: 0 0 8px rgba(255,7,58,0.5);'
         elif 'SIDEWAYS' in val or 'HOLD' in val or '🟡' in val or 'WOLF' in val or '🐶' in val or '🐴' in val:
             return 'color: #ffa500; font-weight: 900; text-shadow: 0 0 8px rgba(255,165,0,0.5);'
-    return 'color: #58a6ff;'
+    return 'color: #00ffcc;'
 
 def get_youtube_embed_url(url, mute_state=0):
     vid_id = "5qap5aO4i9A"
@@ -479,7 +439,7 @@ if "detailed_coin" in st.session_state and st.session_state["detailed_coin"]:
 
     st.markdown("---")
     
-    # Excel-like Professional Table with Buy/Sell columns first
+    # Professional Market Matrix Table (Using standard st.dataframe with custom styled mapping)
     first_cols = ['Trade Advice', 'Animal_Type', 'Date', 'Time', 'close', 'open', 'high', 'low', 'volume']
     other_cols = [c for c in df_detail.columns if c not in first_cols]
     final_detail_cols = first_cols + other_cols
