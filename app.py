@@ -21,23 +21,32 @@ st.markdown("""
     * { box-sizing: border-box; }
     .main { background-color: #05070b; color: #00ffcc; font-family: 'Inter', sans-serif; }
     
+    /* Professional Single-Line Full-Width Responsive Terminal Header */
     .terminal-header-container {
         display: flex;
         align-items: center;
-        gap: 15px;
-        padding: 10px 0;
-        border-bottom: 2px solid rgba(0,255,204,0.2);
-        margin-bottom: 20px;
+        justify-content: flex-start;
+        gap: 20px;
+        width: 100%;
+        padding: 15px 20px;
+        background: linear-gradient(90deg, #0d1117 0%, #161b22 100%);
+        border: 2px solid #00ffcc;
+        border-radius: 14px;
+        box-shadow: 0 0 25px rgba(0,255,204,0.3);
+        margin-bottom: 25px;
+        white-space: nowrap;
+        overflow-x: auto;
     }
 
     .rgb-neon-title {
         font-family: 'Orbitron', sans-serif;
         font-weight: 900;
-        font-size: 28px;
+        font-size: clamp(18px, 2.2vw, 32px);
         color: #00ffcc;
-        text-shadow: 0 0 10px rgba(0,255,204,0.6), 0 0 20px rgba(0,255,204,0.3);
-        letter-spacing: 1.5px;
+        text-shadow: 0 0 10px rgba(0,255,204,0.7), 0 0 25px rgba(0,255,204,0.4);
+        letter-spacing: 2px;
         margin: 0;
+        display: inline-block;
     }
 
     .live-running-price-bull {
@@ -378,13 +387,13 @@ st.sidebar.subheader("🤖 Dual-AI Core Status")
 st.sidebar.success("🟢 **Trading Expert AI**: Active")
 st.sidebar.success("🟢 **Developer AI**: Synced")
 
-# --- HEADER WITH PROFESSIONAL EMBEDDED PNG LOGO & STYLISH TITLE ---
+# --- FULL WIDTH PROFESSIONAL SINGLE-LINE RESPONSIVE HEADER ---
 st.markdown("""
     <div class="terminal-header-container">
-        <svg width="45" height="45" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <svg width="42" height="42" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="flex-shrink: 0;">
             <path d="M13 2L3 14H12L11 22L21 10H12L13 2Z" fill="#00ffcc" stroke="#39ff14" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
-        <h1 class="rgb-neon-title" style="margin:0; font-size: 26px;">APEX QUANTUM MULTI-TIMEFRAME MASTER TERMINAL</h1>
+        <h1 class="rgb-neon-title">APEX QUANTUM MULTI-TIMEFRAME MASTER TERMINAL</h1>
     </div>
 """, unsafe_allow_html=True)
 
