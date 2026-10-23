@@ -476,6 +476,7 @@ with tab1:
             rsi_val = coin_df['RSI_14'].iloc[-1]
             macd_val = coin_df['MACD'].iloc[-1]
             atr_val = coin_df['ATR_14'].iloc[-1]
+            ema_val = coin_df['EMA_20'].iloc[-1]
             
             box_color = '#39ff14' if 'BULL' in animal_type else ('#ff073a' if 'BEAR' in animal_type else '#ffa500')
             price_class = "live-running-price-bull" if 'BULL' in animal_type else ("live-running-price-bear" if 'BEAR' in animal_type else "live-running-price-side")
@@ -500,31 +501,31 @@ with tab1:
                 """, unsafe_allow_html=True)
 
             with col_right:
-                # Dynamic Strategy generation based on real data
                 if "BULL" in animal_type:
                     strat_action = "Long / Buy Setup 🟢"
                     trade_style = "Scalping / Momentum Trading"
                     hold_time = "15 to 45 Minutes"
-                    entry_note = f"RSI ({rsi_val}) & MACD indicate bullish continuation. Watch EMA support."
                 elif "BEAR" in animal_type:
                     strat_action = "Short / Sell Setup 🔴"
                     trade_style = "Aggressive Scalping / Breakout Short"
                     hold_time = "10 to 30 Minutes"
-                    entry_note = f"RSI ({rsi_val}) under pressure. MACD bear crossover active."
                 else:
-                    strat_text_type = "Sideways / Range Trading 🟡"
-                    strat_action = "Range Bound Strategy"
+                    strat_action = "Range Bound Strategy 🟡"
                     trade_style = "Range Scalping (Buy Support, Sell Resistance)"
                     hold_time = "5 to 20 Minutes"
-                    entry_note = f"RSI ({rsi_val}) is neutral. Wait for breakout from Bollinger bands."
 
                 st.markdown(f"""
                     <div class="unique-strategy-box" style="margin-top: 0; padding: 15px;">
                         <h4 style="color: #00ffcc; margin-top: 0; font-size: 15px;">🎯 AI Live Trading Strategy ({selected_tf})</h4>
-                        <p style="color: #ffffff; font-size: 12px; margin-bottom: 5px;"><b>Strategy Type:</b> {trade_style}</p>
-                        <p style="color: #39ff14; font-size: 12px; margin-bottom: 5px;"><b>Recommended Action:</b> {strat_action}</p>
-                        <p style="color: #ffffff; font-size: 12px; margin-bottom: 5px;"><b>Hold Duration:</b> Hold trade for {hold_time}</p>
-                        <p style="color: #8b949e; font-size: 11px; margin-bottom: 0;"><b>Indicator Note:</b> {entry_note} (ATR: {atr_val})</p>
+                        <p style="color: #ffffff; font-size: 12px; margin-bottom: 5px;"><b>Strategy Type:</b> <span style="color: #58a6ff;">{trade_style}</span></p>
+                        <p style="color: #ffffff; font-size: 12px; margin-bottom: 5px;"><b>Recommended Action:</b> <span style="color: #39ff14;">{strat_action}</span></p>
+                        <p style="color: #ffffff; font-size: 12px; margin-bottom: 5px;"><b>Hold Duration:</b> <span style="color: #ffa500;">Hold trade for {hold_time}</span></p>
+                        <p style="color: #8b949e; font-size: 11px; margin-bottom: 0;"><b>Indicators:</b> 
+                            <span style="color: #f5c542;">RSI: {rsi_val}</span> | 
+                            <span style="color: #00b0ff;">MACD: {macd_val}</span> | 
+                            <span style="color: #ff8a65;">EMA: {ema_val}</span> | 
+                            <span style="color: #ce93d8;">ATR: {atr_val}</span>
+                        </p>
                     </div>
                 """, unsafe_allow_html=True)
             
