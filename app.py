@@ -21,13 +21,24 @@ st.markdown("""
     * { box-sizing: border-box; }
     .main { background-color: #05070b; color: #00ffcc; font-family: 'Inter', sans-serif; }
     
+    /* Professional Terminal Title Styling */
+    .terminal-header-container {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        padding: 10px 0;
+        border-bottom: 2px solid rgba(0,255,204,0.2);
+        margin-bottom: 20px;
+    }
+
     .rgb-neon-title {
         font-family: 'Orbitron', sans-serif;
         font-weight: 900;
-        font-size: 26px;
+        font-size: 28px;
         color: #00ffcc;
-        text-shadow: 0 0 5px rgba(0,255,204,0.4);
-        display: inline-block;
+        text-shadow: 0 0 10px rgba(0,255,204,0.6), 0 0 20px rgba(0,255,204,0.3);
+        letter-spacing: 1.5px;
+        margin: 0;
     }
 
     .live-running-price-bull {
@@ -368,12 +379,15 @@ st.sidebar.subheader("🤖 Dual-AI Core Status")
 st.sidebar.success("🟢 **Trading Expert AI**: Active")
 st.sidebar.success("🟢 **Developer AI**: Synced")
 
-# --- HEADER WITH PROFESSIONAL LOGO AND ORGANIZED LAYOUT ---
-head_col1, head_col2 = st.columns([0.08, 0.92])
-with head_col1:
-    st.image("https://images.unsplash.com/photo-1622979135225-d2ba269bc1df?q=80&w=150&auto=format&fit=crop", width=65)
-with head_col2:
-    st.markdown('<div class="rgb-neon-title">⚡ APEX QUANTUM MULTI-TIMEFRAME MASTER TERMINAL</div>', unsafe_allow_html=True)
+# --- HEADER WITH PROFESSIONAL EMBEDDED PNG LOGO & STYLISH TITLE ---
+st.markdown("""
+    <div class="terminal-header-container">
+        <svg width="45" height="45" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M13 2L3 14H12L11 22L21 10H12L13 2Z" fill="#00ffcc" stroke="#39ff14" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <h1 class="rgb-neon-title" style="margin:0; font-size: 26px;">APEX QUANTUM MULTI-TIMEFRAME MASTER TERMINAL</h1>
+    </div>
+""", unsafe_allow_html=True)
 
 # --- GLOBAL SEARCH BAR WITH WORKING SEARCH BUTTON & MULTI-SOURCE FETCHING ---
 st.markdown("### 🔍 Global Market Search")
@@ -809,7 +823,7 @@ with tab8:
     
     indian_stocks_df = pd.DataFrame({
         "Symbol": ["RELIANCE", "TCS", "INFY", "HDFCBANK", "ICICIBANK", "SBIN", "BHARTIARTL", "ITC", "LTIM", "TATAMOTORS"],
-        "Sector": ["Energy", "IT", "IT", "Banking", "Banking", "Banking", "Telecom", "FMCG", "IT", "Auto"],
+        "Sector": "Energy", "IT", "IT", "Banking", "Banking", "Banking", "Telecom", "FMCG", "IT", "Auto"],
         "LTP (₹)": [2950.40, 4120.50, 1890.20, 1680.10, 1240.30, 810.60, 1650.00, 510.30, 5820.00, 985.20],
         "Change (%)": [+1.25, -0.45, +1.80, +0.95, +1.10, -0.30, +2.40, +0.15, -1.12, +1.65],
         "RSI (14)": [61.2, 48.5, 66.4, 58.1, 62.0, 47.9, 70.5, 52.3, 44.2, 63.8],
