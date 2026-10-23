@@ -559,15 +559,24 @@ if "detailed_coin" in st.session_state and st.session_state["detailed_coin"]:
     
     st.stop()
 
-# --- SEARCH BAR ---
+# --- INTELLIGENT SEARCH BAR WITH AUTO-SUGGESTIONS & CLEAR BUTTON ---
 st.markdown("### 🔍 Global Market Search")
+
 available_coin_symbols = sorted(list(all_coins_dict.keys()) + MASTER_COIN_LIST + TOP_TOKENS_LIST + COMMODITIES_LIST)
+
 sc1, sc2, sc3 = st.columns([4, 1, 1])
 
 with sc1:
-    user_typed_query = st.selectbox("Search or Select Coin Symbol:", options=[""] + available_coin_symbols, index=0, label_visibility="collapsed")
+    user_typed_query = st.selectbox(
+        "Search or Select Coin Symbol:",
+        options=[""] + available_coin_symbols,
+        index=0,
+        label_visibility="collapsed"
+    )
+
 with sc2:
     fetch_pressed = st.button("🚀 Fetch Data", use_container_width=True)
+
 with sc3:
     clear_pressed = st.button("🧹 Clear", use_container_width=True)
 
@@ -575,6 +584,7 @@ if clear_pressed:
     st.rerun()
 
 clean_queried_coin = user_typed_query.upper().replace("USDT", "").replace("USD", "").replace("/", "").strip()
+
 if fetch_pressed and clean_queried_coin:
     st.session_state["detailed_coin"] = clean_queried_coin
     st.rerun()
@@ -597,12 +607,14 @@ df = None
 
 with tab1:
     st.subheader(f"🌍 Master Excel Sheet Matrix ({selected_currency} Mode)")
+    
     timeframe_list = [
         "1 Min", "3 Min", "5 Min", "15 Min", "30 Min", "75 Min", 
         "1 Hour", "2 Hour", "3 Hour", "4 Hour", "6 Hour", "12 Hour", 
         "1 Day", "1 Week", "1 Month", "3 Months", "6 Months", 
         "1 Year", "3 Years", "5 Years", "2026 (YTD)", "2025", "2024", "2023", "2022", "2021", "2020"
     ]
+    
     selected_tf = st.radio("⚡ Select Global Timeframe / Year for All Coins:", timeframe_list, horizontal=True)
     seed_offset = timeframe_list.index(selected_tf)
     r_count = 120
@@ -732,7 +744,7 @@ with tab3:
     gs_cols = st.columns(2)
     gs_data_cache = {}
     for i, gs_sym in enumerate(COMMODITIES_LIST):
-        gs_id = "tether" if gs_sym == "GOLD" else "usd-coin"
+        gs_id = "tether" if gs_sym == "GOLD" else "usd-coin" # proxy mapping
         gdf = fetch_master_excel_data(gs_id, row_count=120, seed_offset=gs_seed + (i * 99))
         gs_data_cache[gs_sym] = gdf
         last_row = gdf.iloc[-1]
@@ -760,7 +772,7 @@ with tab3:
             styled_gdf = gdf.style.map(color_coding_table, subset=['Animal_Type', 'Trade Advice'])
             st.dataframe(styled_gdf, use_container_width=True, height=450)
 
-# --- ADVANCED CHARTS ---
+# --- TAB 3: ADVANCED CHARTS ---
 with tab4:
     st.subheader("📊 Pro Interactive Chart Engine")
     try:
@@ -769,7 +781,7 @@ with tab4:
     except Exception as e:
         st.info(f"Chart rendering note: {e}")
 
-# --- DERIVATIVES ---
+# --- TAB 4: DERIVATIVES & COINGLASS ---
 with tab5:
     st.subheader("🐋 Whales, Open Interest & Liquidations")
     col1, col2 = st.columns(2)
@@ -780,7 +792,7 @@ with tab5:
         st.metric("24h Liquidations", "$158 Million", "Short Squeeze Active")
         st.metric("Funding Rate", "+0.0132%", "Bullish Bias")
 
-# --- PAPER TRADING ---
+# --- TAB 5: PAPER TRADING ---
 with tab6:
     st.subheader("🎮 Risk-Free Paper Trading Simulator")
     st.write(f"**Virtual Wallet Balance:** {curr_symbol}10,000.00")
@@ -789,7 +801,7 @@ with tab6:
     if st.button("🚀 Execute Simulated Order", use_container_width=True):
         st.success(f"Successfully placed {t_type} with Auto-Trailing Stop-Loss!")
 
-# --- CYBER YOUTUBE ---
+# --- TAB 6: CYBER YOUTUBE & DOWNLOAD SUITE ---
 with tab7:
     st.markdown('<div class="rgb-neon-title">📺 🔴 APEX MEDIA STREAM & DOWNLOAD SUITE</div>', unsafe_allow_html=True)
     if 'active_yt_url' not in st.session_state:
@@ -820,7 +832,7 @@ with tab7:
         </div>
     """, unsafe_allow_html=True)
 
-# --- TAX & PNL ---
+# --- TAB 7: TAX & PNL LEDGER ---
 with tab8:
     st.subheader("💰 CA-Ready Tax & PnL Ledger")
     tax_df = pd.DataFrame({
@@ -832,7 +844,7 @@ with tab8:
     })
     st.dataframe(tax_df, use_container_width=True)
 
-# --- INDIAN STOCKS ---
+# --- TAB 8: INDIAN STOCK MARKET TAB ---
 with tab9:
     st.subheader("🇮🇳 Indian Stock Market Terminal (NSE / BSE)")
     col_ind1, col_ind2, col_ind3, col_ind4 = st.columns(4)
@@ -845,7 +857,7 @@ with tab9:
     with col_ind4:
         st.metric("India VIX", "13.45", "-2.10% (Low Volatility)")
 
-# --- AI DEVELOPER ---
+# --- TAB 9: PUBLIC DEMAND & AI DEVELOPER BOX ---
 with tab10:
     st.subheader("🤖 Autonomous Developer AI Core")
     user_demand = st.text_area("What do you want to add or change in the app?", placeholder="e.g., Add crypto fear & greed index...")
