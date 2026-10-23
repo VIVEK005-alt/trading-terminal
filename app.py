@@ -79,7 +79,6 @@ st.markdown("""
     /* Equal Height & Equal Width Professional Card Containers with Auto-Fit */
     .equal-box-container {
         background: #0d1117;
-        border: 2px solid #00ffcc;
         border-radius: 12px;
         padding: 22px;
         height: 195px;
@@ -402,17 +401,17 @@ if "detailed_coin" in st.session_state and st.session_state["detailed_coin"]:
     box_col = '#39ff14' if 'BULL' in anim_type else ('#ff073a' if 'BEAR' in anim_type else '#ffa500')
     px_cls = "live-running-price-bull" if 'BULL' in anim_type else ("live-running-price-bear" if 'BEAR' in anim_type else "live-running-price-side")
 
-    # Equal Size Bold & Clear Auto-Fitting Boxes with Dynamic Colors
+    # Equal Size Bold & Clear Auto-Fitting Boxes with Dynamic Trend Colors
     d_col1, d_col2 = st.columns(2)
     with d_col1:
         st.markdown(f"""
             <div class="equal-box-container" style="border: 2px solid {box_col};">
                 <div>
-                    <span style="font-size: 13px; color: #00ffcc; display: block; font-weight: 800; letter-spacing: 1px;">LIVE RUNNING PRICE ({selected_currency}) [{selected_detail_tf}]</span>
+                    <span style="font-size: 13px; color: {box_col}; display: block; font-weight: 800; letter-spacing: 1px;">LIVE RUNNING PRICE ({selected_currency}) [{selected_detail_tf}]</span>
                     <span class="{px_cls}">{curr_symbol}{cur_px:,.2f}</span>
                 </div>
                 <div>
-                    <span style="font-size: 13px; color: #00ffcc; display: block; font-weight: 800; letter-spacing: 1px;">AI SENTIMENT & POWER</span>
+                    <span style="font-size: 13px; color: {box_col}; display: block; font-weight: 800; letter-spacing: 1px;">AI SENTIMENT & POWER</span>
                     <span class="emoji-white-glow" style="font-size: 20px; font-weight: 900; color: {box_col};">{anim_type} — {pow_pct}% Power</span>
                 </div>
             </div>
@@ -422,16 +421,16 @@ if "detailed_coin" in st.session_state and st.session_state["detailed_coin"]:
         st.markdown(f"""
             <div class="equal-box-container" style="border: 2px solid {box_col};">
                 <div>
-                    <h4 style="color: #00ffcc; margin-top: 0; font-size: 17px; font-weight: 900;">🎯 Dedicated AI Trading Strategy</h4>
-                    <p style="color: #ffffff; font-size: 14px; font-weight: 800; margin-bottom: 4px;">Advice: <span style="color: #39ff14;">{adv}</span></p>
+                    <h4 style="color: {box_col}; margin-top: 0; font-size: 17px; font-weight: 900;">🎯 Dedicated AI Trading Strategy</h4>
+                    <p style="color: #ffffff; font-size: 14px; font-weight: 800; margin-bottom: 4px;">Advice: <span style="color: {box_col};">{adv}</span></p>
                 </div>
                 <div>
                     <p style="font-size: 13px; font-weight: 800; margin-bottom: 0;">
                         Indicators: 
-                        <span style="color: #f5c542; text-shadow: 0 0 8px #f5c542;">RSI: {rsi_v}</span> | 
-                        <span style="color: #00b0ff; text-shadow: 0 0 8px #00b0ff;">MACD: {macd_v}</span> | 
-                        <span style="color: #ff8a65; text-shadow: 0 0 8px #ff8a65;">EMA: {ema_v}</span> | 
-                        <span style="color: #ce93d8; text-shadow: 0 0 8px #ce93d8;">ATR: {atr_v}</span>
+                        <span style="color: #f5c542; text-shadow: 0 0 10px #f5c542;">RSI: {rsi_v}</span> | 
+                        <span style="color: #00b0ff; text-shadow: 0 0 10px #00b0ff;">MACD: {macd_v}</span> | 
+                        <span style="color: #ff8a65; text-shadow: 0 0 10px #ff8a65;">EMA: {ema_v}</span> | 
+                        <span style="color: #ce93d8; text-shadow: 0 0 10px #ce93d8;">ATR: {atr_v}</span>
                     </p>
                 </div>
             </div>
@@ -439,7 +438,7 @@ if "detailed_coin" in st.session_state and st.session_state["detailed_coin"]:
 
     st.markdown("---")
     
-    # Professional Market Matrix Table (Using standard st.dataframe with custom styled mapping)
+    # Professional Market Matrix Table with Buy/Sell columns first
     first_cols = ['Trade Advice', 'Animal_Type', 'Date', 'Time', 'close', 'open', 'high', 'low', 'volume']
     other_cols = [c for c in df_detail.columns if c not in first_cols]
     final_detail_cols = first_cols + other_cols
@@ -986,7 +985,7 @@ with tab8:
 with tab9:
     st.subheader("🤖 Autonomous Developer AI Core")
     st.markdown("Type any requirement below to update app architecture insights instantly.")
-    user_demand = st.text_area("What do you want to add or change in the app?", placeholder="e.g., Add crypto fear & greed index...")
+    user_demand = st.text_input("What do you want to add or change in the app?", placeholder="e.g., Add crypto fear & greed index...")
     if st.button("✨ Submit Demand to Developer AI", use_container_width=True):
         if user_demand:
             st.info(f"🔄 **Developer AI is processing your request:** '{user_demand}'...")
