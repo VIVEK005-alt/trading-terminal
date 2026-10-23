@@ -21,7 +21,6 @@ st.markdown("""
     * { box-sizing: border-box; }
     .main { background-color: #05070b; color: #00ffcc; font-family: 'Inter', sans-serif; }
     
-    /* Professional Single-Line Full-Width Responsive Terminal Header */
     .terminal-header-container {
         display: flex;
         align-items: center;
@@ -397,19 +396,29 @@ st.markdown("""
     </div>
 """, unsafe_allow_html=True)
 
-# --- GLOBAL SEARCH BAR WITH WORKING SEARCH BUTTON & MULTI-SOURCE FETCHING ---
+# --- INTELLIGENT GLOBAL SEARCH BAR WITH AUTO-SUGGEST & AUTO-CLEANING ---
 st.markdown("### 🔍 Global Market Search")
+
+available_coin_symbols = sorted(list(all_coins_dict.keys()) + MASTER_COIN_LIST)
+
 s_col1, s_col2 = st.columns([5, 1])
 with s_col1:
-    search_input = st.text_input("Search Coin/Token (e.g. BTC, ETH, PEPE, SOL):", value="BTC/USDT", label_visibility="collapsed")
+    selected_search_coin = st.selectbox(
+        "Search or Select Coin Symbol:",
+        options=available_coin_symbols,
+        index=available_coin_symbols.index("BTC") if "BTC" in available_coin_symbols else 0,
+        label_visibility="collapsed"
+    )
 with s_col2:
     search_clicked = st.button("🚀 Fetch Data", use_container_width=True)
 
-if search_clicked and search_input:
-    st.session_state["global_search_target"] = search_input.strip().upper()
+# Auto-clean input: remove words like USDT, USD if typed or selected
+clean_coin = selected_search_coin.upper().replace("USDT", "").replace("USD", "").replace("/", "").strip()
 
-search_query = st.session_state.get("global_search_target", "BTC/USDT")
-base_symbol = search_query.split('/')[0].replace("USDT", "").replace("USD", "").strip()
+if search_clicked:
+    st.session_state["global_search_target"] = clean_coin
+
+active_search_symbol = st.session_state.get("global_search_target", clean_coin)
 
 # --- UPDATED TABS INCLUDING TOKEN TAB & INDIAN STOCK MARKET TAB ---
 tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9 = st.tabs([
@@ -427,12 +436,14 @@ tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9 = st.tabs([
 df = None
 
 with tab1:
-    st.subheader(f"🌍 Master Excel Sheet Matrix ({selected_currency} Mode)")
+    st.subheader(f"🌍 Master Excel Sheet Matrix ({selected_currency} Mode) — Active Coin: {active_search_symbol}")
     
     selected_lang = st.selectbox("🌐 Choose Language / भाषा चुनें:", ["English", "Hinglish", "Hindi"], key="inline_lang_selector")
     lang = LANG_DICT[selected_lang]
     
     coin_mapping = {k: all_coins_dict[k] for k in st.session_state.custom_playlists[active_playlist] if k in all_coins_dict}
+    if active_search_symbol not in coin_mapping and active_search_symbol in all_coins_dict:
+        coin_mapping = {active_search_symbol: all_coins_dict[active_search_symbol], **coin_mapping}
     if not coin_mapping:
         coin_mapping = {"BTC": "bitcoin", "ETH": "ethereum", "SOL": "solana"}
     
@@ -850,7 +861,7 @@ with tab8:
 with tab9:
     st.subheader("🤖 Autonomous Developer AI Core")
     st.markdown("Type any requirement below to update app architecture insights instantly.")
-    user_demand = st.text_area("What do you want to add or change in the app?", placeholder="e.g., Add crypto fear & greed index...")
+    user_demand = st.text_input("What do you want to add or change in the app?", placeholder="e.g., Add crypto fear & greed index...")
     if st.button("✨ Submit Demand to Developer AI", use_container_width=True):
         if user_demand:
             st.info(f"🔄 **Developer AI is processing your request:** '{user_demand}'...")
