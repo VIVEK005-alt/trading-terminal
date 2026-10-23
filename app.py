@@ -39,18 +39,22 @@ st.markdown("""
     }
 
     .summary-card-bull {
-        background: linear-gradient(rgba(13, 17, 23, 0.90), rgba(13, 17, 23, 0.90)), url('https://images.unsplash.com/photo-1621416894569-0f39ed31d247?q=80&w=400&auto=format&fit=crop');
-        background-size: cover; background-position: center; border: 2px solid #39ff14; padding: 15px; border-radius: 12px; text-align: center; box-shadow: 0 4px 15px rgba(57,255,20,0.3); margin-bottom: 20px;
+        background: linear-gradient(rgba(13, 17, 23, 0.85), rgba(13, 17, 23, 0.85)), url('https://images.unsplash.com/photo-1642543492481-44e81e3914a7?q=80&w=400&auto=format&fit=crop');
+        background-size: cover; background-position: center; border: 2px solid #39ff14; padding: 15px; border-radius: 12px; text-align: center; box-shadow: 0 4px 15px rgba(255,255,255,0.25); margin-bottom: 20px;
     }
 
     .summary-card-bear {
-        background: linear-gradient(rgba(13, 17, 23, 0.90), rgba(13, 17, 23, 0.90)), url('https://images.unsplash.com/photo-1621416894569-0f39ed31d247?q=80&w=400&auto=format&fit=crop');
-        background-size: cover; background-position: center; border: 2px solid #ff073a; padding: 15px; border-radius: 12px; text-align: center; box-shadow: 0 4px 15px rgba(255,7,58,0.3); margin-bottom: 20px;
+        background: linear-gradient(rgba(13, 17, 23, 0.85), rgba(13, 17, 23, 0.85)), url('https://images.unsplash.com/photo-1563089145-599997674d42?q=80&w=400&auto=format&fit=crop');
+        background-size: cover; background-position: center; border: 2px solid #ff073a; padding: 15px; border-radius: 12px; text-align: center; box-shadow: 0 4px 15px rgba(255,255,255,0.25); margin-bottom: 20px;
     }
 
     .summary-card-side {
-        background: linear-gradient(rgba(13, 17, 23, 0.90), rgba(13, 17, 23, 0.90)), url('https://images.unsplash.com/photo-1621416894569-0f39ed31d247?q=80&w=400&auto=format&fit=crop');
-        background-size: cover; background-position: center; border: 2px solid #ffa500; padding: 15px; border-radius: 12px; text-align: center; box-shadow: 0 4px 15px rgba(255,165,0,0.3); margin-bottom: 20px;
+        background: linear-gradient(rgba(13, 17, 23, 0.85), rgba(13, 17, 23, 0.85)), url('https://images.unsplash.com/photo-1543466835-00a7907e9de1?q=80&w=400&auto=format&fit=crop');
+        background-size: cover; background-position: center; border: 2px solid #ffa500; padding: 15px; border-radius: 12px; text-align: center; box-shadow: 0 4px 15px rgba(255,255,255,0.25); margin-bottom: 20px;
+    }
+
+    .emoji-white-glow {
+        text-shadow: 0 0 10px rgba(255, 255, 255, 0.8), 0 0 20px rgba(255, 255, 255, 0.5);
     }
 
     .unique-strategy-box {
@@ -212,7 +216,9 @@ def compute_master_indicators(df, seed_offset=0):
         elif bp <= 45:
             return "BEAR 🐻", (100 - bp), "STRONG SELL / SHORT 🔴"
         else:
-            return "SIDEWAYS 🤖", 50.0, "NEUTRAL / HOLD 🟡"
+            # Using Dog or Donkey emoji for Sideways as requested
+            side_emoji = "🐶" if (row.name % 2 == 0) else "🐴"
+            return f"SIDEWAYS {side_emoji}", 50.0, "NEUTRAL / HOLD 🟡"
 
     sentiments = df.apply(get_sentiment, axis=1)
     df['Animal_Type'] = [s[0] for s in sentiments]
@@ -265,7 +271,7 @@ def color_coding_table(val):
             return 'color: #39ff14; font-weight: 900; text-shadow: 0 0 8px #39ff14;'
         elif 'BEAR' in val or 'SELL' in val or '🔴' in val:
             return 'color: #ff073a; font-weight: 900; text-shadow: 0 0 8px #ff073a;'
-        elif 'SIDEWAYS' in val or 'HOLD' in val or '🟡' in val or 'WOLF' in val:
+        elif 'SIDEWAYS' in val or 'HOLD' in val or '🟡' in val or 'WOLF' in val or '🐶' in val or '🐴' in val:
             return 'color: #ffa500; font-weight: 900; text-shadow: 0 0 8px #ffa500;'
     return ''
 
@@ -408,7 +414,6 @@ with tab1:
         curr_symbol = "¥"
 
     for i, (c_name, c_id) in enumerate(coin_mapping.items()):
-        # Fixed unique seed offset for each coin so values differ correctly
         cdf = fetch_master_excel_data(c_id, row_count=r_count, seed_offset=seed_offset + (i * 37))
         coin_data_cache[c_name] = cdf
         last_row = cdf.iloc[-1]
@@ -429,7 +434,7 @@ with tab1:
             st.markdown(f"""
                 <div class="{card_class}">
                     <span style="font-size: 13px; font-weight: 900; color: #ffffff; text-shadow: 0 0 5px #000;">{c_name}</span><br>
-                    <span style="font-size: 14px; font-weight: 900; color: {col_color}; text-shadow: 0 0 8px {col_color};">{anim}</span><br>
+                    <span class="emoji-white-glow" style="font-size: 14px; font-weight: 900; color: {col_color};">{anim}</span><br>
                     <span style="font-size: 11px; font-weight: 700; color: #ffffff; text-shadow: 0 0 4px #000;">{power}% Power</span>
                 </div>
             """, unsafe_allow_html=True)
@@ -464,7 +469,7 @@ with tab1:
                     </div>
                     <div style="border-left: 1px solid #30363d; padding-left: 20px;">
                         <span style="font-size: 11px; color: #8b949e; display: block; font-weight: 600;">MARKET SENTIMENT & ANIMAL AI</span>
-                        <span style="font-size: 22px; font-weight: 900; color: {box_color}; text-shadow: {box_shadow};">
+                        <span class="emoji-white-glow" style="font-size: 22px; font-weight: 900; color: {box_color};">
                             {animal_type} — {sentiment_pct}% Power
                         </span>
                     </div>
@@ -720,7 +725,7 @@ with tab6:
     if st.button("📥 Export CA-Ready Report", use_container_width=True):
         st.success("Report successfully generated and downloaded!")
 
-# --- TAB 7: TOKEN TAB (NEWLY ADDED) ---
+# --- TAB 7: TOKEN TAB ---
 with tab7:
     st.subheader("🪙 Web3 & Crypto Tokens Master Screener")
     st.markdown("Explore top altcoins, Layer-1 tokens, DeFi protocols, and meme coins with live synchronized indicators and market caps.")
@@ -742,7 +747,7 @@ with tab7:
     st.markdown("---")
     st.info("💡 **Token Tab Tip:** Use the TradingView Advanced Chart tab or Master Screener for deep timeframe analysis on any selected token.")
 
-# --- TAB 8: INDIAN STOCK MARKET TAB (NEWLY ADDED) ---
+# --- TAB 8: INDIAN STOCK MARKET TAB ---
 with tab8:
     st.subheader("🇮🇳 Indian Stock Market Terminal (NSE / BSE)")
     st.markdown("Live tracking of major Indian benchmark indices and top equity stocks with professional technical signals.")
