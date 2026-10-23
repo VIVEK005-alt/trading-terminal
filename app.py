@@ -72,35 +72,42 @@ INDEX_TICKERS = {"NIFTY 50": "^NSEI", "BANK NIFTY": "^NSEBANK", "SENSEX": "^BSES
 
 st.markdown(f"""
 <style>
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Inter:wght@400;500;600;700&display=swap');
+
 html, body, .stApp, [data-testid="stAppViewContainer"], [data-testid="stHeader"] {{
-    background-color: {BG} !important; color: #d6fff5 !important;
+    background-color: {BG} !important; color: #00ffcc !important; font-family: 'Inter', sans-serif;
 }}
-[data-testid="stSidebar"] {{ background-color: {SIDE} !important; border-right: 1px solid #1b2330; }}
-h1, h2, h3, h4, h5, label, p {{ color: #d6fff5 !important; }}
-.apex-title {{ font-weight: 800; font-size: 28px; color: {ACCENT};
-               text-shadow: 0 0 10px rgba(0,255,204,0.35); margin-bottom: 2px; }}
-.apex-sub {{ color: {MUTED}; font-size: 13px; margin-bottom: 10px; }}
+[data-testid="stSidebar"] {{ background-color: {SIDE} !important; border-right: 1px solid #2d333b; }}
+h1, h2, h3, h4, h5, label, p {{ color: #00ffcc !important; font-family: 'Orbitron', sans-serif !important; }}
+.apex-title {{ font-weight: 900; font-size: 26px; color: {ACCENT};
+               text-shadow: 0 0 5px rgba(0,255,204,0.4); margin-bottom: 2px; }}
+.apex-sub {{ color: {MUTED}; font-size: 13px; margin-bottom: 10px; font-family: 'Inter', sans-serif !important; }}
 .apex-live {{ background: {PANEL}; border: 1px solid {ACCENT}; border-radius: 12px; padding: 12px 18px;
               box-shadow: 0 0 18px rgba(0,255,204,0.18); display:flex; gap:28px; align-items:center; flex-wrap:wrap; }}
-.apex-price {{ font-size: 30px; font-weight: 900; text-shadow: 0 0 8px rgba(38,166,154,0.5); }}
-.apex-card {{ background: {PANEL}; border: 1px solid #1b2330; border-radius: 10px; padding: 12px 16px; margin: 8px 0; }}
+.apex-price {{ font-size: 28px; font-weight: 900; color: #39ff14; text-shadow: 0 0 8px rgba(57,255,20,0.5); font-family: 'Orbitron', sans-serif !important; }}
+.apex-card {{ background: {PANEL}; border: 1px solid #30363d; border-radius: 12px; padding: 15px; margin: 8px 0; }}
+.unique-strategy-box {{
+    background: linear-gradient(135deg, #0d1117 0%, #161b22 100%);
+    border: 2px solid #00ffcc; border-radius: 12px; padding: 20px;
+    box-shadow: 0 0 20px rgba(0,255,204,0.25); margin-top: 15px; margin-bottom: 25px;
+}}
 .badge {{ padding: 3px 10px; border-radius: 12px; font-size: 12px; font-weight: 700; }}
 .badge-live {{ background:#0f3d2e; color:{UP}; }}
 .badge-warn {{ background:#3d2a0f; color:{WARN}; }}
-.stTabs [data-baseweb="tab-list"] {{ background:{PANEL}; border:1px solid #1b2330; border-radius:10px; gap:4px; flex-wrap:wrap; padding:6px; }}
-.stTabs [data-baseweb="tab"] {{ color:#7ee7d2; font-weight:600; }}
-.stTabs [aria-selected="true"] {{ color:{BG} !important; background:{ACCENT} !important; border-radius:6px; }}
+.stTabs [data-baseweb="tab-list"] {{ background:{PANEL}; border:1px solid #30363d; border-radius:12px; gap:6px; flex-wrap:wrap; padding:10px; }}
+.stTabs [data-baseweb="tab"] {{ background:#161b22; color:#00ffcc; border-radius:6px; padding:8px 16px; font-weight:700; border:1px solid #30363d; font-family: 'Orbitron', sans-serif; }}
+.stTabs [aria-selected="true"] {{ background: linear-gradient(135deg, #238636 0%, #1f6feb 100%) !important; color: white !important; border-color: #00ffcc !important; }}
 .stTabs [data-baseweb="tab-highlight"] {{ display:none !important; }}
 input, textarea, [data-baseweb="select"] > div, [data-baseweb="input"] > div {{
-    background:{PANEL} !important; color:#d6fff5 !important; border-color:#1b2330 !important; }}
-[data-baseweb="popover"] li, [data-baseweb="menu"] {{ background:{PANEL} !important; color:#d6fff5 !important; }}
+    background:{PANEL} !important; color:#00ffcc !important; border-color:#30363d !important; }}
+[data-baseweb="popover"] li, [data-baseweb="menu"] {{ background:{PANEL} !important; color:#00ffcc !important; }}
 .stButton > button, .stDownloadButton > button, .stFormSubmitButton > button, .stLinkButton > a {{
     background:{PANEL}; color:{ACCENT} !important; border:1px solid {ACCENT}; border-radius:8px; font-weight:700; }}
 .stButton > button:hover, .stFormSubmitButton > button:hover, .stLinkButton > a:hover {{ background:{ACCENT}; color:{BG} !important; }}
-[data-testid="stMetric"] {{ background:{PANEL}; border:1px solid #1b2330; border-radius:10px; padding:10px 14px; }}
-[data-testid="stMetricValue"] {{ color:{ACCENT} !important; }}
+[data-testid="stMetric"] {{ background:{PANEL}; border:1px solid #30363d; border-radius:12px; padding:15px; box-shadow: 0 4px 15px rgba(0,255,204,0.1); }}
+[data-testid="stMetricValue"] {{ color:{ACCENT} !important; font-family: 'Orbitron', sans-serif !important; }}
 [data-testid="stMetricLabel"] {{ color:{MUTED} !important; }}
-[data-testid="stAlert"] {{ background:{PANEL} !important; border:1px solid #1b2330; }}
+[data-testid="stAlert"] {{ background:{PANEL} !important; border:1px solid #30363d; }}
 </style>
 """, unsafe_allow_html=True)
 
@@ -797,7 +804,15 @@ with tabs[1]:
         m3.metric("ADX (14)", f"{last['ADX']:.1f}", "Trending" if last["ADX"] > 25 else "Weak trend", delta_color="off")
         m4.metric("ATR (14)", f"{last['ATR']:.4f}")
         m5.metric("SuperTrend", "UP 🟢" if last["ST_DIR"] == 1 else "DOWN 🔴")
-        st.markdown(f"**Signal:** {last['SIGNAL']} · **Close in range:** {last['CLOSE_IN_RANGE']:.1f}%")
+        
+        # --- ADDED BACK STRATEGY BOX ---
+        st.markdown(f"""
+            <div class="unique-strategy-box">
+                <h3 style="color: #00ffcc; margin-top: 0; font-family: 'Orbitron'; font-size: 18px;">🤖 AI Pro Strategy & Scalping Matrix ({base})</h3>
+                <p style="color: #d6fff5; font-size: 14px; margin-bottom: 8px;"><b>Indicator Status:</b> RSI: {last['RSI']:.1f} | MACD: {last['MACD']:.4f} | Volume, Supertrend, EMA, ATR, ADX & Bollinger: Fully Synced</p>
+                <p style="color: #39ff14; font-size: 15px; margin-bottom: 0;"><b>Execution Plan:</b> Active setup: {last['SIGNAL']}. Maintain strict stoploss for scalping.</p>
+            </div>
+        """, unsafe_allow_html=True)
 
         with st.expander("📐 Fibonacci retracement (last 100 candles)"):
             hi, lo = df["high"].tail(100).max(), df["low"].tail(100).min()
