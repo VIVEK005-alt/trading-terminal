@@ -76,7 +76,7 @@ st.markdown("""
         text-shadow: 0 0 12px rgba(255, 255, 255, 0.9), 0 0 25px rgba(255, 255, 255, 0.6);
     }
 
-    /* Bold, Clear and Larger Equal Size Boxes with Auto-Fit */
+    /* Equal Height & Equal Width Professional Card Containers with Auto-Fit */
     .equal-box-container {
         background: #0d1117;
         border: 2px solid #00ffcc;
@@ -95,35 +95,44 @@ st.markdown("""
         font-weight: 800 !important;
     }
 
-    /* Excel-like Professional Table Styling */
+    /* MS Excel-like Ready-Made Spreadsheet Table Styling */
+    div[data-testid="stDataFrame"] div {
+        background-color: #ffffff !important;
+    }
+
     table.dataframe {
-        background-color: #0d1117 !important;
-        color: #00ffcc !important;
-        border: 2px solid #30363d !important;
+        background-color: #ffffff !important;
+        color: #000000 !important;
+        border: 1px solid #d9d9d9 !important;
         border-collapse: collapse !important;
         width: 100% !important;
+        font-family: 'Inter', sans-serif !important;
     }
     
     table.dataframe th {
-        font-family: 'Orbitron', sans-serif !important;
-        font-weight: 900 !important;
-        font-size: 13px !important;
-        color: #ffffff !important;
-        background-color: #161b22 !important;
-        border: 1px solid #30363d !important;
+        font-family: 'Inter', sans-serif !important;
+        font-weight: 700 !important;
+        font-size: 12px !important;
+        color: #000000 !important;
+        background-color: #f2f2f2 !important;
+        border: 1px solid #d9d9d9 !important;
         text-align: center !important;
-        padding: 12px !important;
+        padding: 8px 12px !important;
     }
     
     table.dataframe td {
         font-family: 'Inter', sans-serif !important;
-        font-weight: 700 !important;
+        font-weight: 500 !important;
         font-size: 12px !important;
-        color: #58a6ff !important;
-        background-color: #0d1117 !important;
-        border: 1px solid #21262d !important;
+        color: #111111 !important;
+        background-color: #ffffff !important;
+        border: 1px solid #e0e0e0 !important;
         text-align: center !important;
-        padding: 10px !important;
+        padding: 6px 10px !important;
+    }
+
+    table.dataframe tr:nth-child(even) td {
+        background-color: #f9fbfd !important;
     }
 
     h1, h2, h3, h4, p, label, .stMarkdown { 
@@ -282,12 +291,12 @@ def fetch_master_excel_data(coin_id, row_count=100, seed_offset=0):
 def color_coding_table(val):
     if isinstance(val, str):
         if 'BULL' in val or 'BUY' in val or '🟢' in val:
-            return 'color: #39ff14; font-weight: 900; text-shadow: 0 0 8px #39ff14;'
+            return 'color: #008000; font-weight: 800; background-color: #e6ffed;'
         elif 'BEAR' in val or 'SELL' in val or '🔴' in val:
-            return 'color: #ff073a; font-weight: 900; text-shadow: 0 0 8px #ff073a;'
+            return 'color: #cc0000; font-weight: 800; background-color: #ffe6e6;'
         elif 'SIDEWAYS' in val or 'HOLD' in val or '🟡' in val or 'WOLF' in val or '🐶' in val or '🐴' in val:
-            return 'color: #ffa500; font-weight: 900; text-shadow: 0 0 8px #ffa500;'
-    return ''
+            return 'color: #b27b00; font-weight: 800; background-color: #fff9e6;'
+    return 'color: #000000;'
 
 def get_youtube_embed_url(url, mute_state=0):
     vid_id = "5qap5aO4i9A"
@@ -470,7 +479,7 @@ if "detailed_coin" in st.session_state and st.session_state["detailed_coin"]:
 
     st.markdown("---")
     
-    # Excel-like Professional Table with Buy/Sell columns first
+    # MS Excel-like Professional Table with Buy/Sell columns first
     first_cols = ['Trade Advice', 'Animal_Type', 'Date', 'Time', 'close', 'open', 'high', 'low', 'volume']
     other_cols = [c for c in df_detail.columns if c not in first_cols]
     final_detail_cols = first_cols + other_cols
