@@ -54,7 +54,6 @@ st.markdown("""
         text-shadow: 0 0 10px rgba(255,165,0,0.7);
     }
 
-    /* Crystal Clear Bright Summary Cards with Dedicated Real Images */
     .summary-card-bull {
         background: linear-gradient(rgba(10, 15, 25, 0.45), rgba(10, 15, 25, 0.45)), url('https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?q=80&w=400&auto=format&fit=crop');
         background-size: cover; background-position: center; border: 2px solid #39ff14; padding: 15px; border-radius: 12px; text-align: center; box-shadow: 0 4px 20px rgba(57,255,20,0.5); margin-bottom: 20px;
@@ -369,8 +368,26 @@ st.sidebar.subheader("🤖 Dual-AI Core Status")
 st.sidebar.success("🟢 **Trading Expert AI**: Active")
 st.sidebar.success("🟢 **Developer AI**: Synced")
 
-st.title("⚡ APEX QUANTUM MULTI-TIMEFRAME MASTER TERMINAL")
-search_query = st.text_input("🔍 Global Search Bar (e.g., BTC/USDT, ETH/USDT, SOL/USDT):", value="BTC/USDT")
+# --- HEADER WITH PROFESSIONAL LOGO AND ORGANIZED LAYOUT ---
+head_col1, head_col2 = st.columns([0.1, 0.9])
+with head_col1:
+    st.image("https://images.unsplash.com/photo-1622979135225-d2ba269bc1df?q=80&w=150&auto=format&fit=crop", width=75)
+with head_col2:
+    st.markdown('<div class="rgb-neon-title">⚡ APEX QUANTUM MULTI-TIMEFRAME MASTER TERMINAL</div>', unsafe_allow_html=True)
+
+# --- GLOBAL SEARCH BAR WITH WORKING SEARCH BUTTON & MULTI-SOURCE FETCHING ---
+st.markdown("### 🔍 Global Market Search")
+s_col1, s_col2 = st.columns([5, 1])
+with s_col1:
+    search_input = st.text_input("Search Coin/Token (e.g. BTC, ETH, PEPE, SOL):", value="BTC/USDT", label_visibility="collapsed")
+with s_col2:
+    search_clicked = st.button("🚀 Fetch Data", use_container_width=True)
+
+if search_clicked and search_input:
+    st.session_state["global_search_target"] = search_input.strip().upper()
+
+search_query = st.session_state.get("global_search_target", "BTC/USDT")
+base_symbol = search_query.split('/')[0].replace("USDT", "").replace("USD", "").strip()
 
 # --- UPDATED TABS INCLUDING TOKEN TAB & INDIAN STOCK MARKET TAB ---
 tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9 = st.tabs([
