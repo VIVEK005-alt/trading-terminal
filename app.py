@@ -886,7 +886,7 @@ with tab4:
     t_type = st.radio("Order Type:", ["BUY / LONG", "SELL / SHORT"])
     t_qty = st.number_input("Position Size / Quantity:", value=1.0)
     if st.button("🚀 Execute Simulated Order", use_container_width=True):
-        st.success(f"Successfully placed {t_type} with Auto-Trailing Stop-Loss!")
+        st.success(f"Successfully placed {t_type} for {search_query} with Auto-Trailing Stop-Loss!")
 
 # --- TAB 5: CYBER YOUTUBE & DOWNLOAD SUITE ---
 with tab5:
@@ -958,7 +958,7 @@ with tab6:
     if st.button("📥 Export CA-Ready Report", use_container_width=True):
         st.success("Report successfully generated and downloaded!")
 
-# --- TAB 7: TOKEN TAB (Master Screener Interface with Bull/Bear Cards) ---
+# --- TAB 7: TOKEN TAB (Master Screener Interface with Bull/Bear Cards & Chart) ---
 with tab7:
     st.subheader(f"🪙 Web3 & Crypto Tokens Master Screener ({selected_currency} Mode)")
     token_timeframe = st.radio("⚡ Select Token Timeframe / Year:", timeframe_list, horizontal=True, key="token_tf_radio")
@@ -1012,7 +1012,45 @@ with tab7:
             styled_tdf = tdf[table_display_cols].style.map(color_coding_table, subset=['Animal_Type', 'Trade Advice'])
             st.dataframe(styled_tdf, use_container_width=True, height=450)
 
-# --- TAB 8: GOLD & SILVER TAB (Separate Commodity Screener) ---
+            # Added TradingView Professional Chart below table in Token Tab
+            st.markdown(f"### 📈 Live TradingView Professional Chart ({t_sym})")
+            tv_symbol = f"BINANCE:{t_sym}USDT"
+            token_chart_html = f"""
+            <!DOCTYPE html>
+            <html>
+            <head><meta charset="utf-8"></head>
+            <body style="margin:0;background-color:#07090e;">
+              <div class="tradingview-widget-container" style="height:600px;width:100%">
+                <div class="tradingview-widget-container__widget" style="height:100%;width:100%"></div>
+                <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js" async>
+                {{
+                  "autosize": true,
+                  "symbol": "{tv_symbol}",
+                  "interval": "D",
+                  "timezone": "Etc/UTC",
+                  "theme": "dark",
+                  "style": "1",
+                  "locale": "en",
+                  "enable_publishing": false,
+                  "allow_symbol_change": true,
+                  "details": true,
+                  "hotlist": true,
+                  "calendar": false,
+                  "support_host": "https://www.tradingview.com"
+                }}
+                </script>
+              </div>
+            </body>
+            </html>
+            """
+            encoded_token_html = urllib.parse.quote(token_chart_html)
+            st.markdown(f"""
+                <div style="width: 100%; height: 620px; border: 2px solid #00ffcc; border-radius: 14px; overflow: hidden; background: #07090e;">
+                    <iframe src="data:text/html;charset=utf-8,{encoded_token_html}" width="100%" height="100%" frameborder="0" allowtransparency="true" scrolling="no" allowfullscreen="true" sandbox="allow-scripts allow-same-origin allow-popups"></iframe>
+                </div>
+            """, unsafe_allow_html=True)
+
+# --- TAB 8: GOLD & SILVER TAB (Separate Commodity Screener with Chart) ---
 with tab8:
     st.subheader(f"🥇 Gold & Silver Market Screener ({selected_currency} Mode)")
     gs_timeframe = st.radio("⚡ Select Gold/Silver Timeframe:", timeframe_list, horizontal=True, key="gs_tf_radio")
@@ -1051,6 +1089,44 @@ with tab8:
             table_display_cols = first_cols + other_cols
             styled_gdf = gdf[table_display_cols].style.map(color_coding_table, subset=['Animal_Type', 'Trade Advice'])
             st.dataframe(styled_gdf, use_container_width=True, height=450)
+
+            # Added TradingView Professional Chart below table in Gold & Silver Tab
+            st.markdown(f"### 📈 Live TradingView Professional Chart ({gs_sym})")
+            gs_tv_symbol = "OANDA:XAUUSD" if gs_sym == "GOLD" else "OANDA:XAGUSD"
+            gs_chart_html = f"""
+            <!DOCTYPE html>
+            <html>
+            <head><meta charset="utf-8"></head>
+            <body style="margin:0;background-color:#07090e;">
+              <div class="tradingview-widget-container" style="height:600px;width:100%">
+                <div class="tradingview-widget-container__widget" style="height:100%;width:100%"></div>
+                <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js" async>
+                {{
+                  "autosize": true,
+                  "symbol": "{gs_tv_symbol}",
+                  "interval": "D",
+                  "timezone": "Etc/UTC",
+                  "theme": "dark",
+                  "style": "1",
+                  "locale": "en",
+                  "enable_publishing": false,
+                  "allow_symbol_change": true,
+                  "details": true,
+                  "hotlist": true,
+                  "calendar": false,
+                  "support_host": "https://www.tradingview.com"
+                }}
+                </script>
+              </div>
+            </body>
+            </html>
+            """
+            encoded_gs_html = urllib.parse.quote(gs_chart_html)
+            st.markdown(f"""
+                <div style="width: 100%; height: 620px; border: 2px solid #ffd700; border-radius: 14px; overflow: hidden; background: #07090e;">
+                    <iframe src="data:text/html;charset=utf-8,{encoded_gs_html}" width="100%" height="100%" frameborder="0" allowtransparency="true" scrolling="no" allowfullscreen="true" sandbox="allow-scripts allow-same-origin allow-popups"></iframe>
+                </div>
+            """, unsafe_allow_html=True)
 
 # --- TAB 9: INDIAN STOCK MARKET TAB ---
 with tab9:
