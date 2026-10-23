@@ -441,14 +441,14 @@ if "detailed_coin" in st.session_state and st.session_state["detailed_coin"]:
     styled_detail_df = df_detail[final_detail_cols].style.map(color_coding_table, subset=['Animal_Type', 'Trade Advice'])
     st.dataframe(styled_detail_df, use_container_width=True, height=400)
 
-    # --- TRADINGVIEW PRO ADVANCED EMBED CHART WITH EXTERNAL CONTROLS ---
+    # --- TRADINGVIEW PRO ADVANCED EMBED CHART WITH CORRECTED THEME MODE ---
     st.markdown(f"### 📈 Live TradingView Professional Chart ({target_coin})")
     
     dc1, dc2, dc3 = st.columns([2, 2, 3])
     with dc1:
         d_view_mode = st.selectbox("🔒 Chart View Mode:", ["Landscape View", "Portrait View", "True Full Screen"], key="detail_vmode")
     with dc2:
-        d_theme_mode = st.selectbox("🌓 Theme Mode:", ["Dark Mode", "Light Mode"], key="detail_theme")
+        chart_theme_mode = st.selectbox("🌓 Theme Mode:", ["Dark Mode", "Light Mode"], key="detail_theme")
     with dc3:
         tv_link_url = f"https://www.tradingview.com/chart/?symbol=BINANCE:{target_coin}USDT"
         st.markdown(f"""
@@ -471,7 +471,7 @@ if "detailed_coin" in st.session_state and st.session_state["detailed_coin"]:
         is_fs = "false"
 
     tv_symbol = f"BINANCE:{target_coin}USDT"
-    tv_theme_str = "light" if d_theme_mode == "Light Mode" else "dark"
+    tv_theme_str = "light" if chart_theme_mode == "Light Mode" else "dark"
     bg_col = "#fff" if chart_theme_mode == "Light Mode" else "#07090e"
 
     container_id = f"tv_chart_container_{target_coin}"
@@ -509,7 +509,7 @@ if "detailed_coin" in st.session_state and st.session_state["detailed_coin"]:
           "watchlist": ["BINANCE:BTCUSDT", "BINANCE:ETHUSDT", "BINANCE:SOLUSDT", "BINANCE:BNBUSDT", "BINANCE:XRPUSDT", "BINANCE:ADAUSDT", "BINANCE:AVAXUSDT", "BINANCE:LINKUSDT", "BINANCE:SUIUSDT", "BINANCE:DOTUSDT"],
           "details": true,
           "hotlist": true,
-          "calendar": true,
+          "calendar": false,
           "support_host": "https://www.tradingview.com"
         }}
         </script>
