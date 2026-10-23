@@ -395,15 +395,15 @@ st.markdown("""
     </div>
 """, unsafe_allow_html=True)
 
-# --- DETAILED VIEW PAGE (OPENED WHEN A COIN IS SEARCHED/SELECTED) ---
+# --- DEDICATED MARKET DETAIL VIEW PAGE (ACTIVATED ON SEARCH) ---
 if "detailed_coin" in st.session_state and st.session_state["detailed_coin"]:
     target_coin = st.session_state["detailed_coin"]
     
-    if st.button("⬅️ Back to Master Terminal", use_container_width=True):
+    if st.button("⬅️ Back to Master Terminal Dashboard", use_container_width=True):
         del st.session_state["detailed_coin"]
         st.rerun()
 
-    st.markdown(f"## ⚡ Dedicated Market Detail View: {target_coin}")
+    st.markdown(f"## ⚡ Dedicated Market Detail View: {target_coin} / USDT")
     
     c_id = all_coins_dict.get(target_coin, target_coin.lower())
     curr_multiplier = 1.0
@@ -461,44 +461,41 @@ if "detailed_coin" in st.session_state and st.session_state["detailed_coin"]:
         """, unsafe_allow_html=True)
 
     st.markdown("---")
+    st.subheader(f"📊 Full Historical & Indicator Matrix for {target_coin}")
     st.dataframe(df_detail, use_container_width=True, height=500)
     st.stop()
 
-# --- INTELLIGENT SEARCH BAR WITH CLEAR BUTTON & DROPDOWN SUGGESTIONS ---
+# --- INTELLIGENT SEARCH BAR WITH AUTO-SUGGESTIONS & CLEAR BUTTON ---
 st.markdown("### 🔍 Global Market Search")
 
 available_coin_symbols = sorted(list(all_coins_dict.keys()) + MASTER_COIN_LIST)
 
-# Initialize session state for input cleaning
-if "search_box_val" not in st.session_state:
-    st.session_state["search_box_val"] = "BTC"
+if "search_input_val" not in st.session_state:
+    st.session_state["search_input_val"] = ""
 
-s_col1, s_col2, s_col3 = st.columns([4, 1, 1])
+sc1, sc2, sc3 = st.columns([4, 1, 1])
 
-with s_col1:
-    typed_coin = st.selectbox(
-        "Search or Select Coin Symbol (Suggestions below):",
-        options=available_coin_symbols,
-        index=available_coin_symbols.index(st.session_state["search_box_val"]) if st.session_state["search_box_val"] in available_coin_symbols else 0,
+with sc1:
+    user_typed_query = st.selectbox(
+        "Search or Select Coin Symbol:",
+        options=[""] + available_coin_symbols,
+        index=0,
         label_visibility="collapsed"
     )
 
-with s_col2:
-    fetch_btn = st.button("🚀 Fetch Data", use_container_width=True)
+with sc2:
+    fetch_pressed = st.button("🚀 Fetch Data", use_container_width=True)
 
-with s_col3:
-    clear_btn = st.button("🧹 Clear", use_container_width=True)
+with sc3:
+    clear_pressed = st.button("🧹 Clear", use_container_width=True)
 
-if clear_btn:
-    st.session_state["search_box_val"] = "BTC"
-    if "detailed_coin" in st.session_state:
-        del st.session_state["detailed_coin"]
+if clear_pressed:
     st.rerun()
 
-clean_symbol = typed_coin.upper().replace("USDT", "").replace("USD", "").replace("/", "").strip()
+clean_queried_coin = user_typed_query.upper().replace("USDT", "").replace("USD", "").replace("/", "").strip()
 
-if fetch_btn and clean_symbol:
-    st.session_state["detailed_coin"] = clean_symbol
+if fetch_pressed and clean_queried_coin:
+    st.session_state["detailed_coin"] = clean_queried_coin
     st.rerun()
 
 # --- UPDATED TABS INCLUDING TOKEN TAB & INDIAN STOCK MARKET TAB ---
