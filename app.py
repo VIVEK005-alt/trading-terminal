@@ -369,9 +369,9 @@ st.sidebar.success("🟢 **Trading Expert AI**: Active")
 st.sidebar.success("🟢 **Developer AI**: Synced")
 
 # --- HEADER WITH PROFESSIONAL LOGO AND ORGANIZED LAYOUT ---
-head_col1, head_col2 = st.columns([0.1, 0.9])
+head_col1, head_col2 = st.columns([0.08, 0.92])
 with head_col1:
-    st.image("https://images.unsplash.com/photo-1622979135225-d2ba269bc1df?q=80&w=150&auto=format&fit=crop", width=75)
+    st.image("https://images.unsplash.com/photo-1622979135225-d2ba269bc1df?q=80&w=150&auto=format&fit=crop", width=65)
 with head_col2:
     st.markdown('<div class="rgb-neon-title">⚡ APEX QUANTUM MULTI-TIMEFRAME MASTER TERMINAL</div>', unsafe_allow_html=True)
 
