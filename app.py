@@ -89,11 +89,6 @@ st.markdown("""
         margin-bottom: 20px;
     }
 
-    .equal-box-container span, .equal-box-container b, .equal-box-container p {
-        color: #ffffff !important;
-        font-weight: 800 !important;
-    }
-
     h1, h2, h3, h4, p, label, .stMarkdown { 
         font-family: 'Orbitron', sans-serif !important; 
     }
@@ -981,11 +976,11 @@ with tab8:
     st.dataframe(styled_df, use_container_width=True, height=450)
     st.markdown("---")
 
-# --- TAB 9: PUBLIC DEMAND & AI DEVELOPER BOX ---
+# --- TAB 9:PUBLIC DEMAND & AI DEVELOPER BOX ---
 with tab9:
     st.subheader("🤖 Autonomous Developer AI Core")
     st.markdown("Type any requirement below to update app architecture insights instantly.")
-    user_demand = st.text_input("What do you want to add or change in the app?", placeholder="e.g., Add crypto fear & greed index...")
+    user_demand = st.text_area("What do you want to add or change in the app?", placeholder="e.g., Add crypto fear & greed index...")
     if st.button("✨ Submit Demand to Developer AI", use_container_width=True):
         if user_demand:
             st.info(f"🔄 **Developer AI is processing your request:** '{user_demand}'...")
