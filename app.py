@@ -597,7 +597,7 @@ def fy_label(ts):
     return f"FY {y}-{str(y + 1)[-2:]}"
 
 # =====================================================================
-# 7. SIDEBAR
+# 7. SIDEBAR (Native Streamlit Buttons replacing non-functional HTML ones)
 # =====================================================================
 get_conn()
 universe = get_universe()
@@ -608,8 +608,12 @@ fx = get_fx()
 with st.sidebar:
     st.markdown("## ⚡ APEX CONTROL")
 
-    if st.button("🔄 Refresh all live data", use_container_width=True):
+    col_btn1, col_btn2 = st.columns(2)
+    if col_btn1.button("⟳ Refresh", use_container_width=True):
         st.cache_data.clear()
+        st.rerun()
+    if col_btn2.button("🏠 Home", use_container_width=True):
+        st.session_state["pending_q"] = "BTC/USDT"
         st.rerun()
 
     def persisted_select(label, options, key):
@@ -805,7 +809,7 @@ with tabs[1]:
         m4.metric("ATR (14)", f"{last['ATR']:.4f}")
         m5.metric("SuperTrend", "UP 🟢" if last["ST_DIR"] == 1 else "DOWN 🔴")
         
-        # --- ADDED BACK STRATEGY BOX ---
+        # Strategy Box Included
         st.markdown(f"""
             <div class="unique-strategy-box">
                 <h3 style="color: #00ffcc; margin-top: 0; font-family: 'Orbitron'; font-size: 18px;">🤖 AI Pro Strategy & Scalping Matrix ({base})</h3>
