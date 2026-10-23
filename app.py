@@ -72,6 +72,21 @@ st.markdown("""
         text-shadow: 0 0 12px rgba(255,165,0,0.8);
     }
 
+    .summary-card-bull {
+        background: linear-gradient(rgba(10, 15, 25, 0.55), rgba(10, 15, 25, 0.55)), url('https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?q=80&w=400&auto=format&fit=crop');
+        background-size: cover; background-position: center; border: 2px solid #39ff14; padding: 15px; border-radius: 12px; text-align: center; box-shadow: 0 4px 20px rgba(57,255,20,0.5); margin-bottom: 20px;
+    }
+
+    .summary-card-bear {
+        background: linear-gradient(rgba(10, 15, 25, 0.55), rgba(10, 15, 25, 0.55)), url('https://images.unsplash.com/photo-1534177616072-ef7dc120449d?q=80&w=400&auto=format&fit=crop');
+        background-size: cover; background-position: center; border: 2px solid #ff073a; padding: 15px; border-radius: 12px; text-align: center; box-shadow: 0 4px 20px rgba(255,7,58,0.5); margin-bottom: 20px;
+    }
+
+    .summary-card-side {
+        background: linear-gradient(rgba(10, 15, 25, 0.55), rgba(10, 15, 25, 0.55)), url('https://images.unsplash.com/photo-1543466835-00a7907e9de1?q=80&w=400&auto=format&fit=crop');
+        background-size: cover; background-position: center; border: 2px solid #ffa500; padding: 15px; border-radius: 12px; text-align: center; box-shadow: 0 4px 20px rgba(255,165,0,0.5); margin-bottom: 20px;
+    }
+
     .emoji-white-glow {
         text-shadow: 0 0 12px rgba(255, 255, 255, 0.9), 0 0 25px rgba(255, 255, 255, 0.6);
     }
@@ -639,13 +654,10 @@ with tab1:
             col_color = '#ffa500'
 
         with summary_cols[i % len(summary_cols)]:
-            st.markdown(f"""
-                <div class="{card_class}">
-                    <span style="font-size: 14px; font-weight: 900; color: #ffffff; text-shadow: 0 0 8px #000000, 0 0 12px #000000;">{c_name}</span><br>
-                    <span class="emoji-white-glow" style="font-size: 16px; font-weight: 900; color: {col_color};">{anim}</span><br>
-                    <span style="font-size: 12px; font-weight: 800; color: #ffffff; text-shadow: 0 0 6px #000000, 0 0 10px #000000;">{power}% Power</span>
-                </div>
-            """, unsafe_allow_html=True)
+            # Interactive summary card button to view dedicated coin details
+            if st.button(f"{c_name}\n{anim}\n{power}% Power", key=f"card_btn_{c_name}_{i}", use_container_width=True):
+                st.session_state["detailed_coin"] = c_name
+                st.rerun()
 
     st.markdown("---")
 
