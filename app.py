@@ -30,28 +30,44 @@ st.markdown("""
         display: inline-block;
     }
 
-    .live-running-price {
+    .live-running-price-bull {
         font-family: 'Orbitron', sans-serif;
         font-weight: 900;
-        font-size: 28px;
+        font-size: 32px;
         color: #39ff14;
-        text-shadow: 0 0 8px rgba(57,255,20,0.5);
+        text-shadow: 0 0 10px rgba(57,255,20,0.7);
     }
 
-    /* Crystal Clear High Contrast Summary Cards */
+    .live-running-price-bear {
+        font-family: 'Orbitron', sans-serif;
+        font-weight: 900;
+        font-size: 32px;
+        color: #ff073a;
+        text-shadow: 0 0 10px rgba(255,7,58,0.7);
+    }
+
+    .live-running-price-side {
+        font-family: 'Orbitron', sans-serif;
+        font-weight: 900;
+        font-size: 32px;
+        color: #ffa500;
+        text-shadow: 0 0 10px rgba(255,165,0,0.7);
+    }
+
+    /* Crystal Clear Bright Summary Cards with Dedicated Real Images */
     .summary-card-bull {
-        background: linear-gradient(rgba(5, 7, 11, 0.75), rgba(5, 7, 11, 0.75)), url('https://images.unsplash.com/photo-1642543492481-44e81e3914a7?q=80&w=400&auto=format&fit=crop');
-        background-size: cover; background-position: center; border: 2px solid #39ff14; padding: 15px; border-radius: 12px; text-align: center; box-shadow: 0 4px 15px rgba(57,255,20,0.4); margin-bottom: 20px;
+        background: linear-gradient(rgba(10, 15, 25, 0.45), rgba(10, 15, 25, 0.45)), url('https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?q=80&w=400&auto=format&fit=crop');
+        background-size: cover; background-position: center; border: 2px solid #39ff14; padding: 15px; border-radius: 12px; text-align: center; box-shadow: 0 4px 20px rgba(57,255,20,0.5); margin-bottom: 20px;
     }
 
     .summary-card-bear {
-        background: linear-gradient(rgba(5, 7, 11, 0.75), rgba(5, 7, 11, 0.75)), url('https://images.unsplash.com/photo-1563089145-599997674d42?q=80&w=400&auto=format&fit=crop');
-        background-size: cover; background-position: center; border: 2px solid #ff073a; padding: 15px; border-radius: 12px; text-align: center; box-shadow: 0 4px 15px rgba(255,7,58,0.4); margin-bottom: 20px;
+        background: linear-gradient(rgba(10, 15, 25, 0.45), rgba(10, 15, 25, 0.45)), url('https://images.unsplash.com/photo-1534177616072-ef7dc120449d?q=80&w=400&auto=format&fit=crop');
+        background-size: cover; background-position: center; border: 2px solid #ff073a; padding: 15px; border-radius: 12px; text-align: center; box-shadow: 0 4px 20px rgba(255,7,58,0.5); margin-bottom: 20px;
     }
 
     .summary-card-side {
-        background: linear-gradient(rgba(5, 7, 11, 0.75), rgba(5, 7, 11, 0.75)), url('https://images.unsplash.com/photo-1543466835-00a7907e9de1?q=80&w=400&auto=format&fit=crop');
-        background-size: cover; background-position: center; border: 2px solid #ffa500; padding: 15px; border-radius: 12px; text-align: center; box-shadow: 0 4px 15px rgba(255,165,0,0.4); margin-bottom: 20px;
+        background: linear-gradient(rgba(10, 15, 25, 0.45), rgba(10, 15, 25, 0.45)), url('https://images.unsplash.com/photo-1543466835-00a7907e9de1?q=80&w=400&auto=format&fit=crop');
+        background-size: cover; background-position: center; border: 2px solid #ffa500; padding: 15px; border-radius: 12px; text-align: center; box-shadow: 0 4px 20px rgba(255,165,0,0.5); margin-bottom: 20px;
     }
 
     .emoji-white-glow {
@@ -457,28 +473,60 @@ with tab1:
             animal_type = coin_df['Animal_Type'].iloc[-1]
             sentiment_pct = coin_df['Sentiment (%)'].iloc[-1]
             trade_advice = coin_df['Trade Advice'].iloc[-1]
+            rsi_val = coin_df['RSI_14'].iloc[-1]
+            macd_val = coin_df['MACD'].iloc[-1]
+            atr_val = coin_df['ATR_14'].iloc[-1]
             
             box_color = '#39ff14' if 'BULL' in animal_type else ('#ff073a' if 'BEAR' in animal_type else '#ffa500')
-            box_shadow = f"0 0 10px {box_color}"
+            price_class = "live-running-price-bull" if 'BULL' in animal_type else ("live-running-price-bear" if 'BEAR' in animal_type else "live-running-price-side")
 
-            st.markdown(f"""
-                <div class="market-sentiment-box">
-                    <div>
-                        <span style="font-size: 11px; color: #8b949e; display: block; font-weight: 600;">⚡ LIVE RUNNING PRICE ({selected_currency})</span>
-                        <span class="live-running-price">{curr_symbol}{current_price:,.2f}</span>
+            # --- Layout Split: Left for Price/Sentiment, Right for Trading Strategy Box ---
+            col_left, col_right = st.columns([1.3, 1])
+
+            with col_left:
+                st.markdown(f"""
+                    <div class="market-sentiment-box" style="padding: 15px; background: #0d1117; border-radius: 12px; border: 1px solid #30363d;">
+                        <div>
+                            <span style="font-size: 11px; color: #8b949e; display: block; font-weight: 600;">⚡ LIVE RUNNING PRICE ({selected_currency})</span>
+                            <span class="{price_class}">{curr_symbol}{current_price:,.2f}</span>
+                        </div>
+                        <div style="margin-top: 10px;">
+                            <span style="font-size: 11px; color: #8b949e; display: block; font-weight: 600;">MARKET SENTIMENT & ANIMAL AI</span>
+                            <span class="emoji-white-glow" style="font-size: 20px; font-weight: 900; color: {box_color};">
+                                {animal_type} — {sentiment_pct}% Power
+                            </span>
+                        </div>
                     </div>
-                    <div style="border-left: 1px solid #30363d; padding-left: 20px;">
-                        <span style="font-size: 11px; color: #8b949e; display: block; font-weight: 600;">MARKET SENTIMENT & ANIMAL AI</span>
-                        <span class="emoji-white-glow" style="font-size: 22px; font-weight: 900; color: {box_color};">
-                            {animal_type} — {sentiment_pct}% Power
-                        </span>
+                """, unsafe_allow_html=True)
+
+            with col_right:
+                # Dynamic Strategy generation based on real data
+                if "BULL" in animal_type:
+                    strat_action = "Long / Buy Setup 🟢"
+                    trade_style = "Scalping / Momentum Trading"
+                    hold_time = "15 to 45 Minutes"
+                    entry_note = f"RSI ({rsi_val}) & MACD indicate bullish continuation. Watch EMA support."
+                elif "BEAR" in animal_type:
+                    strat_action = "Short / Sell Setup 🔴"
+                    trade_style = "Aggressive Scalping / Breakout Short"
+                    hold_time = "10 to 30 Minutes"
+                    entry_note = f"RSI ({rsi_val}) under pressure. MACD bear crossover active."
+                else:
+                    strat_text_type = "Sideways / Range Trading 🟡"
+                    strat_action = "Range Bound Strategy"
+                    trade_style = "Range Scalping (Buy Support, Sell Resistance)"
+                    hold_time = "5 to 20 Minutes"
+                    entry_note = f"RSI ({rsi_val}) is neutral. Wait for breakout from Bollinger bands."
+
+                st.markdown(f"""
+                    <div class="unique-strategy-box" style="margin-top: 0; padding: 15px;">
+                        <h4 style="color: #00ffcc; margin-top: 0; font-size: 15px;">🎯 AI Live Trading Strategy ({selected_tf})</h4>
+                        <p style="color: #ffffff; font-size: 12px; margin-bottom: 5px;"><b>Strategy Type:</b> {trade_style}</p>
+                        <p style="color: #39ff14; font-size: 12px; margin-bottom: 5px;"><b>Recommended Action:</b> {strat_action}</p>
+                        <p style="color: #ffffff; font-size: 12px; margin-bottom: 5px;"><b>Hold Duration:</b> Hold trade for {hold_time}</p>
+                        <p style="color: #8b949e; font-size: 11px; margin-bottom: 0;"><b>Indicator Note:</b> {entry_note} (ATR: {atr_val})</p>
                     </div>
-                    <div style="border-left: 1px solid #30363d; padding-left: 20px;">
-                        <span style="font-size: 11px; color: #8b949e; display: block; font-weight: 600;">ACTIONABLE ADVICE</span>
-                        <span style="font-size: 18px; font-weight: 900; color: #ffffff;">{trade_advice}</span>
-                    </div>
-                </div>
-            """, unsafe_allow_html=True)
+                """, unsafe_allow_html=True)
             
             st.markdown("<br>", unsafe_allow_html=True)
             
@@ -504,30 +552,6 @@ with tab1:
             styled_df = filtered_df[excel_display_cols].style.map(color_coding_table, subset=['Animal_Type', 'Trade Advice'])
             st.dataframe(styled_df, use_container_width=True, height=450)
             
-            # --- REAL-TIME SCALPING & FUTURE TRADE BANNER ---
-            st.markdown(f"""
-                <div style="background: #161b22; border: 1px solid #39ff14; padding: 12px; border-radius: 8px; margin-top: 10px; margin-bottom: 10px;">
-                    <span style="color: #39ff14; font-weight: 900;">🚀 Real-Time Scalping & Future Trade Signal ({selected_tf}):</span> 
-                    <span style="color: #ffffff;">{trade_advice} | Recommended Action: Monitor EMA & Supertrend for breakout confirmation.</span>
-                </div>
-            """, unsafe_allow_html=True)
-
-            # --- UNIQUE PRO AI STRATEGY BOX ---
-            last_row = coin_df.iloc[-1]
-            rsi_v = last_row['RSI_14']
-            macd_v = last_row['MACD']
-            adv_v = last_row['Trade Advice']
-            
-            strat_text = f"Active setup: {adv_v}. RSI ({rsi_v}) and MACD ({macd_v}) validate current trend. Maintain strict stoploss for scalping."
-
-            st.markdown(f"""
-                <div class="unique-strategy-box">
-                    <h3 style="color: #00ffcc; margin-top: 0; font-family: 'Orbitron'; font-size: 18px;">🤖 AI Pro Strategy & Scalping Matrix ({c_tab_name} - {selected_tf})</h3>
-                    <p style="color: #ffffff; font-size: 14px; margin-bottom: 8px;"><b>Indicator Status:</b> RSI: {rsi_v} | MACD: {macd_v} | Volume, Supertrend, EMA, ATR, ADX & Bollinger: Fully Synced</p>
-                    <p style="color: #39ff14; font-size: 15px; margin-bottom: 0;"><b>Execution Plan:</b> {strat_text}</p>
-                </div>
-            """, unsafe_allow_html=True)
-
             # --- TRADINGVIEW PRO ADVANCED EMBED CHART WITH BUILT-IN WATCHLIST & FULL INTERACTIVITY ---
             st.markdown(f"### 📈 Live TradingView Professional Chart ({c_tab_name})")
             
