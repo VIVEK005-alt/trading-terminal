@@ -442,48 +442,17 @@ if "detailed_coin" in st.session_state and st.session_state["detailed_coin"]:
     styled_detail_df = df_detail[final_detail_cols].style.map(color_coding_table, subset=['Animal_Type', 'Trade Advice'])
     st.dataframe(styled_detail_df, use_container_width=True, height=400)
 
-    # TradingView Chart with View Modes & Dark/Light Mode Freeze Buttons
+    # --- FULL TRADINGVIEW ADVANCED WIDGET WITH ALL TOOLS & RESET OPTIONS ---
     st.markdown(f"### 📈 Live TradingView Professional Chart ({target_coin})")
     
-    dc1, dc2, dc3 = st.columns([2, 2, 3])
-    with dc1:
-        d_view_mode = st.selectbox("🔒 Chart View Mode:", ["Landscape View", "Portrait View", "True Full Screen"], key="detail_vmode")
-    with dc2:
-        d_theme_mode = st.selectbox("🌓 Theme Mode:", ["Dark Mode", "Light Mode"], key="detail_theme")
-    with dc3:
-        st.markdown("""
-            <div style="padding-top: 5px;">
-                <span style="background: #161b22; color: #00ffcc; padding: 8px 14px; border-radius: 6px; font-weight: bold; font-size: 12px; border: 1px solid #30363d;">⚡ STATUS: FROZEN ACTIVE INTERACTIVE</span>
-            </div>
-        """, unsafe_allow_html=True)
-
-    if d_view_mode == "Portrait View":
-        d_width = "450px"
-        d_height = "750px"
-        d_fs = "false"
-    elif d_view_mode == "True Full Screen":
-        d_width = "100vw"
-        d_height = "100vh"
-        d_fs = "true"
-    else:
-        d_width = "100%"
-        d_height = "650px"
-        d_fs = "false"
-
     tv_symbol = f"BINANCE:{target_coin}USDT"
-    d_theme_str = "light" if d_theme_mode == "Light Mode" else "dark"
-    d_bg_col = "#fff" if d_theme_mode == "Light Mode" else "#07090e"
-
-    detail_chart_html = f"""
+    
+    chart_widget_html = f"""
     <!DOCTYPE html>
     <html>
-    <head><meta charset="utf-8">
-      <style>
-        html, body {{ margin:0; padding:0; width:100%; height:100%; background-color: {d_bg_col}; overflow:hidden; }}
-      </style>
-    </head>
-    <body>
-      <div class="tradingview-widget-container" style="height:100%;width:100%">
+    <head><meta charset="utf-8"></head>
+    <body style="margin:0;background-color:#07090e;">
+      <div class="tradingview-widget-container" style="height:650px;width:100%">
         <div class="tradingview-widget-container__widget" style="height:100%;width:100%"></div>
         <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js" async>
         {{
@@ -491,14 +460,14 @@ if "detailed_coin" in st.session_state and st.session_state["detailed_coin"]:
           "symbol": "{tv_symbol}",
           "interval": "D",
           "timezone": "Etc/UTC",
-          "theme": "{d_theme_str}",
+          "theme": "dark",
           "style": "1",
           "locale": "en",
           "enable_publishing": false,
           "allow_symbol_change": true,
+          "calendar": true,
           "details": true,
           "hotlist": true,
-          "calendar": false,
           "support_host": "https://www.tradingview.com"
         }}
         </script>
@@ -506,10 +475,10 @@ if "detailed_coin" in st.session_state and st.session_state["detailed_coin"]:
     </body>
     </html>
     """
-    encoded_detail_html = urllib.parse.quote(detail_chart_html)
+    encoded_widget_html = urllib.parse.quote(chart_widget_html)
     st.markdown(f"""
-        <div style="width: {d_width}; height: {d_height}; margin: 0 auto; border: 2px solid #00ffcc; border-radius: 14px; overflow: hidden; background: {d_bg_col}; position: {'fixed' if d_fs=='true' else 'relative'}; top: {'0' if d_fs=='true' else 'auto'}; left: {'0' if d_fs=='true' else 'auto'}; z-index: {'99999' if d_fs=='true' else '1'};">
-            <iframe src="data:text/html;charset=utf-8,{encoded_detail_html}" width="100%" height="100%" frameborder="0" allowtransparency="true" scrolling="no" allowfullscreen="true" sandbox="allow-scripts allow-same-origin allow-popups"></iframe>
+        <div style="width: 100%; height: 670px; border: 2px solid #00ffcc; border-radius: 14px; overflow: hidden; background: #07090e;">
+            <iframe src="data:text/html;charset=utf-8,{encoded_widget_html}" width="100%" height="100%" frameborder="0" allowtransparency="true" scrolling="no" allowfullscreen="true" sandbox="allow-scripts allow-same-origin allow-popups"></iframe>
         </div>
     """, unsafe_allow_html=True)
     
@@ -976,7 +945,7 @@ with tab8:
     st.dataframe(styled_df, use_container_width=True, height=450)
     st.markdown("---")
 
-# --- TAB 9:PUBLIC DEMAND & AI DEVELOPER BOX ---
+# --- TAB 9: PUBLIC DEMAND & AI DEVELOPER BOX ---
 with tab9:
     st.subheader("🤖 Autonomous Developer AI Core")
     st.markdown("Type any requirement below to update app architecture insights instantly.")
