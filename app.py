@@ -91,38 +91,26 @@ st.markdown("""
         text-shadow: 0 0 12px rgba(255, 255, 255, 0.9), 0 0 25px rgba(255, 255, 255, 0.6);
     }
 
-    .unique-strategy-box {
-        background: linear-gradient(135deg, #0d1117 0%, #161b22 100%);
+    /* Equal Height & Equal Width Professional Card Containers */
+    .equal-box-container {
+        background: #0d1117;
         border: 2px solid #00ffcc;
         border-radius: 12px;
         padding: 20px;
-        box-shadow: 0 0 20px rgba(0,255,204,0.25);
-        margin-top: 15px;
-        margin-bottom: 25px;
-    }
-
-    [data-testid="stSidebar"] {
-        background-color: #12141c;
-        border-right: 1px solid #2d333b;
-        padding: 20px 14px;
-        font-family: 'Inter', sans-serif;
-    }
-    
-    .software-nav-bar {
-        background: #161b22;
-        padding: 10px;
-        border-radius: 8px;
-        border: 1px solid #30363d;
+        height: 180px;
         display: flex;
-        justify-content: space-around;
-        align-items: center;
+        flex-direction: column;
+        justify-content: space-between;
+        box-shadow: 0 0 20px rgba(0,255,204,0.25);
         margin-bottom: 20px;
     }
 
+    /* Excel-like Professional Table Styling */
     table.dataframe {
         background-color: #0d1117 !important;
         color: #00ffcc !important;
-        border: 1px solid #30363d !important;
+        border: 2px solid #30363d !important;
+        border-collapse: collapse !important;
     }
     
     table.dataframe th {
@@ -133,6 +121,7 @@ st.markdown("""
         background-color: #161b22 !important;
         border: 1px solid #30363d !important;
         text-align: center !important;
+        padding: 10px !important;
     }
     
     table.dataframe td {
@@ -143,6 +132,7 @@ st.markdown("""
         background-color: #0d1117 !important;
         border: 1px solid #21262d !important;
         text-align: center !important;
+        padding: 8px !important;
     }
 
     h1, h2, h3, h4, p, label, .stMarkdown { 
@@ -395,11 +385,12 @@ st.markdown("""
     </div>
 """, unsafe_allow_html=True)
 
-# --- DEDICATED MARKET DETAIL VIEW PAGE (WITH TRADINGVIEW CHART & REORDERED COLUMNS) ---
+# --- DEDICATED MARKET DETAIL VIEW PAGE (EQUAL SIZE BOXES, EXCEL TABLE, TRADINGVIEW CHART WITH VIEW MODES) ---
 if "detailed_coin" in st.session_state and st.session_state["detailed_coin"]:
     target_coin = st.session_state["detailed_coin"]
     
-    if st.button("⬅️ Back to Master Terminal Dashboard", use_container_width=True):
+    # Exit / Back button at the very top of the page
+    if st.button("⬅️ Exit / Back to Master Terminal Dashboard", use_container_width=True):
         del st.session_state["detailed_coin"]
         st.rerun()
 
@@ -439,30 +430,38 @@ if "detailed_coin" in st.session_state and st.session_state["detailed_coin"]:
     box_col = '#39ff14' if 'BULL' in anim_type else ('#ff073a' if 'BEAR' in anim_type else '#ffa500')
     px_cls = "live-running-price-bull" if 'BULL' in anim_type else ("live-running-price-bear" if 'BEAR' in anim_type else "live-running-price-side")
 
-    d_col1, d_col2 = st.columns([1.3, 1])
+    # First Image: Equal Size Boxes for Price & Strategy
+    d_col1, d_col2 = st.columns(2)
     with d_col1:
         st.markdown(f"""
-            <div style="padding: 20px; background: #0d1117; border-radius: 12px; border: 2px solid {box_col};">
-                <span style="font-size: 12px; color: #8b949e; display: block; font-weight: 600;">LIVE RUNNING PRICE ({selected_currency})</span>
-                <span class="{px_cls}">{curr_symbol}{cur_px:,.2f}</span>
-                <hr style="border-color: #30363d; margin: 10px 0;">
-                <span style="font-size: 12px; color: #8b949e; display: block; font-weight: 600;">AI SENTIMENT & POWER</span>
-                <span class="emoji-white-glow" style="font-size: 22px; font-weight: 900; color: {box_col};">{anim_type} — {pow_pct}% Power</span>
+            <div class="equal-box-container" style="border: 2px solid {box_col};">
+                <div>
+                    <span style="font-size: 11px; color: #8b949e; display: block; font-weight: 600;">LIVE RUNNING PRICE ({selected_currency})</span>
+                    <span class="{px_cls}">{curr_symbol}{cur_px:,.2f}</span>
+                </div>
+                <div>
+                    <span style="font-size: 11px; color: #8b949e; display: block; font-weight: 600;">AI SENTIMENT & POWER</span>
+                    <span class="emoji-white-glow" style="font-size: 18px; font-weight: 900; color: {box_col};">{anim_type} — {pow_pct}% Power</span>
+                </div>
             </div>
         """, unsafe_allow_html=True)
 
     with d_col2:
         st.markdown(f"""
-            <div class="unique-strategy-box" style="margin-top: 0; padding: 20px;">
-                <h4 style="color: #00ffcc; margin-top: 0; font-size: 16px;">🎯 Dedicated AI Trading Strategy</h4>
-                <p style="color: #ffffff; font-size: 13px; margin-bottom: 6px;"><b>Advice:</b> <span style="color: #39ff14;">{adv}</span></p>
-                <p style="color: #8b949e; font-size: 12px; margin-bottom: 0;"><b>Key Indicators:</b> RSI: {rsi_v} | MACD: {macd_v} | EMA: {ema_v} | ATR: {atr_v}</p>
+            <div class="equal-box-container">
+                <div>
+                    <h4 style="color: #00ffcc; margin-top: 0; font-size: 15px;">🎯 Dedicated AI Trading Strategy</h4>
+                    <p style="color: #ffffff; font-size: 12px; margin-bottom: 4px;"><b>Advice:</b> <span style="color: #39ff14;">{adv}</span></p>
+                </div>
+                <div>
+                    <p style="color: #8b949e; font-size: 11px; margin-bottom: 0;"><b>Key Indicators:</b> RSI: {rsi_v} | MACD: {macd_v} | EMA: {ema_v} | ATR: {atr_v}</p>
+                </div>
             </div>
         """, unsafe_allow_html=True)
 
     st.markdown("---")
     
-    # Reordering columns to put essential buy/sell columns first
+    # Second Image: MS Excel-like Professional Table with Buy/Sell columns first
     first_cols = ['Trade Advice', 'Animal_Type', 'Date', 'Time', 'close', 'open', 'high', 'low', 'volume']
     other_cols = [c for c in df_detail.columns if c not in first_cols]
     final_detail_cols = first_cols + other_cols
@@ -471,15 +470,48 @@ if "detailed_coin" in st.session_state and st.session_state["detailed_coin"]:
     styled_detail_df = df_detail[final_detail_cols].style.map(color_coding_table, subset=['Animal_Type', 'Trade Advice'])
     st.dataframe(styled_detail_df, use_container_width=True, height=400)
 
-    # --- TRADINGVIEW PRO EMBED CHART ON DETAIL PAGE ---
+    # Third Image: Proper TradingView Chart with View Modes & Dark/Light Mode Freeze Buttons
     st.markdown(f"### 📈 Live TradingView Professional Chart ({target_coin})")
+    
+    dc1, dc2, dc3 = st.columns([2, 2, 3])
+    with dc1:
+        d_view_mode = st.selectbox("🔒 Chart View Mode:", ["Landscape View", "Portrait View", "True Full Screen"], key="detail_vmode")
+    with dc2:
+        d_theme_mode = st.selectbox("🌓 Theme Mode:", ["Dark Mode", "Light Mode"], key="detail_theme")
+    with dc3:
+        st.markdown("""
+            <div style="padding-top: 5px;">
+                <span style="background: #161b22; color: #00ffcc; padding: 8px 14px; border-radius: 6px; font-weight: bold; font-size: 12px; border: 1px solid #30363d;">⚡ STATUS: FROZEN ACTIVE INTERACTIVE</span>
+            </div>
+        """, unsafe_allow_html=True)
+
+    if d_view_mode == "Portrait View":
+        d_width = "450px"
+        d_height = "750px"
+        d_fs = "false"
+    elif d_view_mode == "True Full Screen":
+        d_width = "100vw"
+        d_height = "100vh"
+        d_fs = "true"
+    else:
+        d_width = "100%"
+        d_height = "650px"
+        d_fs = "false"
+
     tv_symbol = f"BINANCE:{target_coin}USDT"
-    chart_html_content = f"""
+    d_theme_str = "light" if d_theme_mode == "Light Mode" else "dark"
+    d_bg_col = "#fff" if d_theme_mode == "Light Mode" else "#07090e"
+
+    detail_chart_html = f"""
     <!DOCTYPE html>
     <html>
-    <head><meta charset="utf-8"></head>
-    <body style="margin:0;background-color:#07090e;">
-      <div class="tradingview-widget-container" style="height:600px;width:100%">
+    <head><meta charset="utf-8">
+      <style>
+        html, body {{ margin:0; padding:0; width:100%; height:100%; background-color: {d_bg_col}; overflow:hidden; }}
+      </style>
+    </head>
+    <body>
+      <div class="tradingview-widget-container" style="height:100%;width:100%">
         <div class="tradingview-widget-container__widget" style="height:100%;width:100%"></div>
         <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js" async>
         {{
@@ -487,7 +519,7 @@ if "detailed_coin" in st.session_state and st.session_state["detailed_coin"]:
           "symbol": "{tv_symbol}",
           "interval": "D",
           "timezone": "Etc/UTC",
-          "theme": "dark",
+          "theme": "{d_theme_str}",
           "style": "1",
           "locale": "en",
           "enable_publishing": false,
@@ -502,9 +534,9 @@ if "detailed_coin" in st.session_state and st.session_state["detailed_coin"]:
     </body>
     </html>
     """
-    encoded_detail_html = urllib.parse.quote(chart_html_content)
+    encoded_detail_html = urllib.parse.quote(detail_chart_html)
     st.markdown(f"""
-        <div style="width: 100%; height: 620px; border: 2px solid #00ffcc; border-radius: 14px; overflow: hidden; background: #07090e;">
+        <div style="width: {d_width}; height: {d_height}; margin: 0 auto; border: 2px solid #00ffcc; border-radius: 14px; overflow: hidden; background: {d_bg_col}; position: {'fixed' if d_fs=='true' else 'relative'}; top: {'0' if d_fs=='true' else 'auto'}; left: {'0' if d_fs=='true' else 'auto'}; z-index: {'99999' if d_fs=='true' else '1'};">
             <iframe src="data:text/html;charset=utf-8,{encoded_detail_html}" width="100%" height="100%" frameborder="0" allowtransparency="true" scrolling="no" allowfullscreen="true" sandbox="allow-scripts allow-same-origin allow-popups"></iframe>
         </div>
     """, unsafe_allow_html=True)
@@ -515,9 +547,6 @@ if "detailed_coin" in st.session_state and st.session_state["detailed_coin"]:
 st.markdown("### 🔍 Global Market Search")
 
 available_coin_symbols = sorted(list(all_coins_dict.keys()) + MASTER_COIN_LIST)
-
-if "search_input_val" not in st.session_state:
-    st.session_state["search_input_val"] = ""
 
 sc1, sc2, sc3 = st.columns([4, 1, 1])
 
@@ -714,7 +743,6 @@ with tab1:
                 filtered_df = filtered_df[filtered_df['Trade Advice'] == filter_signal]
             filtered_df = filtered_df[filtered_df['RSI_14'] >= min_rsi]
             
-            # Reordered columns to place Buy/Sell columns first for professional layout
             first_cols = ['Trade Advice', 'Animal_Type', 'Date', 'Time', 'close', 'open', 'high', 'low', 'volume']
             other_cols = [c for c in filtered_df.columns if c not in first_cols]
             table_display_cols = first_cols + other_cols
