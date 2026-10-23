@@ -21,7 +21,6 @@ st.markdown("""
     * { box-sizing: border-box; }
     .main { background-color: #05070b; color: #00ffcc; font-family: 'Inter', sans-serif; }
     
-    /* Professional Terminal Title Styling */
     .terminal-header-container {
         display: flex;
         align-items: center;
@@ -821,14 +820,16 @@ with tab8:
     st.markdown("### 🔥 Top Indian Equities Screener")
     indian_stock_search = st.text_input("🔍 Search Indian Stock:", placeholder="e.g., RELIANCE, TCS, INFY...")
     
-    indian_stocks_df = pd.DataFrame({
-        "Symbol": ["RELIANCE", "TCS", "INFY", "HDFCBANK", "ICICIBANK", "SBIN", "BHARTIARTL", "ITC", "LTIM", "TATAMOTORS"],
-        "Sector": "Energy", "IT", "IT", "Banking", "Banking", "Banking", "Telecom", "FMCG", "IT", "Auto"],
-        "LTP (₹)": [2950.40, 4120.50, 1890.20, 1680.10, 1240.30, 810.60, 1650.00, 510.30, 5820.00, 985.20],
-        "Change (%)": [+1.25, -0.45, +1.80, +0.95, +1.10, -0.30, +2.40, +0.15, -1.12, +1.65],
-        "RSI (14)": [61.2, 48.5, 66.4, 58.1, 62.0, 47.9, 70.5, 52.3, 44.2, 63.8],
-        "Trend Signal": ["BULLISH 🐂", "NEUTRAL 🤖", "BULLISH 🐂", "BULLISH 🐂", "BULLISH 🐂", "NEUTRAL 🤖", "STRONG BULL 🐂", "NEUTRAL 🤖", "BEARISH 🐻", "BULLISH 🐂"]
-    })
+    indian_stocks_df = pd.DataFrame(
+        {
+            "Symbol": ["RELIANCE", "TCS", "INFY", "HDFCBANK", "ICICIBANK", "SBIN", "BHARTIARTL", "ITC", "LTIM", "TATAMOTORS"],
+            "Sector": ["Energy", "IT", "IT", "Banking", "Banking", "Banking", "Telecom", "FMCG", "IT", "Auto"],
+            "LTP (₹)": [2950.40, 4120.50, 1890.20, 1680.10, 1240.30, 810.60, 1650.00, 510.30, 5820.00, 985.20],
+            "Change (%)": [+1.25, -0.45, +1.80, +0.95, +1.10, -0.30, +2.40, +0.15, -1.12, +1.65],
+            "RSI (14)": [61.2, 48.5, 66.4, 58.1, 62.0, 47.9, 70.5, 52.3, 44.2, 63.8],
+            "Trend Signal": ["BULLISH 🐂", "NEUTRAL 🤖", "BULLISH 🐂", "BULLISH 🐂", "BULLISH 🐂", "NEUTRAL 🤖", "STRONG BULL 🐂", "NEUTRAL 🤖", "BEARISH 🐻", "BULLISH 🐂"]
+        }
+    )
     
     if indian_stock_search:
         indian_stocks_df = indian_stocks_df[indian_stocks_df['Symbol'].str.contains(indian_stock_search.upper())]
