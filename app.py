@@ -76,7 +76,6 @@ st.markdown("""
         text-shadow: 0 0 12px rgba(255, 255, 255, 0.9), 0 0 25px rgba(255, 255, 255, 0.6);
     }
 
-    /* Equal Height & Equal Width Professional Card Containers with Auto-Fit */
     .equal-box-container {
         background: #0d1117;
         border-radius: 12px;
@@ -473,7 +472,7 @@ if "detailed_coin" in st.session_state and st.session_state["detailed_coin"]:
 
     tv_symbol = f"BINANCE:{target_coin}USDT"
     tv_theme_str = "light" if d_theme_mode == "Light Mode" else "dark"
-    bg_col = "#fff" if d_theme_mode == "Light Mode" else "#07090e"
+    bg_col = "#fff" if chart_theme_mode == "Light Mode" else "#07090e"
 
     container_id = f"tv_chart_container_{target_coin}"
 
