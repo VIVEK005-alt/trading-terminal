@@ -5,7 +5,6 @@ import requests
 import urllib.parse
 from datetime import datetime, timedelta
 import numpy as np
-import plotly.graph_objects as go
 
 # --- Direct Built-in Security Shield (No Import Error) ---
 def check_security_access():
@@ -528,29 +527,96 @@ if "detailed_coin" in st.session_state and st.session_state["detailed_coin"]:
     styled_detail_df = df_detail[final_detail_cols].style.map(color_coding_table, subset=['Animal_Type', 'Trade Advice'])
     st.dataframe(styled_detail_df, use_container_width=True, height=400)
 
-    st.markdown(f"### 📈 Custom Plotly Price Action Chart ({target_coin})")
-    chart_df = fetch_master_excel_data(c_id, row_count=100, seed_offset=detail_seed_offset)
-    fig_det = go.Figure(data=[go.Candlestick(
-        x=chart_df['Date'] + ' ' + chart_df['Time'],
-        open=chart_df['open'] * curr_multiplier,
-        high=chart_df['high'] * curr_multiplier,
-        low=chart_df['low'] * curr_multiplier,
-        close=chart_df['close'] * curr_multiplier,
-        name="Candles"
-    )])
-    fig_det.add_trace(go.Scatter(x=chart_df['Date'] + ' ' + chart_df['Time'], y=chart_df['EMA_20'] * curr_multiplier, mode='lines', name='EMA 20', line=dict(color='#00ffcc', width=1.5)))
-    fig_det.add_trace(go.Scatter(x=chart_df['Date'] + ' ' + chart_df['Time'], y=chart_df['EMA_50'] * curr_multiplier, mode='lines', name='EMA 50', line=dict(color='#ffa500', width=1.5)))
-    fig_det.update_layout(
-        template="plotly_dark",
-        paper_bgcolor="#07090e",
-        plot_bgcolor="#07090e",
-        title=f"{target_coin} Custom Candlestick & EMA Matrix",
-        xaxis_title="Timeline",
-        yaxis_title=f"Price ({selected_currency})",
-        height=600,
-        margin=dict(l=20, r=20, t=40, b=20)
-    )
-    st.plotly_chart(fig_det, use_container_width=True)
+    st.markdown(f"### 📈 Live TradingView Professional Chart ({target_coin})")
+    
+    dc1, dc2, dc3 = st.columns([2, 2, 3])
+    with dc1:
+        d_view_mode = st.selectbox("🔒 Chart View Mode:", ["Landscape View", "Portrait View", "True Full Screen"], key="detail_vmode")
+    with dc2:
+        chart_theme_mode = st.selectbox("🌓 Theme Mode:", ["Dark Mode", "Light Mode"], key="detail_theme")
+    with dc3:
+        tv_link_url = f"https://www.tradingview.com/chart/?symbol=BINANCE:{target_coin}USDT"
+        st.markdown(f"""
+            <div style="padding-top: 5px;">
+                <a href="{tv_link_url}" target="_blank" style="background: #238636; color: white; padding: 8px 16px; border-radius: 6px; text-decoration: none; font-weight: bold; font-size: 12px; border: 1px solid #00ffcc;">🔗 Open Full TradingView Pro Workspace</a>
+            </div>
+        """, unsafe_allow_html=True)
+
+    if d_view_mode == "Portrait View":
+        tv_width = "450px"
+        tv_height = "750px"
+        is_fs = "false"
+    elif d_view_mode == "True Full Screen":
+        tv_width = "100vw"
+        tv_height = "100vh"
+        is_fs = "true"
+    else:
+        tv_width = "100%"
+        tv_height = "650px"
+        is_fs = "false"
+
+    tv_symbol = f"BINANCE:{target_coin}USDT"
+    tv_theme_str = "light" if chart_theme_mode == "Light Mode" else "dark"
+    bg_col = "#fff" if chart_theme_mode == "Light Mode" else "#07090e"
+
+    container_id = f"tv_chart_container_{target_coin}"
+
+    chart_html_content = f"""
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <style>
+        html, body {{
+          margin: 0;
+          padding: 0;
+          width: 100%;
+          height: 100%;
+          background-color: {bg_col};
+          overflow: hidden;
+        }}
+      </style>
+    </head>
+    <body>
+      <div class="tradingview-widget-container" style="height:100%;width:100%">
+        <div class="tradingview-widget-container__widget" style="height:100%;width:100%"></div>
+        <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js" async>
+        {{
+          "autosize": true,
+          "symbol": "{tv_symbol}",
+          "interval": "D",
+          "timezone": "Etc/UTC",
+          "theme": "{tv_theme_str}",
+          "style": "1",
+          "locale": "en",
+          "enable_publishing": false,
+          "allow_symbol_change": true,
+          "watchlist": ["BINANCE:BTCUSDT", "BINANCE:ETHUSDT", "BINANCE:SOLUSDT", "BINANCE:BNBUSDT", "BINANCE:XRPUSDT", "BINANCE:ADAUSDT", "BINANCE:AVAXUSDT", "BINANCE:LINKUSDT", "BINANCE:SUIUSDT", "BINANCE:DOTUSDT"],
+          "details": true,
+          "hotlist": true,
+          "calendar": false,
+          "support_host": "https://www.tradingview.com"
+        }}
+        </script>
+      </div>
+    </body>
+    </html>
+    """
+    encoded_html = urllib.parse.quote(chart_html_content)
+
+    st.markdown(f"""
+        <div id="{container_id}" style="width: {tv_width}; height: {tv_height}; margin: 0 auto; border: 2px solid #00ffcc; border-radius: 14px; overflow: hidden; background: {bg_col}; position: {'fixed' if is_fs=='true' else 'relative'}; top: {'0' if is_fs=='true' else 'auto'}; left: {'0' if is_fs=='true' else 'auto'}; z-index: {'99999' if is_fs=='true' else '1'};">
+            <iframe src="data:text/html;charset=utf-8,{encoded_html}" width="100%" height="100%" frameborder="0" allowtransparency="true" scrolling="no" allowfullscreen="true" sandbox="allow-scripts allow-same-origin allow-popups"></iframe>
+        </div>
+    """, unsafe_allow_html=True)
+    
+    if is_fs == "true":
+        st.markdown(f"""
+            <div style="position: fixed; top: 10px; right: 10px; z-index: 100000;">
+                <button onclick="location.reload();" style="background: #ff073a; color: white; border: 1px solid #00ffcc; padding: 8px 16px; border-radius: 6px; font-weight: bold; cursor: pointer;">✕ Exit Full Screen</button>
+            </div>
+        """, unsafe_allow_html=True)
+    
     st.stop()
 
 # --- INTELLIGENT SEARCH BAR ---
@@ -585,6 +651,8 @@ tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9, tab10 = st.tabs([
     "🇮🇳 Indian Stock Market",
     "🤖 AI Developer Core"
 ])
+
+df = None
 
 with tab1:
     st.subheader(f"🌍 Master Excel Sheet Matrix ({selected_currency} Mode)")
@@ -645,9 +713,9 @@ with tab1:
         with summary_cols[i % len(summary_cols)]:
             st.markdown(f"""
                 <div class="{card_class}">
-                    <span style="font-size: 14px; font-weight: 900; color: #ffffff;">{c_name}</span><br>
+                    <span style="font-size: 14px; font-weight: 900; color: #ffffff; text-shadow: 0 0 8px #000000, 0 0 12px #000000;">{c_name}</span><br>
                     <span class="emoji-white-glow" style="font-size: 16px; font-weight: 900; color: {col_color};">{anim}</span><br>
-                    <span style="font-size: 12px; font-weight: 800; color: #ffffff;">{power}% Power</span>
+                    <span style="font-size: 12px; font-weight: 800; color: #ffffff; text-shadow: 0 0 6px #000000, 0 0 10px #000000;">{power}% Power</span>
                 </div>
             """, unsafe_allow_html=True)
             if st.button(f"🔍 View {c_name} Chart", key=f"card_btn_{c_name}_{i}", use_container_width=True):
@@ -656,67 +724,228 @@ with tab1:
 
     st.markdown("---")
     coin_tabs = st.tabs(list(coin_mapping.keys()))
+    
     for idx, (c_tab_name, c_id) in enumerate(coin_mapping.items()):
         with coin_tabs[idx]:
-            st.markdown(f"### ⚡ {c_tab_name} Comprehensive Data Matrix ({selected_tf})")
+            st.markdown(f"### ⚡ {c_tab_name} Comprehensive Data Matrix ({selected_tf}) — Currency: {selected_currency}")
             coin_df = coin_data_cache[c_tab_name].copy()
             coin_df['close'] = coin_df['close'] * curr_multiplier
             coin_df['open'] = coin_df['open'] * curr_multiplier
             coin_df['high'] = coin_df['high'] * curr_multiplier
             coin_df['low'] = coin_df['low'] * curr_multiplier
             
+            current_price = coin_df['close'].iloc[-1]
+            animal_type = coin_df['Animal_Type'].iloc[-1]
+            sentiment_pct = coin_df['Sentiment (%)'].iloc[-1]
+            trade_advice = coin_df['Trade Advice'].iloc[-1]
+            rsi_val = coin_df['RSI_14'].iloc[-1]
+            macd_val = coin_df['MACD'].iloc[-1]
+            atr_val = coin_df['ATR_14'].iloc[-1]
+            ema_val = coin_df['EMA_20'].iloc[-1]
+            
+            box_color = '#39ff14' if 'BULL' in animal_type else ('#ff073a' if 'BEAR' in animal_type else '#ffa500')
+            price_class = "live-running-price-bull" if 'BULL' in animal_type else ("live-running-price-bear" if 'BEAR' in animal_type else "live-running-price-side")
+
+            col_left, col_right = st.columns([1.3, 1])
+
+            with col_left:
+                st.markdown(f"""
+                    <div class="market-sentiment-box" style="padding: 15px; background: #0d1117; border-radius: 12px; border: 1px solid #30363d;">
+                        <div>
+                            <span style="font-size: 11px; color: #8b949e; display: block; font-weight: 600;">⚡ LIVE RUNNING PRICE ({selected_currency})</span>
+                            <span class="{price_class}">{curr_symbol}{current_price:,.2f}</span>
+                        </div>
+                        <div style="margin-top: 10px;">
+                            <span style="font-size: 11px; color: #8b949e; display: block; font-weight: 600;">MARKET SENTIMENT & ANIMAL AI</span>
+                            <span class="emoji-white-glow" style="font-size: 20px; font-weight: 900; color: {box_color};">
+                                {animal_type} — {sentiment_pct}% Power
+                            </span>
+                        </div>
+                    </div>
+                """, unsafe_allow_html=True)
+
+            with col_right:
+                if "BULL" in animal_type:
+                    strat_action = "Long / Buy Setup 🟢"
+                    trade_style = "Scalping / Momentum Trading"
+                    hold_time = "15 to 45 Minutes"
+                elif "BEAR" in animal_type:
+                    strat_action = "Short / Sell Setup 🔴"
+                    trade_style = "Aggressive Scalping / Breakout Short"
+                    hold_time = "10 to 30 Minutes"
+                else:
+                    strat_action = "Range Bound Strategy 🟡"
+                    trade_style = "Range Scalping (Buy Support, Sell Resistance)"
+                    hold_time = "5 to 20 Minutes"
+
+                st.markdown(f"""
+                    <div class="unique-strategy-box" style="margin-top: 0; padding: 15px;">
+                        <h4 style="color: {box_color}; margin-top: 0; font-size: 15px;">🎯 AI Live Trading Strategy ({selected_tf})</h4>
+                        <p style="color: #ffffff; font-size: 12px; margin-bottom: 5px;"><b>Strategy Type:</b> <span style="color: #58a6ff;">{trade_style}</span></p>
+                        <p style="color: #ffffff; font-size: 12px; margin-bottom: 5px;"><b>Recommended Action:</b> <span style="color: {box_color};">{strat_action}</span></p>
+                        <p style="color: #ffffff; font-size: 12px; margin-bottom: 5px;"><b>Hold Duration:</b> <span style="color: #ffa500;">Hold trade for {hold_time}</span></p>
+                        <p style="color: #8b949e; font-size: 11px; margin-bottom: 0;"><b>Indicators:</b> 
+                            <span style="color: #f5c542;">RSI: {rsi_val}</span> | 
+                            <span style="color: #00b0ff;">MACD: {macd_val}</span> | 
+                            <span style="color: #ff8a65;">EMA: {ema_val}</span> | 
+                            <span style="color: #ce93d8;">ATR: {atr_val}</span>
+                        </p>
+                    </div>
+                """, unsafe_allow_html=True)
+            
+            st.markdown("<br>", unsafe_allow_html=True)
+            col_f1, col_f2 = st.columns(2)
+            with col_f1:
+                filter_signal = st.selectbox(f"Filter Signal ({selected_tf})", ["All", "STRONG BUY / LONG 🟢", "STRONG SELL / SHORT 🔴", "NEUTRAL / HOLD 🟡"], key=f"filt_{c_id}")
+            with col_f2:
+                min_rsi = st.slider(f"Minimum RSI Filter ({selected_tf})", 0.0, 100.0, 0.0, key=f"rsi_{c_id}")
+
+            filtered_df = coin_df.copy()
+            if filter_signal != "All":
+                filtered_df = filtered_df[filtered_df['Trade Advice'] == filter_signal]
+            filtered_df = filtered_df[filtered_df['RSI_14'] >= min_rsi]
+
             first_cols = ['Trade Advice', 'Animal_Type', 'Date', 'Time', 'close', 'open', 'high', 'low', 'volume']
-            other_cols = [c for c in coin_df.columns if c not in first_cols]
-            styled_df = coin_df[first_cols + other_cols].style.map(color_coding_table, subset=['Animal_Type', 'Trade Advice'])
+            other_cols = [c for c in filtered_df.columns if c not in first_cols]
+            table_display_cols = first_cols + other_cols
+
+            styled_df = filtered_df[table_display_cols].style.map(color_coding_table, subset=['Animal_Type', 'Trade Advice'])
             st.dataframe(styled_df, use_container_width=True, height=450)
 
-# --- TAB 2: ADVANCED CUSTOM CHARTS (Plotly Engine) ---
+            st.markdown(f"### 📈 Live TradingView Professional Chart ({c_tab_name})")
+            col_c1, col_c2, col_c3 = st.columns([2, 2, 3])
+            with col_c1:
+                chart_view_mode = st.selectbox(f"🔒 Chart View Mode ({c_tab_name}):", ["Landscape View", "Portrait View", "True Full Screen"], key=f"tv_vmode_{c_id}")
+            with col_c2:
+                chart_theme_mode = st.selectbox(f"🌓 Theme Mode ({c_tab_name}):", ["Dark Mode", "Light Mode"], key=f"tv_theme_{c_id}")
+            with col_c3:
+                tv_link_url = f"https://www.tradingview.com/chart/?symbol=BINANCE:{c_tab_name}USDT"
+                st.markdown(f"""
+                    <div style="padding-top: 5px;">
+                        <a href="{tv_link_url}" target="_blank" style="background: #238636; color: white; padding: 8px 16px; border-radius: 6px; text-decoration: none; font-weight: bold; font-size: 12px; border: 1px solid #00ffcc;">🔗 Open Full TradingView Pro Workspace</a>
+                    </div>
+                """, unsafe_allow_html=True)
+
+            if chart_view_mode == "Portrait View":
+                tv_width = "450px"
+                tv_height = "750px"
+                is_fs = "false"
+            elif chart_view_mode == "True Full Screen":
+                tv_width = "100vw"
+                tv_height = "100vh"
+                is_fs = "true"
+            else:
+                tv_width = "100%"
+                tv_height = "650px"
+                is_fs = "false"
+
+            tv_symbol = f"BINANCE:{c_tab_name}USDT"
+            tv_theme_str = "light" if chart_theme_mode == "Light Mode" else "dark"
+            bg_col = "#fff" if chart_theme_mode == "Light Mode" else "#07090e"
+            container_id = f"tv_chart_container_{c_id}"
+
+            chart_html_content = f"""
+            <!DOCTYPE html>
+            <html>
+            <head>
+              <meta charset="utf-8">
+              <style>
+                html, body {{
+                  margin: 0; padding: 0; width: 100%; height: 100%;
+                  background-color: {bg_col}; overflow: hidden;
+                }}
+              </style>
+            </head>
+            <body>
+              <div class="tradingview-widget-container" style="height:100%;width:100%">
+                <div class="tradingview-widget-container__widget" style="height:100%;width:100%"></div>
+                <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js" async>
+                {{
+                  "autosize": true,
+                  "symbol": "{tv_symbol}",
+                  "interval": "D",
+                  "timezone": "Etc/UTC",
+                  "theme": "{tv_theme_str}",
+                  "style": "1",
+                  "locale": "en",
+                  "enable_publishing": false,
+                  "allow_symbol_change": true,
+                  "watchlist": ["BINANCE:BTCUSDT", "BINANCE:ETHUSDT", "BINANCE:SOLUSDT", "BINANCE:BNBUSDT", "BINANCE:XRPUSDT"],
+                  "details": true,
+                  "hotlist": true,
+                  "calendar": false,
+                  "support_host": "https://www.tradingview.com"
+                }}
+                </script>
+              </div>
+            </body>
+            </html>
+            """
+            encoded_html = urllib.parse.quote(chart_html_content)
+            st.markdown(f"""
+                <div id="{container_id}" style="width: {tv_width}; height: {tv_height}; margin: 0 auto; border: 2px solid #00ffcc; border-radius: 14px; overflow: hidden; background: {bg_col}; position: {'fixed' if is_fs=='true' else 'relative'}; top: {'0' if is_fs=='true' else 'auto'}; left: {'0' if is_fs=='true' else 'auto'}; z-index: {'99999' if is_fs=='true' else '1'};">
+                    <iframe src="data:text/html;charset=utf-8,{encoded_html}" width="100%" height="100%" frameborder="0" allowtransparency="true" scrolling="no" allowfullscreen="true" sandbox="allow-scripts allow-same-origin allow-popups"></iframe>
+                </div>
+            """, unsafe_allow_html=True)
+            
+            if is_fs == "true":
+                st.markdown(f"""
+                    <div style="position: fixed; top: 10px; right: 10px; z-index: 100000;">
+                        <button onclick="location.reload();" style="background: #ff073a; color: white; border: 1px solid #00ffcc; padding: 8px 16px; border-radius: 6px; font-weight: bold; cursor: pointer;">✕ Exit Full Screen</button>
+                    </div>
+                """, unsafe_allow_html=True)
+            st.markdown("---")
+
+# --- TAB 2: ADVANCED CHARTS (TradingView Pro Embedded) ---
 with tab2:
-    st.subheader("📊 Proprietary Custom Interactive Chart Engine")
+    st.subheader("📊 Pro Interactive TradingView Chart Engine")
     st.markdown("""
         <div class="ai-box">
-            <b>🤖 Trading Expert AI Insight:</b> Custom Python-rendered candlestick & technical indicator mapping active.
+            <b>🤖 Trading Expert AI Insight:</b> Advanced multi-symbol TradingView Pro widget matrix active.
         </div>
     """, unsafe_allow_html=True)
     
-    custom_coin = st.selectbox("Select Asset for Custom Chart:", list(all_coins_dict.keys()), index=0, key="custom_chart_select")
-    c_custom_id = all_coins_dict.get(custom_coin, "bitcoin")
+    t2_symbol = st.selectbox("Select Asset for Advanced Chart:", ["BTCUSDT", "ETHUSDT", "SOLUSDT", "BNBUSDT", "XRPUSDT", "ADAUSDT", "AVAXUSDT", "LINKUSDT"], index=0, key="t2_sym_select")
+    t2_tv_symbol = f"BINANCE:{t2_symbol}"
     
-    cust_df = fetch_master_excel_data(c_custom_id, row_count=120)
-    cust_df['close'] = cust_df['close'] * curr_multiplier
-    cust_df['open'] = cust_df['open'] * curr_multiplier
-    cust_df['high'] = cust_df['high'] * curr_multiplier
-    cust_df['low'] = cust_df['low'] * curr_multiplier
-    cust_df['EMA_20'] = cust_df['EMA_20'] * curr_multiplier
-    cust_df['EMA_50'] = cust_df['EMA_50'] * curr_multiplier
-    
-    fig_main = go.Figure(data=[go.Candlestick(
-        x=cust_df['Date'] + ' ' + cust_df['Time'],
-        open=cust_df['open'],
-        high=cust_df['high'],
-        low=cust_df['low'],
-        close=cust_df['close'],
-        name="Candles"
-    )])
-    
-    fig_main.add_trace(go.Scatter(x=cust_df['Date'] + ' ' + cust_df['Time'], y=cust_df['EMA_20'], mode='lines', name='EMA 20', line=dict(color='#00ffcc', width=1.5)))
-    fig_main.add_trace(go.Scatter(x=cust_df['Date'] + ' ' + cust_df['Time'], y=cust_df['EMA_50'], mode='lines', name='EMA 50', line=dict(color='#ffa500', width=1.5)))
-    
-    fig_main.update_layout(
-        template="plotly_dark",
-        paper_bgcolor="#07090e",
-        plot_bgcolor="#07090e",
-        title=f"APEX Quantum Custom Price Action & EMA Matrix ({custom_coin})",
-        xaxis_title="Timeline",
-        yaxis_title=f"Price ({selected_currency})",
-        height=650,
-        margin=dict(l=20, r=20, t=40, b=20)
-    )
-    
-    st.plotly_chart(fig_main, use_container_width=True)
+    t2_chart_html = f"""
+    <!DOCTYPE html>
+    <html>
+    <head><meta charset="utf-8"></head>
+    <body style="margin:0;background-color:#07090e;">
+      <div class="tradingview-widget-container" style="height:650px;width:100%">
+        <div class="tradingview-widget-container__widget" style="height:100%;width:100%"></div>
+        <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js" async>
+        {{
+          "autosize": true,
+          "symbol": "{t2_tv_symbol}",
+          "interval": "D",
+          "timezone": "Etc/UTC",
+          "theme": "dark",
+          "style": "1",
+          "locale": "en",
+          "enable_publishing": false,
+          "allow_symbol_change": true,
+          "watchlist": ["BINANCE:BTCUSDT", "BINANCE:ETHUSDT", "BINANCE:SOLUSDT", "BINANCE:BNBUSDT", "BINANCE:XRPUSDT"],
+          "details": true,
+          "hotlist": true,
+          "calendar": false,
+          "support_host": "https://www.tradingview.com"
+        }}
+        </script>
+      </div>
+    </body>
+    </html>
+    """
+    encoded_t2_html = urllib.parse.quote(t2_chart_html)
+    st.markdown(f"""
+        <div style="width: 100%; height: 670px; border: 2px solid #00ffcc; border-radius: 14px; overflow: hidden; background: #07090e;">
+            <iframe src="data:text/html;charset=utf-8,{encoded_t2_html}" width="100%" height="100%" frameborder="0" allowtransparency="true" scrolling="no" allowfullscreen="true" sandbox="allow-scripts allow-same-origin allow-popups"></iframe>
+        </div>
+    """, unsafe_allow_html=True)
 
 with tab3:
-    st.subheader("🐋 Whales, Open Interest & Liquidations")
+    st.subheader("🐋 Whales, Open Interest & Liquidations (CoinGlass Style)")
     col1, col2 = st.columns(2)
     with col1:
         st.metric("Open Interest (OI)", "$5.82 Billion", "+6.2% (Bullish)")
