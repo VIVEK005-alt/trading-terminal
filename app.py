@@ -59,6 +59,14 @@ def check_security_access():
 # Security Shield Activation
 check_security_access()
 
+# --- PWA Manifest & App Icon Link ---
+st.markdown("""
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#00ffcc">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+""", unsafe_allow_html=True)
+
 # 1. PAGE CONFIGURATION & UNIVERSAL RESPONSIVE ARCHITECTURE
 st.set_page_config(
     page_title="APEX QUANTUM MULTI-TIMEFRAME MASTER TERMINAL",
