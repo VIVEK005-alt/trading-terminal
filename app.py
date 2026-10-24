@@ -5,6 +5,17 @@ import requests
 import urllib.parse
 from datetime import datetime, timedelta
 import numpy as np
+# --- Naye Modular Imports ---
+from security.auth_shield import check_security_access
+from indicators.accurate_realtime import calculate_realtime_indicators
+from indicators.all_indicators import calculate_all_indicators
+from modules.browser_embed import render_secure_browser
+from modules.inshorts_news import render_inshorts_news
+from sandbox_requests.dynamic_user_requests import render_user_sandbox
+from history_archive.archive_manager import render_history_archive
+
+# Security Shield Activation (Master Key Protection)
+check_security_access()
 
 # 1. PAGE CONFIGURATION & UNIVERSAL RESPONSIVE ARCHITECTURE
 st.set_page_config(
