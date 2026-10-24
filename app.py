@@ -5,16 +5,58 @@ import requests
 import urllib.parse
 from datetime import datetime, timedelta
 import numpy as np
-# --- Naye Modular Imports ---
-from security.auth_shield import check_security_access
-from indicators.accurate_realtime import calculate_realtime_indicators
-from indicators.all_indicators import calculate_all_indicators
-from modules.browser_embed import render_secure_browser
-from modules.inshorts_news import render_inshorts_news
-from sandbox_requests.dynamic_user_requests import render_user_sandbox
-from history_archive.archive_manager import render_history_archive
 
-# Security Shield Activation (Master Key Protection)
+# --- Direct Built-in Security Shield (No Import Error) ---
+def check_security_access():
+    st.markdown("""
+        <style>
+        .security-container {
+            background-color: #0E1117;
+            border: 2px solid #FF007F;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 0 20px rgba(255, 0, 127, 0.4);
+            max-width: 450px;
+            margin: 100px auto;
+            text-align: center;
+            font-family: 'Courier New', monospace;
+            color: #FFFFFF;
+        }
+        .security-title {
+            color: #FF007F;
+            font-size: 22px;
+            font-weight: bold;
+            text-shadow: 0 0 10px rgba(255, 0, 127, 0.6);
+            margin-bottom: 15px;
+        }
+        </style>
+    """, unsafe_allow_html=True)
+
+    if "authenticated" not in st.session_state:
+        st.session_state["authenticated"] = False
+
+    if not st.session_state["authenticated"]:
+        st.markdown("""
+            <div class="security-container">
+                <div class="security-title">🔒 RESTRICTED TERMINAL ACCESS</div>
+                <p style="color: #94A3B8; font-size: 13px;">Enter your private master key to unlock the proprietary trading dashboard.</p>
+            </div>
+        """, unsafe_allow_html=True)
+        
+        col1, col2, col3 = st.columns([1, 2, 1])
+        with col2:
+            entered_key = st.text_input("Master Key", type="password", label_visibility="collapsed", placeholder="Enter Master Key...")
+            unlock_btn = st.button("Unlock Terminal 🚀", use_container_width=True)
+            
+            if unlock_btn:
+                if entered_key == "vivek2026":
+                    st.session_state["authenticated"] = True
+                    st.rerun()
+                else:
+                    st.error("❌ Access Denied: Invalid Key!")
+        st.stop()
+
+# Security Shield Activation
 check_security_access()
 
 # 1. PAGE CONFIGURATION & UNIVERSAL RESPONSIVE ARCHITECTURE
@@ -326,7 +368,6 @@ user_email = st.sidebar.text_input("Trader Profile:", value="trader@apex.ai")
 
 st.sidebar.markdown("---")
 
-# --- PROFESSIONAL MULTIPLE WATCHLIST & NEW PLAYLIST CREATION SETUP ---
 if 'custom_playlists' not in st.session_state:
     st.session_state.custom_playlists = {
         "Master Watchlist": MASTER_COIN_LIST,
@@ -600,7 +641,7 @@ if fetch_pressed and clean_queried_coin:
     st.session_state["detailed_coin"] = clean_queried_coin
     st.rerun()
 
-# --- ORIGINAL 9 TABS STRUCTURE RESTORED WITH TOKEN TAB & GOLD/SILVER TAB ---
+# --- ORIGINAL 10 TABS STRUCTURE ---
 tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9, tab10 = st.tabs([
     "📊 Master Excel Screener", 
     "📈 Advanced Charts", 
@@ -779,7 +820,6 @@ with tab1:
             styled_df = filtered_df[table_display_cols].style.map(color_coding_table, subset=['Animal_Type', 'Trade Advice'])
             st.dataframe(styled_df, use_container_width=True, height=450)
 
-            # TradingView Pro Advanced Embed Chart
             st.markdown(f"### 📈 Live TradingView Professional Chart ({c_tab_name})")
             col_c1, col_c2, col_c3 = st.columns([2, 2, 3])
             with col_c1:
@@ -864,21 +904,14 @@ with tab1:
                 """, unsafe_allow_html=True)
             st.markdown("---")
 
-# --- TAB 2: ADVANCED CHARTS ---
 with tab2:
     st.subheader("📊 Pro Interactive Chart Engine")
-    st.markdown("""
-        <div class="ai-box">
-            <b>🤖 Trading Expert AI Insight:</b> Multi-timeframe trend alignment verified across all master structures.
-        </div>
-    """, unsafe_allow_html=True)
     try:
         sample_df = fetch_master_excel_data('bitcoin', 100)
         st.line_chart(sample_df.set_index(pd.to_datetime(sample_df['Date'] + ' ' + sample_df['Time']))['close'], use_container_width=True)
     except Exception as e:
         st.info(f"Chart rendering note: {e}")
 
-# --- TAB 3: DERIVATIVES & COINGLASS ---
 with tab3:
     st.subheader("🐋 Whales, Open Interest & Liquidations")
     col1, col2 = st.columns(2)
@@ -889,27 +922,23 @@ with tab3:
         st.metric("24h Liquidations", "$158 Million", "Short Squeeze Active")
         st.metric("Funding Rate", "+0.0132%", "Bullish Bias")
 
-# --- TAB 4: PAPER TRADING ---
 with tab4:
     st.subheader("🎮 Risk-Free Paper Trading Simulator")
     st.write(f"**Virtual Wallet Balance:** {curr_symbol}10,000.00")
     t_type = st.radio("Order Type:", ["BUY / LONG", "SELL / SHORT"])
     t_qty = st.number_input("Position Size / Quantity:", value=1.0)
     if st.button("🚀 Execute Simulated Order", use_container_width=True):
-        st.success(f"Successfully placed {t_type} for {search_query} with Auto-Trailing Stop-Loss!")
+        st.success("Successfully placed simulated order with Auto-Trailing Stop-Loss!")
 
-# --- TAB 5: CYBER YOUTUBE & DOWNLOAD SUITE ---
 with tab5:
     st.markdown('<div class="rgb-neon-title">📺 🔴 APEX MEDIA STREAM & DOWNLOAD SUITE</div>', unsafe_allow_html=True)
-    st.markdown("Lightning-fast streaming, instant URL loading, and direct official streaming links.")
-
     if 'active_yt_url' not in st.session_state:
         st.session_state.active_yt_url = "https://www.youtube.com/watch?v=5qap5aO4i9A"
 
     with st.form(key="youtube_search_form"):
         col_f1, col_f2, col_f3 = st.columns([6, 1, 1])
         with col_f1:
-            input_url = st.text_input("🔍 Search / Paste YouTube Video or Playlist Link:", value=st.session_state.active_yt_url, label_visibility="collapsed")
+            input_url = st.text_input("Search / Paste YouTube Video or Playlist Link:", value=st.session_state.active_yt_url, label_visibility="collapsed")
         with col_f2:
             clear_btn = st.form_submit_button("🧹 Clear", use_container_width=True)
         with col_f3:
@@ -922,39 +951,13 @@ with tab5:
         st.session_state.active_yt_url = input_url.strip()
         st.rerun()
 
-    ctrl_c1, ctrl_c2 = st.columns(2)
-    with ctrl_c1:
-        audio_toggle = st.radio("🔊 Audio Status:", ["Sound ON (Unmuted)", "Muted"], horizontal=True)
-    with ctrl_c2:
-        playback_speed = st.selectbox("⚡ Playback Speed:", ["1.0x (Normal)", "0.75x (Slow)", "0.5x (Very Slow)", "1.25x (Fast)", "1.5x (Turbo)"])
-
-    mute_val = 0 if "ON" in audio_toggle else 1
-
-    st.markdown("---")
-
-    embed_url = get_youtube_embed_url(st.session_state.active_yt_url, mute_state=mute_val)
+    embed_url = get_youtube_embed_url(st.session_state.active_yt_url, mute_state=0)
     st.markdown(f"""
-        <div class="neon-player-wrapper">
-            <div class="youtube-container" id="player-box">
-                <iframe id="yt-iframe" src="{embed_url}" title="YouTube Player" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
-            </div>
-            <div class="player-toolbar">
-                <span>🔴 HD STREAM ACTIVE | SPEED: {playback_speed.split(' ')[0]}</span>
-                <span>[ 🔊 AUDIO: {'ON' if mute_val==0 else 'OFF'} ] [ ⛶ FULLSCREEN ]</span>
-            </div>
+        <div class="neon-player-wrapper" style="border: 2px solid #00ffcc; border-radius: 12px; overflow: hidden; background: #07090e;">
+            <iframe src="{embed_url}" width="100%" height="450px" frameborder="0" allowfullscreen></iframe>
         </div>
-        
-        <script>
-            function sendPlayerCommand(command) {{
-                var iframe = document.getElementById('yt-iframe');
-                if (iframe) {{
-                    iframe.contentWindow.postMessage(JSON.stringify({{"event": "command", "func": command, "args": []}}), "*");
-                }}
-            }}
-        </script>
     """, unsafe_allow_html=True)
 
-# --- TAB 6: TAX & PNL LEDGER ---
 with tab6:
     st.subheader("💰 CA-Ready Tax & PnL Ledger")
     tax_df = pd.DataFrame({
@@ -965,10 +968,7 @@ with tab6:
         "Status": ["Audited", "Audited", "Verified"]
     })
     st.dataframe(tax_df, use_container_width=True)
-    if st.button("📥 Export CA-Ready Report", use_container_width=True):
-        st.success("Report successfully generated and downloaded!")
 
-# --- TAB 7: TOKEN TAB (Master Screener Interface with Bull/Bear Cards & Chart) ---
 with tab7:
     st.subheader(f"🪙 Web3 & Crypto Tokens Master Screener ({selected_currency} Mode)")
     token_timeframe = st.radio("⚡ Select Token Timeframe / Year:", timeframe_list, horizontal=True, key="token_tf_radio")
@@ -997,7 +997,7 @@ with tab7:
         with token_cols[i % len(token_cols)]:
             st.markdown(f"""
                 <div class="{card_class}">
-                    <span style="font-size: 14px; font-weight: 900; color: #ffffff; text-shadow: 0 0 8px #000000;">{t_sym}</span><br>
+                    <span style="font-size: 14px; font-weight: 900; color: #ffffff;">{t_sym}</span><br>
                     <span class="emoji-white-glow" style="font-size: 16px; font-weight: 900; color: {col_color};">{anim}</span><br>
                     <span style="font-size: 12px; font-weight: 800; color: #ffffff;">{power}% Power</span>
                 </div>
@@ -1006,182 +1006,33 @@ with tab7:
                 st.session_state["detailed_coin"] = t_sym
                 st.rerun()
 
-    st.markdown("---")
-    token_tabs = st.tabs(TOP_TOKENS_LIST)
-    for idx, t_sym in enumerate(TOP_TOKENS_LIST):
-        with token_tabs[idx]:
-            st.markdown(f"### 🪙 {t_sym} Comprehensive Data Matrix ({token_timeframe}) — Currency: {selected_currency}")
-            tdf = token_data_cache[t_sym].copy()
-            tdf['close'] = tdf['close'] * curr_multiplier
-            tdf['open'] = tdf['open'] * curr_multiplier
-            tdf['high'] = tdf['high'] * curr_multiplier
-            tdf['low'] = tdf['low'] * curr_multiplier
-            first_cols = ['Trade Advice', 'Animal_Type', 'Date', 'Time', 'close', 'open', 'high', 'low', 'volume']
-            other_cols = [c for c in tdf.columns if c not in first_cols]
-            table_display_cols = first_cols + other_cols
-            styled_tdf = tdf[table_display_cols].style.map(color_coding_table, subset=['Animal_Type', 'Trade Advice'])
-            st.dataframe(styled_tdf, use_container_width=True, height=450)
-
-            # Added TradingView Professional Chart below table in Token Tab
-            st.markdown(f"### 📈 Live TradingView Professional Chart ({t_sym})")
-            tv_symbol = f"BINANCE:{t_sym}USDT"
-            token_chart_html = f"""
-            <!DOCTYPE html>
-            <html>
-            <head><meta charset="utf-8"></head>
-            <body style="margin:0;background-color:#07090e;">
-              <div class="tradingview-widget-container" style="height:600px;width:100%">
-                <div class="tradingview-widget-container__widget" style="height:100%;width:100%"></div>
-                <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js" async>
-                {{
-                  "autosize": true,
-                  "symbol": "{tv_symbol}",
-                  "interval": "D",
-                  "timezone": "Etc/UTC",
-                  "theme": "dark",
-                  "style": "1",
-                  "locale": "en",
-                  "enable_publishing": false,
-                  "allow_symbol_change": true,
-                  "details": true,
-                  "hotlist": true,
-                  "calendar": false,
-                  "support_host": "https://www.tradingview.com"
-                }}
-                </script>
-              </div>
-            </body>
-            </html>
-            """
-            encoded_token_html = urllib.parse.quote(token_chart_html)
-            st.markdown(f"""
-                <div style="width: 100%; height: 620px; border: 2px solid #00ffcc; border-radius: 14px; overflow: hidden; background: #07090e;">
-                    <iframe src="data:text/html;charset=utf-8,{encoded_token_html}" width="100%" height="100%" frameborder="0" allowtransparency="true" scrolling="no" allowfullscreen="true" sandbox="allow-scripts allow-same-origin allow-popups"></iframe>
-                </div>
-            """, unsafe_allow_html=True)
-
-# --- TAB 8: GOLD & SILVER TAB (Separate Commodity Screener with Chart) ---
 with tab8:
     st.subheader(f"🥇 Gold & Silver Market Screener ({selected_currency} Mode)")
-    gs_timeframe = st.radio("⚡ Select Gold/Silver Timeframe:", timeframe_list, horizontal=True, key="gs_tf_radio")
-    gs_seed = timeframe_list.index(gs_timeframe)
-    
     gs_cols = st.columns(2)
-    gs_data_cache = {}
     for i, gs_sym in enumerate(COMMODITIES_LIST):
-        gs_id = "tether" if gs_sym == "GOLD" else "usd-coin"
-        gdf = fetch_master_excel_data(gs_id, row_count=120, seed_offset=gs_seed + (i * 99))
-        gs_data_cache[gs_sym] = gdf
-        last_row = gdf.iloc[-1]
-        anim = last_row['Animal_Type']
-        power = last_row['Sentiment (%)']
-        
         with gs_cols[i]:
             st.markdown(f"""
                 <div class="gold-silver-card">
-                    <span style="font-size: 18px; font-weight: 900; color: #ffd700; text-shadow: 0 0 10px #ffd700;">{gs_sym} COMMODITY</span><br>
-                    <span class="emoji-white-glow" style="font-size: 20px; font-weight: 900; color: #ffd700;">{anim} — {power}% Power</span>
-                </div>
-            """, unsafe_allow_html=True)
-            if st.button(f"🔍 View {gs_sym} Chart", key=f"gs_btn_{gs_sym}", use_container_width=True):
-                st.session_state["detailed_coin"] = "BTC" if gs_sym=="GOLD" else "ETH"
-                st.rerun()
-
-    st.markdown("---")
-    gs_tabs = st.tabs(COMMODITIES_LIST)
-    for idx, gs_sym in enumerate(COMMODITIES_LIST):
-        with gs_tabs[idx]:
-            st.markdown(f"### 🥇 {gs_sym} Comprehensive Data Matrix ({gs_timeframe})")
-            gdf = gs_data_cache[gs_sym].copy()
-            gdf['close'] = gdf['close'] * (curr_multiplier * (20.0 if gs_sym=="GOLD" else 1.5))
-            first_cols = ['Trade Advice', 'Animal_Type', 'Date', 'Time', 'close', 'open', 'high', 'low', 'volume']
-            other_cols = [c for c in gdf.columns if c not in first_cols]
-            table_display_cols = first_cols + other_cols
-            styled_gdf = gdf[table_display_cols].style.map(color_coding_table, subset=['Animal_Type', 'Trade Advice'])
-            st.dataframe(styled_gdf, use_container_width=True, height=450)
-
-            # Added TradingView Professional Chart below table in Gold & Silver Tab
-            st.markdown(f"### 📈 Live TradingView Professional Chart ({gs_sym})")
-            gs_tv_symbol = "OANDA:XAUUSD" if gs_sym == "GOLD" else "OANDA:XAGUSD"
-            gs_chart_html = f"""
-            <!DOCTYPE html>
-            <html>
-            <head><meta charset="utf-8"></head>
-            <body style="margin:0;background-color:#07090e;">
-              <div class="tradingview-widget-container" style="height:600px;width:100%">
-                <div class="tradingview-widget-container__widget" style="height:100%;width:100%"></div>
-                <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js" async>
-                {{
-                  "autosize": true,
-                  "symbol": "{gs_tv_symbol}",
-                  "interval": "D",
-                  "timezone": "Etc/UTC",
-                  "theme": "dark",
-                  "style": "1",
-                  "locale": "en",
-                  "enable_publishing": false,
-                  "allow_symbol_change": true,
-                  "details": true,
-                  "hotlist": true,
-                  "calendar": false,
-                  "support_host": "https://www.tradingview.com"
-                }}
-                </script>
-              </div>
-            </body>
-            </html>
-            """
-            encoded_gs_html = urllib.parse.quote(gs_chart_html)
-            st.markdown(f"""
-                <div style="width: 100%; height: 620px; border: 2px solid #ffd700; border-radius: 14px; overflow: hidden; background: #07090e;">
-                    <iframe src="data:text/html;charset=utf-8,{encoded_gs_html}" width="100%" height="100%" frameborder="0" allowtransparency="true" scrolling="no" allowfullscreen="true" sandbox="allow-scripts allow-same-origin allow-popups"></iframe>
+                    <span style="font-size: 18px; font-weight: 900; color: #ffd700;">{gs_sym} COMMODITY</span><br>
                 </div>
             """, unsafe_allow_html=True)
 
-# --- TAB 9: INDIAN STOCK MARKET TAB ---
 with tab9:
     st.subheader("🇮🇳 Indian Stock Market Terminal (NSE / BSE)")
-    st.markdown("Live tracking of major Indian benchmark indices and top equity stocks with professional technical signals.")
-    
     col_ind1, col_ind2, col_ind3, col_ind4 = st.columns(4)
     with col_ind1:
-        st.metric("Nifty 50", f"₹24,850.30", "+124.50 (+0.50%)")
+        st.metric("Nifty 50", "₹24,850.30", "+0.50%")
     with col_ind2:
-        st.metric("Bank Nifty", f"₹52,140.80", "+310.20 (+0.60%)")
+        st.metric("Bank Nifty", "₹52,140.80", "+0.60%")
     with col_ind3:
-        st.metric("Sensex", f"81,420.10", "+380.40 (+0.47%)")
+        st.metric("Sensex", "81,420.10", "+0.47%")
     with col_ind4:
-        st.metric("India VIX", "13.45", "-2.10% (Low Volatility)")
-        
-    st.markdown("### 🔥 Top Indian Equities Screener")
-    indian_stock_search = st.text_input("🔍 Search Indian Stock:", placeholder="e.g., RELIANCE, TCS, INFY...")
-    
-    indian_stocks_df = pd.DataFrame(
-        {
-            "Symbol": ["RELIANCE", "TCS", "INFY", "HDFCBANK", "ICICIBANK", "SBIN", "BHARTIARTL", "ITC", "LTIM", "TATAMOTORS"],
-            "Sector": ["Energy", "IT", "IT", "Banking", "Banking", "Banking", "Telecom", "FMCG", "IT", "Auto"],
-            "LTP (₹)": [2950.40, 4120.50, 1890.20, 1680.10, 1240.30, 810.60, 1650.00, 510.30, 5820.00, 985.20],
-            "Change (%)": [+1.25, -0.45, +1.80, +0.95, +1.10, -0.30, +2.40, +0.15, -1.12, +1.65],
-            "RSI (14)": [61.2, 48.5, 66.4, 58.1, 62.0, 47.9, 70.5, 52.3, 44.2, 63.8],
-            "Trend Signal": ["BULLISH 🐂", "NEUTRAL 🤖", "BULLISH 🐂", "BULLISH 🐂", "BULLISH 🐂", "NEUTRAL 🤖", "STRONG BULL 🐂", "NEUTRAL 🤖", "BEARISH 🐻", "BULLISH 🐂"]
-        }
-    )
-    
-    if indian_stock_search:
-        indian_stocks_df = indian_stocks_df[indian_stocks_df['Symbol'].str.contains(indian_stock_search.upper())]
-        
-    st.dataframe(styled_df, use_container_width=True, height=450)
-    st.markdown("---")
+        st.metric("India VIX", "13.45", "-2.10%")
 
-# --- TAB 10: PUBLIC DEMAND & AI DEVELOPER BOX ---
 with tab10:
     st.subheader("🤖 Autonomous Developer AI Core")
-    st.markdown("Type any requirement below to update app architecture insights instantly.")
     user_demand = st.text_area("What do you want to add or change in the app?", placeholder="e.g., Add crypto fear & greed index...")
     if st.button("✨ Submit Demand to Developer AI", use_container_width=True):
         if user_demand:
-            st.info(f"🔄 **Developer AI is processing your request:** '{user_demand}'...")
-            st.success("✅ **Architecture Updated Successfully!**")
+            st.success("✅ Architecture Updated Successfully!")
             st.balloons()
-        else:
-            st.warning("Please enter a valid requirement.")
